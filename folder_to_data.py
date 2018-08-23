@@ -45,7 +45,7 @@ def folderToData(folderName):
         
     # Get error and mean (deleting raw data in the process)
     for label in averagingLabelCol:
-        rawData[label + "_err"] = stats.sem(rawData[label])
+        rawData[label + "_err"] = 2 * stats.sem(rawData[label])
         rawData[label] = mean(rawData[label], axis = 0)
     
     # Use spacing to lower resolution of data
