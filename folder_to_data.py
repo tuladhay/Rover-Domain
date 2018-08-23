@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 data = {}
 
 def folderToData(folderName):
+    if folderName[-1] != '/':
+        folderName += '/'
     
     rawData = {}
 
