@@ -10,16 +10,16 @@ def copyTestFiles():
     copyfile("specifics.py", "log/%s/specifics.py"%sim.data["Specifics Name"])
 
 
-i = 0
-while True:
-    print("Run %i"%(i))
-    for mod in modCol:
-        sim = getSim()
-        mod(sim)
-        sim.run()
-    i += 1
+def main():
+    getSim().run()
     
-    
-
-    
-    
+# i = 0
+# while True:
+#     print("Run %i"%(i))
+#     for mod in modCol:
+#         sim = getSim()
+#         mod(sim)
+#         sim.run()
+#     i += 1
+# 
+#     

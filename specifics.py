@@ -4,7 +4,7 @@ import pyximport; pyximport.install() # For cython(pyx) code
 from code.world_setup import * # Rover Domain Construction 
 from code.agent_domain_2 import * # Rover Domain Dynamic  
 from code.trajectory_history import * # Agent Position Trajectory History 
-from code.reward import * # Agent Reward 
+from code.reward_2 import * # Agent Reward 
 from code.reward_history import * # Performance Recording 
 from code.ccea import * # CCEA 
 from code.save_to_pickle import * # Save data as pickle file
@@ -20,11 +20,11 @@ def getSim():
     sim.data["Coupling"] = 3
     sim.data["Observation Radius"] = 4.0
     sim.data["Minimum Distance"] = 1.0
-    sim.data["Steps"] = 30
+    sim.data["Steps"] = 50
     sim.data["Trains per Episode"] = 100
     sim.data["Tests per Episode"] = 1
-    sim.data["Number of Episodes"] = 1000
-    sim.data["Specifics Name"] = "coupling_3"
+    sim.data["Number of Episodes"] = 50
+    sim.data["Specifics Name"] = "profiling"
     sim.data["Mod Name"] = "global"
     
     sim.data["Performance Save File Name"] = "log/%s/%s/performance/perf %s.csv"%\
