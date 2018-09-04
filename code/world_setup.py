@@ -26,3 +26,16 @@ def initWorld(data):
     data['Agent Orientations'] = data['Agent Orientations BluePrint'].copy()
     data['Poi Positions'] = data['Poi Positions BluePrint'].copy()
     data['Poi Values'] = data['Poi Values BluePrint'].copy()
+
+
+def blueprintStatic(data):
+    number_agents = data['Number of Agents']
+    number_pois = data['Number of POIs'] 
+    world_width = data['World Width']
+    world_length = data['World Length']
+    
+    data['Agent Positions BluePrint'] = np.ones((number_agents,2)) * 0.5 * [world_width, world_length]
+    angles = np.random.uniform(-np.pi, np.pi, number_agents)
+    data['Agent Orientations BluePrint'] = np.vstack((np.cos(angles), np.sin(angles))).T
+    data['Poi Positions BluePrint'] = data['Poi Relative Static Positions'] * [world_width, world_length]
+    data['Poi Values BluePrint'] =  data['Poi Static Values'].copy()
