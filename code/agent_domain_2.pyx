@@ -118,11 +118,10 @@ def doAgentProcess(data):
     cdef int number_agents = data['Number of Agents']
     actionCol = np.zeros((number_agents, 2), dtype = np.float_)
     policyCol = data["Agent Policies"]
-    policyFuncCol = list(map(lambda x: x.get_next, policyCol))
     observationCol = data["Agent Observations"]
     cdef int agentIndex
     for agentIndex in range(number_agents):
-        actionCol[agentIndex] = policyFuncCol[agentIndex](observationCol[agentIndex])
+        actionCol[agentIndex] = policyCol[agentIndex].get_action(observationCol[agentIndex])
     data["Agent Actions"] = actionCol
 
 @cython.boundscheck(False)  # Deactivate bounds checking
@@ -165,16 +164,16 @@ def doAgentMove(data):
             orientationColView[agentIndex,0] = globalFrameMotion0 /norm
             orientationColView[agentIndex,1] = globalFrameMotion1 /norm
             
-        # Check if action moves agent within the world bounds
-        if agentPositionColView[agentIndex,0] > worldWidth:
-            agentPositionColView[agentIndex,0] = worldWidth
-        elif agentPositionColView[agentIndex,0] < 0.0:
-            agentPositionColView[agentIndex,0] = 0.0
-        
-        if agentPositionColView[agentIndex,1] > worldLength:
-            agentPositionColView[agentIndex,1] = worldLength
-        elif agentPositionColView[agentIndex,1] < 0.0:
-            agentPositionColView[agentIndex,1] = 0.0
+        # # Check if action moves agent within the world bounds
+        # if agentPositionColView[agentIndex,0] > worldWidth:
+        #     agentPositionColView[agentIndex,0] = worldWidth
+        # elif agentPositionColView[agentIndex,0] < 0.0:
+        #     agentPositionColView[agentIndex,0] = 0.0
+        # 
+        # if agentPositionColView[agentIndex,1] > worldLength:
+        #     agentPositionColView[agentIndex,1] = worldLength
+        # elif agentPositionColView[agentIndex,1] < 0.0:
+        #     agentPositionColView[agentIndex,1] = 0.0
         
 
     data["Agent Positions"]  = agentPositionCol

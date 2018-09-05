@@ -101,7 +101,7 @@ def doAgentProcess(data):
     policyCol = data["Agent Policies"]
     observationCol = data["Agent Observations"]
     for agentIndex in range(number_agents):
-        actionCol[agentIndex] = policyCol[agentIndex].get_next(observationCol[agentIndex])
+        actionCol[agentIndex] = policyCol[agentIndex].get_action(observationCol[agentIndex])
     data["Agent Actions"] = actionCol
 
    
@@ -131,16 +131,16 @@ def doAgentMove(data):
         else:
             orientationCol[agentIndex] = globalFrameMotion / linalg.norm(globalFrameMotion)
             
-        # Check if action moves agent within the world bounds
-        if positionCol[agentIndex][0] > worldWidth:
-            positionCol[agentIndex][0] = worldWidth
-        elif positionCol[agentIndex][0] < 0.0:
-            positionCol[agentIndex][0] = 0.0
-        
-        if positionCol[agentIndex][1] > worldLength:
-            positionCol[agentIndex][1] = worldLength
-        elif positionCol[agentIndex][1] < 0.0:
-            positionCol[agentIndex][1] = 0.0
+        # # Check if action moves agent within the world bounds
+        # if positionCol[agentIndex][0] > worldWidth:
+        #     positionCol[agentIndex][0] = worldWidth
+        # elif positionCol[agentIndex][0] < 0.0:
+        #     positionCol[agentIndex][0] = 0.0
+        # 
+        # if positionCol[agentIndex][1] > worldLength:
+        #     positionCol[agentIndex][1] = worldLength
+        # elif positionCol[agentIndex][1] < 0.0:
+        #     positionCol[agentIndex][1] = 0.0
         
     data["Agent Positions"]  = positionCol
     data["Agent Orientations"] = orientationCol 

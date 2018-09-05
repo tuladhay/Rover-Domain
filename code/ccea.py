@@ -8,6 +8,7 @@ from torch.autograd import Variable
 from torch import Tensor
 
 
+
 class RandomPolicy:
     def __init__(self, output_shape, low=-1, high=1):
         self.output_shape = output_shape
@@ -32,14 +33,14 @@ class Evo_MLP(nn.Module):
         for param in self.parameters():
             param.requires_grad = False
 
-    def get_next(self, state):
+    def get_action(self, state):
         x = Variable(torch.FloatTensor(state))
         x = self.fc1(x).tanh()
         y = self.fc2(x).tanh()
         return y.numpy()
         
     def init_weights(m):
-        # Not implemented
+        #Not implemented
         if type(m) == nn.Linear:
             m.weight.data.normal_(0, 2)
 
@@ -57,7 +58,9 @@ class Evo_MLP(nn.Module):
         newMlp = Evo_MLP(self.input_shape, self.num_outputs, self.num_units)
         newMlp.load_state_dict(self.state_dict())
         return newMlp
-    
+
+
+
 def initCcea(input_shape, num_outputs, num_units=16):
     def initCceaGo(data):
         number_agents = data['Number of Agents']
