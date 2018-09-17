@@ -31,22 +31,6 @@ cdef tanhInPlace(double[:] vec):
         vec[index] = tanh(vec[index])
         
 
-cdef mlp(
-    double[:] state,
-    double[:,:] inToHiddenMat, 
-    double[:] inToHiddenBias, 
-    double[:,:] hiddenToOutMat, 
-    double[:] hiddenToOutBias,
-    double[:] hidden,
-    double[:] out
-):
-    mul(inToHiddenMat, state, hidden)
-    addInPlace(hidden, inToHiddenBias)
-    tanhInPlace(hidden)
-    mul(hiddenToOutMat, hidden, out)
-    addInPlace(out, hiddenToOutBias)
-    tanhInPlace(out)
-    
 cdef class Mlp:
     cdef double[:,:] inToHiddenMat
     cdef double[:] inToHiddenBias
