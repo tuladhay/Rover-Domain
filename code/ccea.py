@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import random
+from numba import jit
 from torch.autograd import Variable
 from torch import Tensor
 
@@ -32,6 +33,7 @@ class Evo_MLP(nn.Module):
         
         for param in self.parameters():
             param.requires_grad = False
+            
 
     def get_action(self, state):
         x = Variable(torch.FloatTensor(state))
