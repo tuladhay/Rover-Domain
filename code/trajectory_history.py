@@ -1,19 +1,20 @@
 import csv
 import os
+import errno
+import numpy as np
+
 
 def createTrajectoryHistories(data):
     # create a history of positions for each agents in order to evalutate reward at the end
     number_agents = data['Number of Agents']
     historyStepCount = data["Steps"] + 1
-    agentPositionHistory = [[None for i in range(historyStepCount)] for j in range(number_agents)]
-    agentOrientationHistory = [[None for i in range(historyStepCount)] for j in range(number_agents)]
+    agentPositionHistory = np.zeros((historyStepCount, number_agents, 2))
+    agentOrientationHistory = np.zeros((historyStepCount, number_agents, 2))
     positionCol = data["Agent Positions"]
     orientationCol = data["Agent Orientations"]
-    
-    # populate history with current positions
-    for agentIndex in range(number_agents):
-        agentPositionHistory[agentIndex][0] = positionCol[agentIndex]
-        agentOrientationHistory[agentIndex][0] = orientationCol[agentIndex]
+
+    agentPositionHistory[0] = positionCol
+    agentOrientationHistory[0] = orientationCol
     
     
     data["Agent Position History"] = agentPositionHistory
@@ -29,10 +30,9 @@ def updateTrajectoryHistories(data):
     positionCol = data["Agent Positions"]
     orientationCol = data["Agent Orientations"]
     
-    # populate history with current positions
-    for agentIndex in range(number_agents):
-        agentPositionHistory[agentIndex][stepIndex + 1] = positionCol[agentIndex]
-        agentOrientationHistory[agentIndex][stepIndex + 1] = orientationCol[agentIndex]
+    
+    agentPositionHistory[stepIndex + 1] = positionCol
+    agentOrientationHistory[stepIndex + 1] = orientationCol
         
     data["Agent Position History"] = agentPositionHistory
     data["Agent Orientation History"] = agentOrientationHistory

@@ -22,7 +22,7 @@ def assignGlobalReward(data):
             stepClosestObsDistanceSqr = float("inf")
             for agentIndex in range(number_agents):
                 # Calculate separation distance between poi and agent
-                agentPosition = agentPositionHistory[agentIndex][stepIndex]
+                agentPosition = agentPositionHistory[stepIndex, agentIndex]
                 separation = poiPosition - agentPosition
                 distanceSqr = dot(separation, separation)
                 
@@ -68,7 +68,7 @@ def assignStepGlobalReward(data):
             stepClosestObsDistanceSqr = float("inf")
             for agentIndex in range(number_agents):
                 # Calculate separation distance between poi and agent
-                agentPosition = agentPositionHistory[agentIndex][stepIndex]
+                agentPosition = agentPositionHistory[stepIndex, agentIndex]
                 separation = poiPosition - agentPosition
                 distanceSqr = dot(separation, separation)
                 
@@ -112,7 +112,7 @@ def assignDifferenceReward(data):
             stepClosestObsDistanceSqr = float("inf")
             for agentIndex in range(number_agents):
                 # Calculate separation distance between poi and agent
-                agentPosition = agentPositionHistory[agentIndex][stepIndex]
+                agentPosition = agentPositionHistory[stepIndex, agentIndex]
                 separation = poiPosition - agentPosition
                 distanceSqr = dot(separation, separation)
                 
@@ -148,7 +148,7 @@ def assignDifferenceReward(data):
                 for otherAgentIndex in range(number_agents):
                     if agentIndex != otherAgentIndex:
                         # Calculate separation distance between poi and agent
-                        agentPosition = agentPositionHistory[otherAgentIndex][stepIndex]
+                        agentPosition = agentPositionHistory[stepIndex, otherAgentIndex]
                         separation = poiPosition - agentPosition
                         distanceSqr = dot(separation, separation)
                         

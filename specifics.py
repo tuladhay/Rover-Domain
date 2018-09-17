@@ -6,7 +6,7 @@ from code.agent_domain_2 import * # Rover Domain Dynamic
 from code.trajectory_history import * # Agent Position Trajectory History 
 from code.reward_2 import * # Agent Reward 
 from code.reward_history import * # Performance Recording 
-from code.ccea import * # CCEA 
+from code.ccea_2 import * # CCEA 
 from code.save_to_pickle import * # Save data as pickle file
     
 def getSim():
@@ -92,8 +92,8 @@ def getSim():
     sim.testEndFuncCol.append(evolveCceaPolicies)
     sim.worldTestBeginFuncCol.append(assignBestCceaPolicies)
     
-    # Save data as pickle file
-    sim.trialEndFuncCol.append(savePickle)
+    # Save data as pickle file WARNING PICKLING DISABLED
+    #sim.trialEndFuncCol.append(savePickle)
     
     return sim
 
