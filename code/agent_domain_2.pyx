@@ -15,26 +15,14 @@ def doAgentSense(data):
     cdef int number_agents = data['Number of Agents']
     cdef int number_pois = data['Number of POIs'] 
     cdef double minDistanceSqr = data["Minimum Distance"] ** 2
-    
-    agentPositionCol = np.array(data["Agent Positions"])
-    cdef double[:, :] agentPositionColView = agentPositionCol
-    
-    poiValueCol = np.array(data['Poi Values'])
-    cdef double[:] poiValueColView = poiValueCol
-    
-    poiPositionCol = np.array(data["Poi Positions"])
-    cdef double[:, :] poiPositionColView = poiPositionCol
-    
-    orientationCol = np.array(data["Agent Orientations"])
-    cdef double[:, :] orientationColView = orientationCol
-    
-    observationCol = np.zeros((number_agents, 8), dtype = np.float64)
-    cdef double[:, :] observationColView = observationCol
+    cdef double[:, :] agentPositionCol = data["Agent Positions"]
+    cdef double[:] poiValueCol = data['Poi Values']
+    cdef double[:, :] poiPositionCol = data["Poi Positions"]
+    cdef double[:, :] orientationCol = data["Agent Orientations"]
+    npObservationCol = np.zeros((number_agents, 8), dtype = np.float64)
+    cdef double[:, :] observationCol = npObservationCol
     
     cdef int agentIndex, otherAgentIndex, poiIndex, obsIndex
-
-
-
     cdef double globalFrameSeparation0, globalFrameSeparation1
     cdef double agentFrameSeparation0, agentFrameSeparation1
 
@@ -51,12 +39,12 @@ def doAgentSense(data):
                 continue
                 
             # Get global separation vector between the two agents    
-            globalFrameSeparation0 = agentPositionColView[otherAgentIndex,0] - agentPositionColView[agentIndex,0]
-            globalFrameSeparation1 = agentPositionColView[otherAgentIndex,1] - agentPositionColView[agentIndex,1]
+            globalFrameSeparation0 = agentPositionCol[otherAgentIndex,0] - agentPositionCol[agentIndex,0]
+            globalFrameSeparation1 = agentPositionCol[otherAgentIndex,1] - agentPositionCol[agentIndex,1]
             
             # Translate separation to agent frame using inverse rotation matrix
-            agentFrameSeparation0 = orientationColView[agentIndex, 0] * globalFrameSeparation0 + orientationColView[agentIndex, 1] * globalFrameSeparation1 
-            agentFrameSeparation1 = orientationColView[agentIndex, 0] * globalFrameSeparation1 - orientationColView[agentIndex, 1] * globalFrameSeparation0 
+            agentFrameSeparation0 = orientationCol[agentIndex, 0] * globalFrameSeparation0 + orientationCol[agentIndex, 1] * globalFrameSeparation1 
+            agentFrameSeparation1 = orientationCol[agentIndex, 0] * globalFrameSeparation1 - orientationCol[agentIndex, 1] * globalFrameSeparation0 
             distanceSqr = agentFrameSeparation0 * agentFrameSeparation0 + agentFrameSeparation1 * agentFrameSeparation1
             
             # By bounding distance value we implicitly bound sensor values
@@ -68,15 +56,15 @@ def doAgentSense(data):
             if agentFrameSeparation0 > 0:
                 # other is north-east of agent
                 if agentFrameSeparation1 > 0:
-                    observationColView[agentIndex,0] += 1.0 / distanceSqr
+                    observationCol[agentIndex,0] += 1.0 / distanceSqr
                 else: # other is south-east of agent
-                    observationColView[agentIndex,3] += 1.0  / distanceSqr
+                    observationCol[agentIndex,3] += 1.0  / distanceSqr
             else:  # other is west of agent
                 # other is north-west of agent
                 if agentFrameSeparation1 > 0:
-                    observationColView[agentIndex,1] += 1.0  / distanceSqr
+                    observationCol[agentIndex,1] += 1.0  / distanceSqr
                 else:  # other is south-west of agent
-                    observationColView[agentIndex,2] += 1.0  / distanceSqr
+                    observationCol[agentIndex,2] += 1.0  / distanceSqr
 
 
 
@@ -84,12 +72,12 @@ def doAgentSense(data):
         for poiIndex in range(number_pois):
             
             # Get global separation vector between the two agents    
-            globalFrameSeparation0 = poiPositionColView[poiIndex,0] - agentPositionColView[agentIndex,0]
-            globalFrameSeparation1 = poiPositionColView[poiIndex,1] - agentPositionColView[agentIndex,1]
+            globalFrameSeparation0 = poiPositionCol[poiIndex,0] - agentPositionCol[agentIndex,0]
+            globalFrameSeparation1 = poiPositionCol[poiIndex,1] - agentPositionCol[agentIndex,1]
             
             # Translate separation to agent frame unp.sing inverse rotation matrix
-            agentFrameSeparation0 = orientationColView[agentIndex, 0] * globalFrameSeparation0 + orientationColView[agentIndex, 1] * globalFrameSeparation1 
-            agentFrameSeparation1 = orientationColView[agentIndex, 0] * globalFrameSeparation1 - orientationColView[agentIndex, 1] * globalFrameSeparation0 
+            agentFrameSeparation0 = orientationCol[agentIndex, 0] * globalFrameSeparation0 + orientationCol[agentIndex, 1] * globalFrameSeparation1 
+            agentFrameSeparation1 = orientationCol[agentIndex, 0] * globalFrameSeparation1 - orientationCol[agentIndex, 1] * globalFrameSeparation0 
             distanceSqr = agentFrameSeparation0 * agentFrameSeparation0 + agentFrameSeparation1 * agentFrameSeparation1
             
             # By bounding distance value we implicitly bound sensor values
@@ -100,17 +88,17 @@ def doAgentSense(data):
             if agentFrameSeparation0> 0:
                 # poi is north-east of agent
                 if agentFrameSeparation1 > 0:
-                    observationColView[agentIndex,4] += poiValueColView[poiIndex]  / distanceSqr
+                    observationCol[agentIndex,4] += poiValueCol[poiIndex]  / distanceSqr
                 else: # poi is south-east of agent
-                    observationColView[agentIndex,7] += poiValueColView[poiIndex]  / distanceSqr
+                    observationCol[agentIndex,7] += poiValueCol[poiIndex]  / distanceSqr
             else:  # poi is west of agent
                 # poi is north-west of agent
                 if agentFrameSeparation1 > 0:
-                    observationColView[agentIndex,5] += poiValueColView[poiIndex]  / distanceSqr
+                    observationCol[agentIndex,5] += poiValueCol[poiIndex]  / distanceSqr
                 else:  # poi is south-west of agent
-                    observationColView[agentIndex,6] += poiValueColView[poiIndex]  / distanceSqr
+                    observationCol[agentIndex,6] += poiValueCol[poiIndex]  / distanceSqr
                     
-    data["Agent Observations"] = observationCol
+    data["Agent Observations"] = npObservationCol
 
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing. 
@@ -130,15 +118,10 @@ def doAgentMove(data):
     cdef float worldWidth = data["World Width"]
     cdef float worldLength = data["World Length"]
     cdef int number_agents = data['Number of Agents']
-    
-    agentPositionCol = np.array(data["Agent Positions"])
-    cdef double[:, :] agentPositionColView = agentPositionCol
-    
-    orientationCol = np.array(data["Agent Orientations"])
-    cdef double[:, :] orientationColView = orientationCol
-    
-    actionCol = np.array(data["Agent Actions"]).astype(np.float_)
-    cdef double[:, :] actionColView = actionCol
+    cdef double[:, :] agentPositionCol = data["Agent Positions"]
+    cdef double[:, :] orientationCol = data["Agent Orientations"]
+    npActionCol = np.array(data["Agent Actions"]).astype(np.float_)
+    cdef double[:, :] actionCol = npActionCol
     
     cdef int agentIndex
 
@@ -148,32 +131,32 @@ def doAgentMove(data):
     for agentIndex in range(number_agents):
 
         # turn action into global frame motion
-        globalFrameMotion0 = orientationColView[agentIndex, 0] * actionColView[agentIndex, 0] - orientationColView[agentIndex, 1] * actionColView[agentIndex, 1] 
-        globalFrameMotion1 = orientationColView[agentIndex, 0] * actionColView[agentIndex, 1] + orientationColView[agentIndex, 1] * actionColView[agentIndex, 0] 
+        globalFrameMotion0 = orientationCol[agentIndex, 0] * actionCol[agentIndex, 0] - orientationCol[agentIndex, 1] * actionCol[agentIndex, 1] 
+        globalFrameMotion1 = orientationCol[agentIndex, 0] * actionCol[agentIndex, 1] + orientationCol[agentIndex, 1] * actionCol[agentIndex, 0] 
         
       
         # globally move and reorient agent
-        agentPositionColView[agentIndex, 0] += globalFrameMotion0
-        agentPositionColView[agentIndex, 1] += globalFrameMotion1
+        agentPositionCol[agentIndex, 0] += globalFrameMotion0
+        agentPositionCol[agentIndex, 1] += globalFrameMotion1
         
         if globalFrameMotion0 == 0.0 and globalFrameMotion1 == 0.0:
-            orientationColView[agentIndex,0] = 1.0
-            orientationColView[agentIndex,1] = 0.0
+            orientationCol[agentIndex,0] = 1.0
+            orientationCol[agentIndex,1] = 0.0
         else:
             norm = sqrt(globalFrameMotion0**2 +  globalFrameMotion1 **2)
-            orientationColView[agentIndex,0] = globalFrameMotion0 /norm
-            orientationColView[agentIndex,1] = globalFrameMotion1 /norm
+            orientationCol[agentIndex,0] = globalFrameMotion0 /norm
+            orientationCol[agentIndex,1] = globalFrameMotion1 /norm
             
         # # Check if action moves agent within the world bounds
-        # if agentPositionColView[agentIndex,0] > worldWidth:
-        #     agentPositionColView[agentIndex,0] = worldWidth
-        # elif agentPositionColView[agentIndex,0] < 0.0:
-        #     agentPositionColView[agentIndex,0] = 0.0
+        # if agentPositionCol[agentIndex,0] > worldWidth:
+        #     agentPositionCol[agentIndex,0] = worldWidth
+        # elif agentPositionCol[agentIndex,0] < 0.0:
+        #     agentPositionCol[agentIndex,0] = 0.0
         # 
-        # if agentPositionColView[agentIndex,1] > worldLength:
-        #     agentPositionColView[agentIndex,1] = worldLength
-        # elif agentPositionColView[agentIndex,1] < 0.0:
-        #     agentPositionColView[agentIndex,1] = 0.0
+        # if agentPositionCol[agentIndex,1] > worldLength:
+        #     agentPositionCol[agentIndex,1] = worldLength
+        # elif agentPositionCol[agentIndex,1] < 0.0:
+        #     agentPositionCol[agentIndex,1] = 0.0
         
 
     data["Agent Positions"]  = agentPositionCol
