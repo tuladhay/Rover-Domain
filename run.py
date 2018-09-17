@@ -14,13 +14,14 @@ def copyTestFiles():
 def main():
     getSim().run()
     
-i = 0
-while True:
-    print("Run %i"%(i))
-    for mod in modCol:
-        sim = getSim()
-        mod(sim)
-        sim.run()
-    i += 1
+# i = 0
+# while True:
+#     print("Run %i"%(i))
+#     for mod in modCol:
+#         sim = getSim()
+#         mod(sim)
+#         sim.run()
+#     i += 1
 
     
+main()
