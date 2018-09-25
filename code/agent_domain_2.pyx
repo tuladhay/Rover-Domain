@@ -7,7 +7,7 @@ cdef extern from "math.h":
 
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing.
-def doAgentSense(data):
+cpdef doAgentSense(data):
     """
      Sensor model is <aNE, aNW, aSW, aSE, pNE, pNE, pSW, pSE>
      Where a means (other) agent, p means poi, and the rest are the quadrants
@@ -102,7 +102,7 @@ def doAgentSense(data):
 
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing. 
-def doAgentProcess(data):
+cpdef doAgentProcess(data):
     cdef int number_agents = data['Number of Agents']
     actionCol = np.zeros((number_agents, 2), dtype = np.float_)
     policyCol = data["Agent Policies"]
@@ -114,7 +114,7 @@ def doAgentProcess(data):
 
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing.  
-def doAgentMove(data):
+cpdef doAgentMove(data):
     cdef float worldWidth = data["World Width"]
     cdef float worldLength = data["World Length"]
     cdef int number_agents = data['Number of Agents']

@@ -25,100 +25,119 @@ cdef addInPlace(double[:] vec, double[:] other):
         
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing. 
+cdef addInPlaceMat(double[:,:] mat, double[:,:] other):
+    cdef int colIndex, rowIndex
+    for rowIndex in range(mat.shape[0]):
+        for colIndex in range(mat.shape[1]):
+            mat[rowIndex, colIndex] += other[rowIndex, colIndex]
+        
+@cython.boundscheck(False)  # Deactivate bounds checking
+@cython.wraparound(False)   # Deactivate negative indexing. 
 cdef tanhInPlace(double[:] vec):
     cdef int index
     for index in range(vec.shape[0]):
         vec[index] = tanh(vec[index])
         
-
-cdef class Mlp:
-    cdef double[:,:] inToHiddenMat
-    cdef double[:] inToHiddenBias
-    cdef double[:,:] hiddenToOutMat
-    cdef double[:] hiddenToOutBias
-    cdef double[:] hidden
-    cdef double[:] out
+@cython.boundscheck(False)  # Deactivate bounds checking
+@cython.wraparound(False)   # Deactivate negative indexing. 
+cdef reluInPlace(double[:] vec):
+    cdef int index
+    for index in range(vec.shape[0]):
+        vec[index] = vec[index] * (vec[index] > 0)
+     
+@cython.boundscheck(False)  # Deactivate bounds checking
+@cython.wraparound(False)   # Deactivate negative indexing. 
+cdef mutate(double[:] vec, double m, double mr):
+    shape = [vec.shape[0]]
+    npMutation = np.random.standard_cauchy(shape)
+    npMutation *= np.random.uniform(0, 1, shape) < mr
+    cdef double[:] mutation = npMutation
+    addInPlace(vec, mutation)
     
-    def process(self, double[:] state):
-        mul(self.inToHiddenMat, state, self.hidden)
-        addInPlace(self.hidden, self.inToHiddenBias)
-        tanhInPlace(self.hidden)
-        mul(self.hiddenToOutMat, self.hidden, self.out)
-        addInPlace(self.out, self.hiddenToOutBias)
-        tanhInPlace(self.out)
+@cython.boundscheck(False)  # Deactivate bounds checking
+@cython.wraparound(False)   # Deactivate negative indexing. 
+cdef mutateMat(double[:,:] mat, double m, double mr):
+    shape = [mat.shape[0], mat.shape[1]]
+    npMutation = np.random.standard_cauchy(shape)
+    npMutation *= np.random.uniform(0, 1, shape) < mr
+    cdef double[:,:] mutation = npMutation
+    addInPlaceMat(mat, mutation)
         
-    def connect(
-        self,
-        inToHiddenMat, 
-        inToHiddenBias,
-        hiddenToOutMat,
-        hiddenToOutBias,
-        hidden,
-        out
-    ):
-        self.out = out
-        self.hidden = hidden
-        self.hiddenToOutBias = hiddenToOutBias
-        self.hiddenToOutMat = hiddenToOutMat
-        self.inToHiddenBias = inToHiddenBias
-        self.inToHiddenMat = inToHiddenMat
-        
-        
-class Evo_MLP:
+cdef class Evo_MLP:
+    cdef public double[:,:] inToHiddenMat
+    cdef public double[:] inToHiddenBias
+    cdef public double[:,:] hiddenToOutMat
+    cdef public double[:] hiddenToOutBias
+    cdef public double[:] hidden
+    cdef public double[:] out
+    cdef public object npInToHiddenMat
+    cdef public object npInToHiddenBias
+    cdef public object npHiddenToOutMat
+    cdef public object npHiddenToOutBias
+    cdef public object npHidden
+    cdef public object npOut
+    cdef public int input_shape
+    cdef public int num_outputs
+    cdef public int num_units
+    cdef public double fitness
+    
     def __init__(self, input_shape, num_outputs, num_units=16):
         self.input_shape = input_shape
         self.num_outputs = num_outputs
         self.num_units = num_units
         self.fitness = float("-inf")
 
-        self.inToHiddenMat = np.zeros((num_units, input_shape))
-        self.inToHiddenBias = np.zeros(num_units)
-        self.hiddenToOutMat = np.zeros((num_outputs, num_units))
-        self.hiddenToOutBias = np.zeros(num_outputs)
+        # XAVIER INITIALIZATION
+        stdev = (3/ input_shape) ** 0.5
+        self.npInToHiddenMat = np.random.uniform(-stdev, stdev, (num_units, input_shape))
+        self.npInToHiddenBias = np.random.uniform(-stdev, stdev, num_units)
+        stdev = (3/ num_units) ** 0.5
+        self.npHiddenToOutMat = np.random.uniform(-stdev, stdev, (num_outputs, num_units))
+        self.npHiddenToOutBias = np.random.uniform(-stdev, stdev, num_outputs)
         
-        self.hidden = np.zeros(num_units)
-        self.out = np.zeros(num_outputs)
+        self.npHidden = np.zeros(num_units)
+        self.npOut = np.zeros(num_outputs)
         
-        self.mlp = Mlp()
-        self.mlp.connect(
-            self.inToHiddenMat,
-            self.inToHiddenBias,
-            self.hiddenToOutMat,
-            self.hiddenToOutBias,
-            self.hidden,
-            self.out
-        )
-        
-        
-    def get_action(self, state):
-        self.mlp.process(state)
-        return self.out
+        self.inToHiddenMat = self.npInToHiddenMat
+        self.inToHiddenBias = self.npInToHiddenBias
+        self.hiddenToOutMat = self.npHiddenToOutMat
+        self.hiddenToOutBias = self.npHiddenToOutBias
+        self.hidden = self.npHidden
+        self.out = self.npOut
 
+    cpdef get_action(self, double[:] state):
+        mul(self.inToHiddenMat, state, self.hidden)
+        addInPlace(self.hidden, self.inToHiddenBias)
+        reluInPlace(self.hidden)
+        mul(self.hiddenToOutMat, self.hidden, self.out)
+        addInPlace(self.out, self.hiddenToOutBias)
+        tanhInPlace(self.out)
+        return self.npOut
 
-    def mutate(self):
-        m = 10
-        mr = 0.01
-        weightCol = [self.inToHiddenMat, self.inToHiddenBias, self.hiddenToOutMat, self.hiddenToOutBias]
-        for weight in weightCol:
-            mutation = np.random.normal(0, m, list(weight.shape))
-            mutation *= np.random.uniform(size = list(weight.shape)) < mr
-            weight += mutation
+    cpdef mutate(self):
+        cdef double m = 10
+        cdef double mr = 0.01
+        mutateMat(self.inToHiddenMat, m, mr)
+        mutate(self.inToHiddenBias, m, mr)
+        mutateMat(self.hiddenToOutMat, m, mr)
+        mutate(self.hiddenToOutBias, m, mr)
 
         
-    def copyFrom(self, other):
-        self.inToHiddenMat[:] = other.inToHiddenMat
-        self.inToHiddenBias[:] = other.inToHiddenBias
-        self.hiddenToOutMat[:] = other.hiddenToOutMat
-        self.hiddenToOutBias[:] = other.hiddenToOutBias
+    cpdef copyFrom(self, other):
+        self.input_shape = other.input_shape
+        self.num_outputs = other.num_outputs
+        self.num_units = other.num_units 
         
-        self.mlp.connect(
-            self.inToHiddenMat,
-            self.inToHiddenBias,
-            self.hiddenToOutMat,
-            self.hiddenToOutBias,
-            self.hidden,
-            self.out
-        )
+        cdef double[:,:] newInToHiddenMat = other.npInToHiddenMat
+        self.inToHiddenMat[:] = newInToHiddenMat
+        cdef double[:] newInToHiddenBias = other.npInToHiddenBias
+        self.inToHiddenBias[:] = newInToHiddenBias
+        cdef double[:,:] newHiddenToOutMat = other.npHiddenToOutMat
+        self.hiddenToOutMat[:] = newHiddenToOutMat
+        cdef double[:] newHiddenToOutBias = other.npHiddenToOutBias
+        self.hiddenToOutBias[:] = newHiddenToOutBias
+        
+
         
         
 def initCcea(input_shape, num_outputs, num_units=16):
@@ -153,22 +172,23 @@ def rewardCceaPolicies(data):
     for agentIndex in range(number_agents):
         policyCol[agentIndex].fitness = rewardCol[agentIndex]
     
-def evolveCceaPolicies(data): 
-    number_agents = data['Number of Agents']
+cpdef evolveCceaPolicies(data): 
+    cdef int number_agents = data['Number of Agents']
     populationCol = data['Agent Populations']
+    cdef int agentIndex, matchIndex, halfPopLen
+    halfPopLen = int(len(populationCol[0])//2)
     for agentIndex in range(number_agents):
         population = populationCol[agentIndex]
-
+        
         # Binary Tournament, replace loser with copy of winner, then mutate copy
-        for matchIndex in range(len(population)//2):
+        for matchIndex in range(halfPopLen):
+            
             if population[2 * matchIndex].fitness > population[2 * matchIndex + 1].fitness:
                 population[2 * matchIndex + 1].copyFrom(population[2 * matchIndex])
-                newPolicy = population[2 * matchIndex + 1]
             else:
                 population[2 * matchIndex].copyFrom(population[2 * matchIndex + 1])
-                newPolicy = population[2 * matchIndex + 1]
 
-            newPolicy.mutate()
+            population[2 * matchIndex + 1].mutate()
 
         random.shuffle(population)
         data['Agent Populations'][agentIndex] = population
