@@ -58,7 +58,7 @@ cdef mutate(double[:] vec, double m, double mr):
 @cython.wraparound(False)   # Deactivate negative indexing. 
 cdef mutateMat(double[:,:] mat, double m, double mr):
     shape = [mat.shape[0], mat.shape[1]]
-    npMutation = np.random.standard_cauchy(shape)
+    npMutation = m * np.random.standard_cauchy(shape)
     npMutation *= np.random.uniform(0, 1, shape) < mr
     cdef double[:,:] mutation = npMutation
     addInPlaceMat(mat, mutation)
@@ -115,7 +115,7 @@ cdef class Evo_MLP:
         return self.npOut
 
     cpdef mutate(self):
-        cdef double m = 10
+        cdef double m = 1
         cdef double mr = 0.01
         mutateMat(self.inToHiddenMat, m, mr)
         mutate(self.inToHiddenBias, m, mr)
