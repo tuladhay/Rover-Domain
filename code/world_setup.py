@@ -5,11 +5,29 @@ def blueprintAgent(data):
     world_width = data['World Width']
     world_length = data['World Length']
     
-    # Initial all agents in the np.randomly in world
+    # Initialize all agents in the np.randomly in world
     data['Agent Positions BluePrint'] = np.random.rand(number_agents, 2) * [world_width, world_length]
-    angles = np.random.uniform(-np.pi, np.pi, number_agents)
-    data['Agent Orientations BluePrint'] = np.vstack((np.cos(angles), np.sin(angles))).T
+    angleCol = np.random.uniform(-np.pi, np.pi, number_agents)
+    data['Agent Orientations BluePrint'] = np.vstack((np.cos(angleCol), np.sin(angleCol))).T
 
+def blueprintAgentInitSize(data):
+    number_agents = data['Number of Agents']
+    world_width = data['World Width']
+    world_length = data['World Length']
+    agentInitSize = data["Agent Initialization Size"]
+    
+    worldSize = np.array([world_width, world_length])
+    
+    # Initialize all agents in the np.randomly in world
+    positionCol = np.random.rand(number_agents, 2) * worldSize
+    positionCol *= agentInitSize
+    positionCol += 0.5 * (1 - agentInitSize) * worldSize
+    data['Agent Positions BluePrint'] = positionCol
+    angleCol = np.random.uniform(-np.pi, np.pi, number_agents)
+    data['Agent Orientations BluePrint'] = np.vstack((np.cos(angleCol), np.sin(angleCol))).T
+
+
+    
     
 def blueprintPoi(data):
     number_pois = data['Number of POIs']    
