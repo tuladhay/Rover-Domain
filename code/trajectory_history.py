@@ -57,11 +57,11 @@ def saveTrajectoryHistories(data):
         writer = csv.writer(csvfile)
         
         for agentIndex in range(number_agents):
-            writer.writerow(["Agent %d Position 0"%(agentIndex)] + [pos[0] for pos in agentPositionHistory[agentIndex]])
-            writer.writerow(["Agent %d Position 1"%(agentIndex)] + [pos[1] for pos in agentPositionHistory[agentIndex]])
-            writer.writerow(["Agent %d Orientation 0"%(agentIndex)] + [ori[0] for ori in agentOrientationHistory[agentIndex]])
-            writer.writerow(["Agent %d Orientation 1"%(agentIndex)] + [ori[1] for ori in agentOrientationHistory[agentIndex]])
+            writer.writerow(["Agent %d Position 0"%(agentIndex)] + [pos[0] for pos in agentPositionHistory[:,agentIndex,:]])
+            writer.writerow(["Agent %d Position 1"%(agentIndex)] + [pos[1] for pos in agentPositionHistory[:,agentIndex,:]])
+            writer.writerow(["Agent %d Orientation 0"%(agentIndex)] + [ori[0] for ori in agentOrientationHistory[:,agentIndex,:]])
+            writer.writerow(["Agent %d Orientation 1"%(agentIndex)] + [ori[1] for ori in agentOrientationHistory[:,agentIndex,:]])
             
         for poiIndex in range(number_pois):
-            writer.writerow(["Poi %d Position 0"%(agentIndex)] + [poiPositionCol[poiIndex][0]])
-            writer.writerow(["Poi %d Position 1"%(agentIndex)] + [poiPositionCol[poiIndex][1]])
+            writer.writerow(["Poi %d Position 0"%(agentIndex)] + [poiPositionCol[poiIndex, 0]])
+            writer.writerow(["Poi %d Position 1"%(agentIndex)] + [poiPositionCol[poiIndex, 1]])
