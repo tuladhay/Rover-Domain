@@ -85,7 +85,7 @@ cdef class Evo_MLP:
         self.input_shape = input_shape
         self.num_outputs = num_outputs
         self.num_units = num_units
-        self.fitness = float("-inf")
+        self.fitness = 0
 
         # XAVIER INITIALIZATION
         stdev = (3/ input_shape) ** 0.5
@@ -143,9 +143,26 @@ cdef class Evo_MLP:
 def initCcea(input_shape, num_outputs, num_units=16):
     def initCceaGo(data):
         number_agents = data['Number of Agents']
+
         populationCol = [[Evo_MLP(input_shape,num_outputs,num_units) for i in range(data['Trains per Episode'])] for j in range(number_agents)] 
         data['Agent Populations'] = populationCol
     return initCceaGo
+    
+def initCcea2(input_shape, num_outputs, num_units=16):
+    def initCceaGo(data):
+        number_agents = data['Number of Agents']
+        policyCount = data['Number of Policies']
+        populationCol = [[Evo_MLP(input_shape,num_outputs,num_units) for i in range(policyCount)] for j in range(number_agents)] 
+        data['Agent Populations'] = populationCol
+    return initCceaGo
+    
+def clearFitness(data):
+    populationCol = data['Agent Populations']
+    number_agents = data['Number of Agents']
+    
+    for agentIndex in range(number_agents):
+        for policy in populationCol[agentIndex]:
+            policy.fitness = 0
     
 def assignCceaPolicies(data):
     number_agents = data['Number of Agents']
@@ -154,6 +171,16 @@ def assignCceaPolicies(data):
     policyCol = [None] * number_agents
     for agentIndex in range(number_agents):
         policyCol[agentIndex] = populationCol[agentIndex][worldIndex]
+    data["Agent Policies"] = policyCol
+    
+def assignCceaPolicies2(data):
+    number_agents = data['Number of Agents']
+    populationCol = data['Agent Populations']
+    worldIndex = data["World Index"]
+    policyCount = len(populationCol[0])
+    policyCol = [None] * number_agents
+    for agentIndex in range(number_agents):
+        policyCol[agentIndex] = populationCol[agentIndex][worldIndex % policyCount]
     data["Agent Policies"] = policyCol
     
 def assignBestCceaPolicies(data):
@@ -171,6 +198,13 @@ def rewardCceaPolicies(data):
     rewardCol = data["Agent Rewards"]
     for agentIndex in range(number_agents):
         policyCol[agentIndex].fitness = rewardCol[agentIndex]
+ 
+def rewardCceaPolicies2(data):
+    policyCol = data["Agent Policies"]
+    number_agents = data['Number of Agents']
+    rewardCol = data["Agent Rewards"]
+    for agentIndex in range(number_agents):
+        policyCol[agentIndex].fitness += rewardCol[agentIndex] 
     
 cpdef evolveCceaPolicies(data): 
     cdef int number_agents = data['Number of Agents']
@@ -192,4 +226,6 @@ cpdef evolveCceaPolicies(data):
 
         random.shuffle(population)
         data['Agent Populations'][agentIndex] = population
+        
+   
         
