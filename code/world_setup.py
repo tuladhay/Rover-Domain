@@ -57,3 +57,11 @@ def blueprintStatic(data):
     data['Agent Orientations BluePrint'] = np.vstack((np.cos(angles), np.sin(angles))).T
     data['Poi Positions BluePrint'] = data['Poi Relative Static Positions'] * [world_width, world_length]
     data['Poi Values BluePrint'] =  data['Poi Static Values'].copy()
+    
+def assignRandomPolicy(data):
+    number_agents = data['Number of Agents']
+    populationCol = data['Agent Populations']
+    policyCol = [None] * number_agents
+    for agentIndex in range(number_agents):
+        policyCol[agentIndex] = np.random.choice(populationCol[agentIndex])
+    data["Agent Policies"] = policyCol
