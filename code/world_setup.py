@@ -58,7 +58,7 @@ def blueprintStatic(data):
     data['Poi Positions BluePrint'] = data['Poi Relative Static Positions'] * [world_width, world_length]
     data['Poi Values BluePrint'] =  data['Poi Static Values'].copy()
     
-def assignRandomPolicy(data):
+def assignRandomPolicies(data):
     number_agents = data['Number of Agents']
     populationCol = data['Agent Populations']
     policyCol = [None] * number_agents
