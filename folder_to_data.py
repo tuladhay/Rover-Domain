@@ -15,6 +15,7 @@ def folderToData(folderName):
     # Get all data files in folder
     fileNameCol = glob.glob(folderName + "*.csv")
     sampleCount = len(fileNameCol)
+    print(sampleCount)
     averagingLabelCol = []
     allLabelCol = []
     
@@ -45,9 +46,9 @@ def folderToData(folderName):
                     rawData[label][sampleIndex, :]  = list(map(float, row[1:]))
         sampleIndex += 1
         
-    # Get error and mean (deleting raw data in the process)
+    # Get error (95% CI) and mean (deleting raw data in the process)
     for label in averagingLabelCol:
-        rawData[label + "_err"] = 2 * stats.sem(rawData[label])
+        rawData[label + "_err"] = 1.96 * stats.sem(rawData[label])
         rawData[label] = mean(rawData[label], axis = 0)
     
     # Use spacing to lower resolution of data
