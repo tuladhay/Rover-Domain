@@ -74,10 +74,13 @@ class RoverDomainCoreGym(SimulationCore):
             Dimensions are agentCount by 2.
             
         step()/reset() return [observation] (2d numpy array with double
-            precision): Observation for all agents defined bydata["Observation 
+            precision): Observation for all agents defined by data["Observation 
             Function"].
             Dimensions are agentCount by 8.
             
+        For gym compatibility, self.data["Observation Function"] is
+        called automatically by this object, no need to call it in a 
+        function collection
         """
         self.data["Observation Function"] = doAgentSense
         self.worldTrainStepFuncCol.append(doAgentMove)        
@@ -100,7 +103,24 @@ class RoverDomainCoreGym(SimulationCore):
         self.data["Observation Radius"] = 4.0
         self.data["Reward Function"] = assignGlobalReward
         self.data["Evaluation Function"] = assignGlobalReward
-        
+        sim.worldTrainBeginFuncCol.append(
+            lambda data: data["Gym Reward"] = np.zeros(data['Number of Agents'])
+        )
+        sim.worldTestBeginFuncCol.append(
+            lambda data: data["Gym Reward"] = 0
+        )
+        sim.worldTrainEndFuncCol.append(
+            lambda data: data["Reward Function"](data)
+        )
+        sim.worldTrainEndFuncCol.append(
+            lambda data: data["Gym Reward"] = data["Agent Rewards"]
+        )
+        sim.worldTestEndFuncCol.append(
+            lambda data: data["Evaluation Function"](data)
+        )
+        sim.worldTestEndFuncCol.append(
+            lambda data: data["Gym Reward"] = data["Global Reward"]
+        )    
         
         # Setup world for first time
         self.reset(mode = "Train", fullyResetting = True)
@@ -124,35 +144,48 @@ class RoverDomainCoreGym(SimulationCore):
         """
         # Store Action for other functions to use
         self.data["Agent Actions"] = action
+
         
-        
-        # If not done, do all step functionality
+        # If not done, do step functionality
         if self.data["Step Index"] < self.data["Steps"]:
+            
+            # Do Step Functionality
             self.data["Agent Actions"] = action
             if self.data["Mode"] == "Train":
                 for func in self.worldTrainStepFuncCol:
                     func(self.data)
-                self.data["Reward Function"]()
             elif self.data["Mode"] == "Test":
                 for func in self.worldTestStepFuncCol:
                     func(self.data)
-                self.data["Evaluation Function"]()
             else:
                 raise Exception(
                     'data["Mode"] should be set to "Train" or "Test"'
                 )
-                
-            # Observe state, store result in self.data
-            self.data["Observation Function"](self.data)
             
             # Increment step index for future step() calls
             self.data["Step Index"] += 1
+            
+            # Check is world is done; if so, do ending functions
+            if self.data["Step Index"] >= self.data["Steps"]:
+                if self.data["Mode"] == "Train":
+                    for func in self.worldTrainEndFuncCol:
+                        func(self.data)
+                elif self.data["Mode"] == "Test":
+                    for func in self.worldTestEndFuncCol:
+                        func(self.data)
+                else:
+                    raise Exception(
+                        'data["Mode"] should be set to "Train" or "Test"'
+                    )
+                    
+            # Observe state, store result in self.data
+            self.data["Observation Function"](self.data)
         
         # Check if simulation is done
         done = False
         if self.data["Step Index"] >= self.data["Steps"]:
             done = True
-        
+                
         return self.data["Agent Observations"], self.data["Gym Reward"], \
             done, self.data
         

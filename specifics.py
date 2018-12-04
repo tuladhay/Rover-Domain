@@ -11,11 +11,11 @@ from code.save_to_pickle import * # Save data as pickle file
 
 # from code.experience_replay import *
 # from code.dpg import *
-# todo clip actionCol to -1 and 1
 # todo "Observation Radius" to "Activation Radius"
 # todo "Miniumum Distance" to "Distance Metric Lower Limit"   
 # todo Change reward_history to perforamnce_history and others to be unambiguous
 # todo make functions that do not have 'data' as sole input
+# todo make initCCEA not be a returned function, put parameters is sim.data instead
     
 def getSim():
     """
@@ -97,12 +97,13 @@ def getSim():
     sim.data["Coupling"] = 6
     sim.data["Observation Radius"] = 4.0
     sim.data["Reward Function"] = assignGlobalReward
-    sim.worldTrainEndFuncCol.append(
-        lambda data: data["Reward Function"]()
-    )
     sim.data["Evaluation Function"] = assignGlobalReward
+    sim.worldTrainEndFuncCol.append(
+        lambda data: data["Reward Function"](data)
+    )
+    
     sim.worldTestEndFuncCol.append(
-        lambda data: data["Evaluation Function"]()
+        lambda data: data["Evaluation Function"](data)
     )
     
     # Add Performance Recording Functionality
