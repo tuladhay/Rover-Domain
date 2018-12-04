@@ -14,6 +14,9 @@ def assignGlobalReward(data):
     cdef double[:, :, :] agentPositionHistory = data["Agent Position History"]
     cdef double[:] poiValueCol = data['Poi Values']
     cdef double[:, :] poiPositionCol = data["Poi Positions"]
+    cdef double stepIndex = data["Step Index"]
+    cdef double stepCount = data["Steps"]
+    mode = data["Mode"]
     
     cdef int poiIndex, stepIndex, agentIndex, observerCount
     cdef double separation0, separation1, closestObsDistanceSqr, distanceSqr, stepClosestObsDistanceSqr
@@ -54,6 +57,22 @@ def assignGlobalReward(data):
     
     data["Global Reward"] = globalReward
     data["Agent Rewards"] = np.ones(number_agents) * globalReward
+
+    
+    # Compatibility with Gym?
+    if mode == "Train":
+        if stepIndex < stepCount:
+            data["Gym Rewards"] = np.zeros(number_agents)
+        else:
+            data["Gym Rewards"] = data["Agent Rewards"]
+    elif mode == "Test":
+        if stepIndex < stepCount:
+            data["Gym Rewards"] = 0
+        else:
+            data["Gym Rewards"] = data["Global Reward"]
+    else:
+        raise Exception('data["Mode"] should be set to "Train" or "Test"')
+
  
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing.
@@ -67,6 +86,9 @@ def assignDifferenceReward(data):
     cdef double[:, :, :] agentPositionHistory = data["Agent Position History"]
     cdef double[:] poiValueCol = data['Poi Values']
     cdef double[:, :] poiPositionCol = data["Poi Positions"]
+    cdef double stepIndex = data["Step Index"]
+    cdef double stepCount = data["Steps"]
+    mode = data["Mode"]
     
     cdef int poiIndex, stepIndex, agentIndex, observerCount, otherAgentIndex
     cdef double separation0, separation1, closestObsDistanceSqr, distanceSqr, stepClosestObsDistanceSqr
@@ -145,6 +167,20 @@ def assignDifferenceReward(data):
         
     data["Agent Rewards"] = npDifferenceRewardCol  
     data["Global Reward"] = globalReward
+    
+    # Compatibility with Gym?
+    if mode == "Train":
+        if stepIndex < stepCount:
+            data["Gym Rewards"] = np.zeros(number_agents)
+        else:
+            data["Gym Rewards"] = data["Agent Rewards"]
+    elif mode == "Test":
+        if stepIndex < stepCount:
+            data["Gym Rewards"] = 0
+        else:
+            data["Gym Rewards"] = data["Global Reward"]
+    else:
+        raise Exception('data["Mode"] should be set to "Train" or "Test"')
 
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing.
@@ -158,6 +194,9 @@ def assignDppReward(data):
     cdef double[:, :, :] agentPositionHistory = data["Agent Position History"]
     cdef double[:] poiValueCol = data['Poi Values']
     cdef double[:, :] poiPositionCol = data["Poi Positions"]
+    cdef double stepIndex = data["Step Index"]
+    cdef double stepCount = data["Steps"]
+    mode = data["Mode"]
     
     cdef int poiIndex, stepIndex, agentIndex, observerCount, otherAgentIndex, counterfactualCount
     cdef double separation0, separation1, closestObsDistanceSqr, distanceSqr, stepClosestObsDistanceSqr
@@ -274,6 +313,20 @@ def assignDppReward(data):
             (globalWithExtraReward - globalReward)/(1.0 + counterfactualCount))
         
     data["Agent Rewards"] = npDifferenceRewardCol  
-    data["Global Reward"] = globalReward          
+    data["Global Reward"] = globalReward   
+    
+    # Compatibility with Gym?
+    if mode == "Train":
+        if stepIndex < stepCount:
+            data["Gym Rewards"] = np.zeros(number_agents)
+        else:
+            data["Gym Rewards"] = data["Agent Rewards"]
+    elif mode == "Test":
+        if stepIndex < stepCount:
+            data["Gym Rewards"] = 0
+        else:
+            data["Gym Rewards"] = data["Global Reward"]
+    else:
+        raise Exception('data["Mode"] should be set to "Train" or "Test"')       
     
     

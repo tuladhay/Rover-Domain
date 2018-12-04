@@ -6,7 +6,7 @@ To provide functionality, modify the following attributes:
 data:
 A dictionary shared amongst all functions in the simulation.
 User may add any property they may want to have shared by all provided functions
-SimulationCore provides and manages the following keys:
+SimulationCore provides and manages the following keys during run() execution:
     "Steps": duration of world measured in time steps,
     "Trains per Episode":  number of world instances for training to generate
         in sequence each episode
