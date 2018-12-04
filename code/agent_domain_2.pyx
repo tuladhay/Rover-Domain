@@ -121,6 +121,7 @@ cpdef doAgentMove(data):
     cdef double[:, :] agentPositionCol = data["Agent Positions"]
     cdef double[:, :] orientationCol = data["Agent Orientations"]
     npActionCol = np.array(data["Agent Actions"]).astype(np.float_)
+    npActionCol = np.clip(npActionCol, -1, 1)
     cdef double[:, :] actionCol = npActionCol
     
     cdef int agentIndex
