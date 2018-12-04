@@ -6,18 +6,22 @@ import matplotlib.pyplot as plt
 
 data = {}
 
-def folderToData(folderName):
+def folderToData(folderName, count = None):
     if folderName[-1] != '/':
         folderName += '/'
     
     rawData = {}
-
+    
     # Get all data files in folder
     fileNameCol = glob.glob(folderName + "*.csv")
     sampleCount = len(fileNameCol)
-    print(sampleCount)
     averagingLabelCol = []
     allLabelCol = []
+    if count != None:
+        fileNameCol = fileNameCol[:min(sampleCount, count)]
+    
+    sampleCount = len(fileNameCol)
+    print(sampleCount)
     
     # Get all labels from first file
     with open(fileNameCol[0], newline='') as csvfile:
