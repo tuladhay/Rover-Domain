@@ -11,9 +11,11 @@ from code.save_to_pickle import * # Save data as pickle file
 
 # from code.experience_replay import *
 # from code.dpg import *
-    
+# todo clip actionCol to -1 and 1
 # todo "Observation Radius" to "Activation Radius"
-# todo "Miniumum Distance" to "Distance Metric Lower Limit"    
+# todo "Miniumum Distance" to "Distance Metric Lower Limit"   
+# todo Change reward_history to perforamnce_history and others to be unambiguous
+# todo make functions that do not have 'data' as sole input
     
 def getSim():
     """
@@ -29,8 +31,6 @@ def getSim():
     
     sim.data["Number of Agents"] = 30
     sim.data["Number of POIs"] = 8
-    sim.data["World Width"] = 50
-    sim.data["World Length"] = 50
     sim.data["Minimum Distance"] = 1.0
     sim.data["Steps"] = 100
     sim.data["Trains per Episode"] = 50
@@ -49,6 +49,8 @@ def getSim():
     
     
     # Add Rover Domain Construction Functionality
+    sim.data["World Width"] = 50
+    sim.data["World Length"] = 50
     sim.data['Poi Static Values'] = np.array([1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0])
     sim.data['Poi Relative Static Positions'] = np.array([
         [0.0, 0.0], 
@@ -91,21 +93,21 @@ def getSim():
     sim.worldTestBeginFuncCol.append(createTrajectoryHistories)
     sim.worldTestStepFuncCol.append(updateTrajectoryHistories)
     
-    # Add Agent Training Reward Functionality
+    # Add Agent Training Reward and Evaluation Functionality
     sim.data["Coupling"] = 6
     sim.data["Observation Radius"] = 4.0
     sim.data["Reward Function"] = assignGlobalReward
     sim.worldTrainEndFuncCol.append(
         lambda data: data["Reward Function"]()
     )
-    
-    # Add Performance Recording Functionality
-    sim.data["Performance Save File Name"] = "log/%s/%s/performance/perf %s.csv"%\
-        (sim.data["Specifics Name"], sim.data["Mod Name"], dateTimeString)
     sim.data["Evaluation Function"] = assignGlobalReward
     sim.worldTestEndFuncCol.append(
         lambda data: data["Evaluation Function"]()
     )
+    
+    # Add Performance Recording Functionality
+    sim.data["Performance Save File Name"] = "log/%s/%s/performance/perf %s.csv"%\
+        (sim.data["Specifics Name"], sim.data["Mod Name"], dateTimeString)
     sim.trialBeginFuncCol.append(createRewardHistory)
     sim.testEndFuncCol.append(updateRewardHistory)
     sim.trialEndFuncCol.append(saveRewardHistory)
