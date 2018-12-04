@@ -122,6 +122,10 @@ class RoverDomainCoreGym(SimulationCore):
         info (dictionary): The state of the simulation as a dictionary of data
         
         """
+        # Store Action for other functions to use
+        self.data["Agent Actions"] = action
+        
+        
         # If not done, do all step functionality
         if self.data["Step Index"] < self.data["Steps"]:
             self.data["Agent Actions"] = action
