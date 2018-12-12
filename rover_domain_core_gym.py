@@ -6,6 +6,7 @@ import pyximport; pyximport.install() # For cython(pyx) code
 from code.world_setup import * # Rover Domain Construction 
 from code.agent_domain_2 import * # Rover Domain Dynamic  
 from code.reward_2 import * # Agent Reward and Performance Recording 
+from code.trajectory_history import * # Record trajectory of agents for calculating rewards
 
 
 """
@@ -27,9 +28,7 @@ Note: step function returns result of either the reward or evaluation function
 RoverDomainCoreGym should be mods 
 """
 class RoverDomainCoreGym(SimulationCore):
-    def __init__(
-        self,
-    ):
+    def __init__(self):
         SimulationCore.__init__(self)
         
         self.data["Number of Agents"] = 30
@@ -39,7 +38,7 @@ class RoverDomainCoreGym(SimulationCore):
         self.data["Trains per Episode"] = 50
         self.data["Tests per Episode"] = 1
         self.data["Number of Episodes"] = 5000
-        self.data["Specifics Name"] = "30Agents_8Poi_6Coup_Long_Comparison"
+        self.data["Specifics Name"] = "test"
         self.data["Mod Name"] = "global"
         
         # Add Rover Domain Construction Functionality
@@ -103,27 +102,33 @@ class RoverDomainCoreGym(SimulationCore):
         self.data["Observation Radius"] = 4.0
         self.data["Reward Function"] = assignGlobalReward
         self.data["Evaluation Function"] = assignGlobalReward
-        sim.worldTrainBeginFuncCol.append(
-            lambda data: data["Gym Reward"] = np.zeros(data['Number of Agents'])
+        
+        self.worldTrainBeginFuncCol.append(createTrajectoryHistories)
+        self.worldTrainStepFuncCol.append(updateTrajectoryHistories)
+        self.worldTestBeginFuncCol.append(createTrajectoryHistories)
+        self.worldTestStepFuncCol.append(updateTrajectoryHistories)
+        
+        self.worldTrainBeginFuncCol.append(
+            lambda data: data.update({"Gym Reward": np.zeros(data['Number of Agents'])})
         )
-        sim.worldTestBeginFuncCol.append(
-            lambda data: data["Gym Reward"] = 0
+        self.worldTestBeginFuncCol.append(
+            lambda data: data.update({"Gym Reward": 0})
         )
-        sim.worldTrainEndFuncCol.append(
+        self.worldTrainEndFuncCol.append(
             lambda data: data["Reward Function"](data)
         )
-        sim.worldTrainEndFuncCol.append(
-            lambda data: data["Gym Reward"] = data["Agent Rewards"]
+        self.worldTrainEndFuncCol.append(
+            lambda data: data.update({"Gym Reward": data["Agent Rewards"]})
         )
-        sim.worldTestEndFuncCol.append(
+        self.worldTestEndFuncCol.append(
             lambda data: data["Evaluation Function"](data)
         )
-        sim.worldTestEndFuncCol.append(
-            lambda data: data["Gym Reward"] = data["Global Reward"]
+        self.worldTestEndFuncCol.append(
+            lambda data: data.update({"Gym Reward": data["Global Reward"]}) 
         )    
         
         # Setup world for first time
-        self.reset(mode = "Train", fullyResetting = True)
+        self.reset(newMode = "Train", fullyResetting = True)
         
     def step(self, action):
         """
@@ -189,7 +194,7 @@ class RoverDomainCoreGym(SimulationCore):
         return self.data["Agent Observations"], self.data["Gym Reward"], \
             done, self.data
         
-    def reset(self, mode = None, fullyResetting = False):
+    def reset(self, newMode = None, fullyResetting = False):
         """
         Reset the world 
             
@@ -211,8 +216,8 @@ class RoverDomainCoreGym(SimulationCore):
         self.data["Step Index"] = 0
         
         # Set mode if not None
-        if mode != None:
-            self.data["Mode"] = mode
+        if newMode != None:
+            self.data["Mode"] = newMode
         
         # Execute setting functionality
         if self.data["Mode"] == "Train":
@@ -235,3 +240,5 @@ class RoverDomainCoreGym(SimulationCore):
         
         return self.data["Agent Observations"]
         
+def assign(data, key, value):
+    data[key] = value

@@ -3,6 +3,61 @@ from code.reward_2 import * # Agent Reward
 from code.curriculum import * # Agent Curriculum
 
 
+def globalRewardMod(sim):
+    sim.data["Mod Name"] = "global"
+    
+    dateTimeString = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
+    print("Starting %s test at\n\t%s\n"%(sim.data["Mod Name"], dateTimeString))
+    
+    # Agent Reward 
+    sim.data["Reward Function"] =assignGlobalReward
+    
+    sim.data["Performance Save File Name"] = "log/%s/%s/performance/perf %s.csv"%\
+        (sim.data["Specifics Name"], sim.data["Mod Name"], dateTimeString)
+        
+    sim.data["Trajectory Save File Name"] = "log/%s/%s/trajectory/traj %s.csv"%\
+        (sim.data["Specifics Name"], sim.data["Mod Name"], dateTimeString)
+        
+    sim.data["Pickle Save File Name"] = "log/%s/%s/pickle/data %s.pickle"%\
+        (sim.data["Specifics Name"], sim.data["Mod Name"], dateTimeString)
+        
+def differenceRewardMod(sim):
+    sim.data["Mod Name"] = "difference"
+    
+    dateTimeString = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
+    print("Starting %s test at\n\t%s\n"%(sim.data["Mod Name"], dateTimeString))
+    
+    # Agent Reward 
+    sim.data["Reward Function"] =assignDifferenceReward
+    
+    sim.data["Performance Save File Name"] = "log/%s/%s/performance/perf %s.csv"%\
+        (sim.data["Specifics Name"], sim.data["Mod Name"], dateTimeString)
+        
+    sim.data["Trajectory Save File Name"] = "log/%s/%s/trajectory/traj %s.csv"%\
+        (sim.data["Specifics Name"], sim.data["Mod Name"], dateTimeString)
+        
+    sim.data["Pickle Save File Name"] = "log/%s/%s/pickle/data %s.pickle"%\
+        (sim.data["Specifics Name"], sim.data["Mod Name"], dateTimeString)
+
+def dppRewardMod(sim):
+    sim.data["Mod Name"] = "dpp"
+    
+    dateTimeString = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
+    print("Starting %s test at\n\t%s\n"%(sim.data["Mod Name"], dateTimeString))
+    
+    # Agent Reward 
+    sim.data["Reward Function"] =assignDppReward
+    
+    sim.data["Performance Save File Name"] = "log/%s/%s/performance/perf %s.csv"%\
+        (sim.data["Specifics Name"], sim.data["Mod Name"], dateTimeString)
+        
+    sim.data["Trajectory Save File Name"] = "log/%s/%s/trajectory/traj %s.csv"%\
+        (sim.data["Specifics Name"], sim.data["Mod Name"], dateTimeString)
+        
+    sim.data["Pickle Save File Name"] = "log/%s/%s/pickle/data %s.pickle"%\
+        (sim.data["Specifics Name"], sim.data["Mod Name"], dateTimeString)
+
+
 
 def globalRewardSizeCurrMod10(sim):
     sim.data["Schedule"] = ((10.0, 2000), (50.0,3000))

@@ -16,6 +16,7 @@ from code.save_to_pickle import * # Save data as pickle file
 # todo Change reward_history to perforamnce_history and others to be unambiguous
 # todo make functions that do not have 'data' as sole input
 # todo make initCCEA not be a returned function, put parameters is sim.data instead
+# todo rename trajectoryhistories to jointtrajectoryhistory
     
 def getSim():
     """
