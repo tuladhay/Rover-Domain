@@ -5,7 +5,7 @@ from code.world_setup import * # Rover Domain Construction
 from code.agent_domain import * # Rover Domain Dynamic  
 from code.trajectory_history import * # Agent Position Trajectory History 
 from code.reward import * # Agent Reward 
-from code.reward_history import * # Performance Recording 
+from code.performance_history import * # Performance Recording 
 from code.ccea import * # CCEA 
 from code.save_to_pickle import * # Save data as pickle file
 
@@ -58,7 +58,7 @@ def getSim():
     sim.data["Trains per Episode"] = 50
     sim.data["Tests per Episode"] = 1
     sim.data["Number of Episodes"] = 5000
-    sim.data["Specifics Name"] = "30Agents_8Poi_6Coup_Long_Comparison"
+    sim.data["Specifics Name"] = "test"
     sim.data["Mod Name"] = "global"
     
     # NOTE: all simulation core ...funcCol collections are order-sensitive

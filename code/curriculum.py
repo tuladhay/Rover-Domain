@@ -56,7 +56,7 @@ def setCurriculumWorldSize(data):
     generationSum = 0
     for setupSize, duration in schedule:
         generationSum += duration
-        trainingWorldSize = setupSize
+        trainingSetupSize = setupSize
         if generationSum > episodeIndex:
             break
             

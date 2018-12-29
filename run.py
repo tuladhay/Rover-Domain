@@ -23,7 +23,6 @@ modCol = [
     differenceRewardCoupCurrMod3,
     differenceRewardCoupCurrMod4,
     differenceRewardCoupCurrMod5,
-    
 ]
 
 # modCol = [

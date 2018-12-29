@@ -162,10 +162,10 @@ cdef class Evo_MLP:
         
         
 
-def initCcea(inputCount, outputCount, hiddenCount=16):
-    "
-    Creates
-    
+def initCcea(data):
+    """
+    Creates A Population of Evo_MLP to evolve for each agent
+    """
     agentCount = data['Number of Agents']
     policyCount = data['Number of Policies per Population']
     inputCount = data["Number of Inputs"]
@@ -176,6 +176,9 @@ def initCcea(inputCount, outputCount, hiddenCount=16):
     data['Agent Populations'] = populationCol
     
 def resetFitness(data):
+    """
+    Set fitness value for all policies to 0 for ccea restart for the generation
+    """
     populationCol = data['Agent Populations']
     agentCount = data['Number of Agents']
     
@@ -187,6 +190,10 @@ def resetFitness(data):
 
     
 def assignCceaPolicies(data):
+    """
+    Assign Evo_MLP for each agent as their policies. Cycles through selected 
+        Evo_MLP in the population based on the world index.
+    """
     agentCount = data['Number of Agents']
     populationCol = data['Agent Populations']
     worldIndex = data["World Index"]
@@ -197,6 +204,9 @@ def assignCceaPolicies(data):
     data["Agent Policies"] = policyCol
     
 def assignBestCceaPolicies(data):
+    """
+    Assign Evo_MLP with the highest fitness for each agent as their policies.
+    """
     agentCount = data['Number of Agents']
     populationCol = data['Agent Populations']
     policyCol = [None] * agentCount
@@ -205,6 +215,9 @@ def assignBestCceaPolicies(data):
     data["Agent Policies"] = policyCol
 
 def rewardCceaPolicies(data):
+    """
+    Reset fitness of policies to the reward
+    """
     policyCol = data["Agent Policies"]
     agentCount = data['Number of Agents']
     rewardCol = data["Agent Rewards"]
@@ -213,6 +226,9 @@ def rewardCceaPolicies(data):
     data["Agent Policies"] = policyCol
     
 def addRewardCceaPolicies(data):
+    """
+    Add the reward to the fitness of policies. Use for multiple runs.
+    """
     policyCol = data["Agent Policies"]
     agentCount = data['Number of Agents']
     rewardCol = data["Agent Rewards"]
@@ -221,6 +237,11 @@ def addRewardCceaPolicies(data):
     data["Agent Policies"] = policyCol
     
 cpdef evolveCceaPolicies(data): 
+    """
+    Use binary selection and the mutate winner to replace loser. 
+    Shuffle populations at the end to mix up teams for the next generation.
+    """
+    
     cdef int agentCount = data['Number of Agents']
     populationCol = data['Agent Populations']
     policyCount = data['Number of Policies per Population'] 
@@ -242,7 +263,7 @@ cpdef evolveCceaPolicies(data):
 
         random.shuffle(population)
         data['Agent Populations'][agentIndex] = population
-    data['Agent Populations'] = policyCol
+    data['Agent Populations'] = populationCol
     
    
         
