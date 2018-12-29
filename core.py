@@ -7,7 +7,7 @@ data:
 A dictionary shared amongst all functions in the simulation.
 User may add any property they may want to have shared by all provided functions
 SimulationCore provides and manages the following keys during run() execution:
-    "Steps": duration of world measured in time steps,
+    "Number of Steps": duration of world measured in time steps,
     "Trains per Episode":  number of world instances for training to generate
         in sequence each episode
     "Tests per Episode":  number of world instances for testing to generate
@@ -99,7 +99,7 @@ class SimulationCore:
             None
         """
         self.data = {
-            "Steps": 5,
+            "Number of Steps": 5,
             "Trains per Episode": 3,
             "Tests per Episode": 1,
             "Number of Episodes": 20
@@ -155,7 +155,7 @@ class SimulationCore:
                     func(self.data)
                 
                 # Do world end functions
-                for stepIndex in range(self.data["Steps"]):
+                for stepIndex in range(self.data["Number of Steps"]):
                     self.data["Step Index"] = stepIndex
                     for func in self.worldTrainStepFuncCol:
                         func(self.data)
@@ -184,7 +184,7 @@ class SimulationCore:
                     func(self.data)
                 
                 # Do world end functions
-                for stepIndex in range(self.data["Steps"]):
+                for stepIndex in range(self.data["Number of Steps"]):
                     self.data["Step Index"] = stepIndex
                     for func in self.worldTestStepFuncCol:
                         func(self.data)

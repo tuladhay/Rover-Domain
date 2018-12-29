@@ -32,9 +32,15 @@ while True:
         mod(sim)
         
         #Trial Begins
-        createRewardHistory(sim.data)
-        initCcea(input_shape= 8, num_outputs=2, num_units = 32)(sim.data)
-        sim.data["Steps"] = stepCount
+        createPerformanceHistory(sim.data)
+        
+        sim.data["Number of Inputs"] = 8
+        sim.data["Number of Hidden Units"] = 32
+        sim.data["Number of Outputs"] = 2
+        sim.data['Number of Policies per Population'] = trainCountXEpisode
+        initCcea(sim.data)
+        
+        sim.data["Number of Steps"] = stepCount
         
         for episodeIndex in range(episodeCount):
             sim.data["Episode Index"] = episodeIndex
@@ -77,11 +83,11 @@ while True:
                     stepCount += 1
                     
             evolveCceaPolicies(sim.data)
-            updateRewardHistory(sim.data)
+            updatePerformanceHistory(sim.data)
             
             # Trial End
-            saveRewardHistory(sim.data)
-            saveTrajectoryHistories(sim.data)
+            savePerformanceHistory(sim.data)
+            saveTrajectoryHistory(sim.data)
         
         
         

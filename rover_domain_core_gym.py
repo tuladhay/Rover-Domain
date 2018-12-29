@@ -33,8 +33,8 @@ class RoverDomainCoreGym(SimulationCore):
         
         self.data["Number of Agents"] = 30
         self.data["Number of POIs"] = 8
-        self.data["Minimum Distance"] = 1.0
-        self.data["Steps"] = 100
+        self.data["Distance Metric Lower Limit"] = 1.0
+        self.data["Number of Steps"] = 100
         self.data["Trains per Episode"] = 50
         self.data["Tests per Episode"] = 1
         self.data["Number of Episodes"] = 5000
@@ -43,8 +43,7 @@ class RoverDomainCoreGym(SimulationCore):
         
         # Add Rover Domain Construction Functionality
         # Note: reset() will generate random world based on seed
-        self.data["World Width"] = 50
-        self.data["World Length"] = 50
+        self.data["Setup Size"] = 50
         self.data['Poi Static Values'] = np.array([1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0])
         self.data['Poi Relative Static Positions'] = np.array([
             [0.0, 0.0], 
@@ -99,7 +98,7 @@ class RoverDomainCoreGym(SimulationCore):
             data["Evaluation Function"]
         """
         self.data["Coupling"] = 6
-        self.data["Observation Radius"] = 4.0
+        self.data["Interaction Radius"] = 4.0
         self.data["Reward Function"] = assignGlobalReward
         self.data["Evaluation Function"] = assignGlobalReward
         
@@ -152,7 +151,7 @@ class RoverDomainCoreGym(SimulationCore):
 
         
         # If not done, do step functionality
-        if self.data["Step Index"] < self.data["Steps"]:
+        if self.data["Step Index"] < self.data["Number of Steps"]:
             
             # Do Step Functionality
             self.data["Agent Actions"] = action
@@ -171,7 +170,7 @@ class RoverDomainCoreGym(SimulationCore):
             self.data["Step Index"] += 1
             
             # Check is world is done; if so, do ending functions
-            if self.data["Step Index"] >= self.data["Steps"]:
+            if self.data["Step Index"] >= self.data["Number of Steps"]:
                 if self.data["Mode"] == "Train":
                     for func in self.worldTrainEndFuncCol:
                         func(self.data)
@@ -188,7 +187,7 @@ class RoverDomainCoreGym(SimulationCore):
         
         # Check if simulation is done
         done = False
-        if self.data["Step Index"] >= self.data["Steps"]:
+        if self.data["Step Index"] >= self.data["Number of Steps"]:
             done = True
                 
         return self.data["Agent Observations"], self.data["Gym Reward"], \

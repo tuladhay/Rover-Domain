@@ -2,21 +2,42 @@ import datetime
 from core import SimulationCore
 import pyximport; pyximport.install() # For cython(pyx) code
 from code.world_setup import * # Rover Domain Construction 
-from code.agent_domain_2 import * # Rover Domain Dynamic  
+from code.agent_domain import * # Rover Domain Dynamic  
 from code.trajectory_history import * # Agent Position Trajectory History 
-from code.reward_2 import * # Agent Reward 
+from code.reward import * # Agent Reward 
 from code.reward_history import * # Performance Recording 
-from code.ccea_2 import * # CCEA 
+from code.ccea import * # CCEA 
 from code.save_to_pickle import * # Save data as pickle file
 
 # from code.experience_replay import *
 # from code.dpg import *
-# todo "Observation Radius" to "Activation Radius"
-# todo "Miniumum Distance" to "Distance Metric Lower Limit"   
-# todo Change reward_history to perforamnce_history and others to be unambiguous
-# todo make functions that do not have 'data' as sole input
-# todo make initCCEA not be a returned function, put parameters is sim.data instead
-# todo rename trajectoryhistories to jointtrajectoryhistory
+
+#todo Use lambda to interface code
+
+"""
+Note the following changes:
+ccea_2.pyx to ccea.pyx
+reward_2.pyx to reward.pyx
+agent_domain_2.pyx to agent_domain.pyx
+"Observation Radius" changed to "Interaction Radius"
+"Minimum Distance" to "Distance Metric Lower Limit"  
+"Steps" to "Number of Steps"
+4 new keys for sim.data for CCEA 
+number_agents to agentCount
+number_pois to poiCount
+reward_history to performance_history
+"Reward History" to "Performance History"
+reward_history.py to performance_history.py
+saveRewardHistory to savePerformanceHistory 
+createRewardHistory to createPerformanceHistory
+updateRewardHistory to updatePerformanceHistory 
+"Performance" is new key for sim.data set to "Global Reward"
+createTrajectoryHistories to createTrajectoryHistory
+updateTrajectoryHistories to updateTrajectoryHistory
+saveTrajectoryHistories to saveTrajectoryHistory
+"World Width" to "Setup Size"
+"World Length" removed
+"""
     
 def getSim():
     """
@@ -32,8 +53,8 @@ def getSim():
     
     sim.data["Number of Agents"] = 30
     sim.data["Number of POIs"] = 8
-    sim.data["Minimum Distance"] = 1.0
-    sim.data["Steps"] = 100
+    sim.data["Distance Metric Lower Limit"] = 1.0
+    sim.data["Number of Steps"] = 100
     sim.data["Trains per Episode"] = 50
     sim.data["Tests per Episode"] = 1
     sim.data["Number of Episodes"] = 5000
@@ -50,8 +71,7 @@ def getSim():
     
     
     # Add Rover Domain Construction Functionality
-    sim.data["World Width"] = 50
-    sim.data["World Length"] = 50
+    sim.data["Setup Size"] = 50
     sim.data['Poi Static Values'] = np.array([1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0])
     sim.data['Poi Relative Static Positions'] = np.array([
         [0.0, 0.0], 
@@ -88,15 +108,15 @@ def getSim():
     # Add Agent Position Trajectory History Functionality
     sim.data["Trajectory Save File Name"] = "log/%s/%s/trajectory/traj %s.csv"%\
         (sim.data["Specifics Name"], sim.data["Mod Name"], dateTimeString)
-    sim.worldTrainBeginFuncCol.append(createTrajectoryHistories)
-    sim.worldTrainStepFuncCol.append(updateTrajectoryHistories)
-    sim.trialEndFuncCol.append(saveTrajectoryHistories)
-    sim.worldTestBeginFuncCol.append(createTrajectoryHistories)
-    sim.worldTestStepFuncCol.append(updateTrajectoryHistories)
+    sim.worldTrainBeginFuncCol.append(createTrajectoryHistory)
+    sim.worldTrainStepFuncCol.append(updateTrajectoryHistory)
+    sim.trialEndFuncCol.append(saveTrajectoryHistory)
+    sim.worldTestBeginFuncCol.append(createTrajectoryHistory)
+    sim.worldTestStepFuncCol.append(updateTrajectoryHistory)
     
     # Add Agent Training Reward and Evaluation Functionality
     sim.data["Coupling"] = 6
-    sim.data["Observation Radius"] = 4.0
+    sim.data["Interaction Radius"] = 4.0
     sim.data["Reward Function"] = assignGlobalReward
     sim.data["Evaluation Function"] = assignGlobalReward
     sim.worldTrainEndFuncCol.append(
@@ -110,9 +130,9 @@ def getSim():
     # Add Performance Recording Functionality
     sim.data["Performance Save File Name"] = "log/%s/%s/performance/perf %s.csv"%\
         (sim.data["Specifics Name"], sim.data["Mod Name"], dateTimeString)
-    sim.trialBeginFuncCol.append(createRewardHistory)
-    sim.testEndFuncCol.append(updateRewardHistory)
-    sim.trialEndFuncCol.append(saveRewardHistory)
+    sim.trialBeginFuncCol.append(createPerformanceHistory)
+    sim.testEndFuncCol.append(updatePerformanceHistory)
+    sim.trialEndFuncCol.append(savePerformanceHistory)
     
     # # Add DE Functionality (all Functionality below are dependent and are displayed together for easy accessibility)
     # from code.differential_evolution import initDe, assignDePolicies, rewardDePolicies, evolveDePolicies, assignBestDePolicies
@@ -142,7 +162,11 @@ def getSim():
     # sim.data['Critic Hidden Count'] = 200
     # 
     # Add CCEA Functionality 
-    sim.trialBeginFuncCol.append(initCcea(input_shape= 8, num_outputs=2, num_units = 32))
+    sim.data["Number of Inputs"] = 8
+    sim.data["Number of Hidden Units"] = 32
+    sim.data["Number of Outputs"] = 2
+    sim.data['Number of Policies per Population'] = sim.data["Trains per Episode"]
+    sim.trialBeginFuncCol.append(initCcea)
     sim.worldTrainBeginFuncCol.append(assignCceaPolicies)
     sim.worldTrainEndFuncCol.append(rewardCceaPolicies)
     sim.testEndFuncCol.append(evolveCceaPolicies)
