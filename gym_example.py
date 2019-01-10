@@ -1,12 +1,14 @@
+#! /usr/bin/python3.6
+
 from rover_domain_core_gym import RoverDomainCoreGym
-from mods import *
+from mods import global_reward_mod, difference_reward_mod, dpp_reward_mod
 import datetime
 from code.world_setup import * # Rover Domain Construction 
-from code.agent_domain_2 import * # Rover Domain Dynamic  
+from code.agent_domain import * # Rover Domain Dynamic
 from code.trajectory_history import * # Agent Position Trajectory History 
-from code.reward_2 import * # Agent Reward 
+from code.reward import * # Agent Reward
 from code.reward_history import * # Performance Recording 
-from code.ccea_2 import * # CCEA 
+from code.ccea import * # CCEA
 from code.save_to_pickle import * # Save data as pickle file
 import random
 
@@ -18,13 +20,13 @@ episodeCount =  20
 
 # NOTE: Add the mod functions (variables) to run to modCol here:
 modCol = [
-    globalRewardMod,
-    differenceRewardMod,
-    dppRewardMod
+    global_reward_mod,
+    difference_reward_mod,
+    dpp_reward_mod
 ]
 
 i = 0
-while True:
+while i < 10:
     print("Run %i"%(i))
     random.shuffle(modCol)
     for mod in modCol:
@@ -33,7 +35,7 @@ while True:
         
         #Trial Begins
         createRewardHistory(sim.data)
-        initCcea(input_shape= 8, num_outputs=2, num_units = 32)(sim.data)
+        initCcea(input_shape=8, num_outputs=2, num_units=32)(sim.data)
         sim.data["Steps"] = stepCount
         
         for episodeIndex in range(episodeCount):
@@ -82,7 +84,5 @@ while True:
             # Trial End
             saveRewardHistory(sim.data)
             saveTrajectoryHistories(sim.data)
-        
-        
-        
+
     i += 1

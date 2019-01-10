@@ -106,19 +106,16 @@ class SimulationCore:
         } 
     
         self.trialBeginFuncCol = []
-        
         self.trainBeginFuncCol = []
         self.worldTrainBeginFuncCol = []
         self.worldTrainStepFuncCol = []
         self.worldTrainEndFuncCol = []
         self.trainEndFuncCol = []
-        
         self.testBeginFuncCol = []
         self.worldTestBeginFuncCol = []
         self.worldTestStepFuncCol = []
         self.worldTestEndFuncCol = []
         self.testEndFuncCol = []
-        
         self.trialEndFuncCol = []
         
     def run(self):

@@ -4,8 +4,8 @@ import datetime
 from core import SimulationCore
 import pyximport; pyximport.install() # For cython(pyx) code
 from code.world_setup import * # Rover Domain Construction 
-from code.agent_domain_2 import * # Rover Domain Dynamic  
-from code.reward_2 import * # Agent Reward and Performance Recording 
+from code.agent_domain import * # Rover Domain Dynamic
+from code.reward import * # Agent Reward and Performance Recording
 from code.trajectory_history import * # Record trajectory of agents for calculating rewards
 
 
@@ -33,9 +33,9 @@ class RoverDomainCoreGym(SimulationCore):
         
         self.data["Number of Agents"] = 30
         self.data["Number of POIs"] = 8
-        self.data["Minimum Distance"] = 1.0
+        self.data["Minimum Distance"] = 1.0 # Minimum activation distance?
         self.data["Steps"] = 100
-        self.data["Trains per Episode"] = 50
+        self.data["Trains per Episode"] = 50 # CCEA Generations
         self.data["Tests per Episode"] = 1
         self.data["Number of Episodes"] = 5000
         self.data["Specifics Name"] = "test"
@@ -45,7 +45,7 @@ class RoverDomainCoreGym(SimulationCore):
         # Note: reset() will generate random world based on seed
         self.data["World Width"] = 50
         self.data["World Length"] = 50
-        self.data['Poi Static Values'] = np.array([1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0])
+        self.data['Poi Static Values'] = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0])
         self.data['Poi Relative Static Positions'] = np.array([
             [0.0, 0.0], 
             [0.0, 1.0], 
@@ -56,7 +56,7 @@ class RoverDomainCoreGym(SimulationCore):
             [0.0, 5.0],
             [0.5, 0.0]
         ])
-        self.data['Agent Initialization Size'] = 0.1
+        self.data['Agent Initialization Size'] = 0.1 # What is this?
         self.trainBeginFuncCol.append(blueprintStatic)
         self.trainBeginFuncCol.append(blueprintAgentInitSize)
         self.worldTrainBeginFuncCol.append(initWorld)
@@ -69,7 +69,7 @@ class RoverDomainCoreGym(SimulationCore):
         """
         step() parameter [action] (2d numpy array with double precision):
             Actions for all rovers before clipping -1 to 1 defined by 
-            doAgentMove.
+            do_agent_move.
             Dimensions are agentCount by 2.
             
         step()/reset() return [observation] (2d numpy array with double
@@ -81,9 +81,9 @@ class RoverDomainCoreGym(SimulationCore):
         called automatically by this object, no need to call it in a 
         function collection
         """
-        self.data["Observation Function"] = doAgentSense
-        self.worldTrainStepFuncCol.append(doAgentMove)        
-        self.worldTestStepFuncCol.append(doAgentMove)
+        self.data["Observation Function"] = get_agent_state
+        self.worldTrainStepFuncCol.append(do_agent_move)
+        self.worldTestStepFuncCol.append(do_agent_move)
 
         
             
@@ -98,10 +98,10 @@ class RoverDomainCoreGym(SimulationCore):
         step() return [reward] (double): Performance defined by 
             data["Evaluation Function"]
         """
-        self.data["Coupling"] = 6
-        self.data["Observation Radius"] = 4.0
-        self.data["Reward Function"] = assignGlobalReward
-        self.data["Evaluation Function"] = assignGlobalReward
+        self.data["Coupling"] = 6 # Required observations of PoI
+        self.data["Observation Radius"] = 4.0 # Maximum distance at which observations are counted for score
+        self.data["Reward Function"] = calc_global_reward
+        self.data["Evaluation Function"] = calc_global_reward
         
         self.worldTrainBeginFuncCol.append(createTrajectoryHistories)
         self.worldTrainStepFuncCol.append(updateTrajectoryHistories)

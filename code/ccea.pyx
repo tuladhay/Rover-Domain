@@ -56,107 +56,107 @@ cdef mutate(double[:] vec, double m, double mr):
     
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing. 
-cdef mutateMat(double[:,:] mat, double m, double mr):
+cdef mutateMat(double[:, :] mat, double m, double mr):
     shape = [mat.shape[0], mat.shape[1]]
     npMutation = m * np.random.standard_cauchy(shape)
     npMutation *= np.random.uniform(0, 1, shape) < mr
-    cdef double[:,:] mutation = npMutation
+    cdef double[:, :] mutation = npMutation
     addInPlaceMat(mat, mutation)
         
 cdef class Evo_MLP:
-    cdef public double[:,:] inToHiddenMat
-    cdef public double[:] inToHiddenBias
-    cdef public double[:,:] hiddenToOutMat
-    cdef public double[:] hiddenToOutBias
-    cdef public double[:] hidden
-    cdef public double[:] out
-    cdef public object npInToHiddenMat
-    cdef public object npInToHiddenBias
-    cdef public object npHiddenToOutMat
-    cdef public object npHiddenToOutBias
-    cdef public object npHidden
-    cdef public object npOut
-    cdef public int input_shape
+    cdef public double[:, :] in_To_Hidden_Mat
+    cdef public double[:] in_To_Hidden_Bias
+    cdef public double[:, :] hidden_To_Out_Mat
+    cdef public double[:] hidden_To_Out_Bias
+    cdef public double[:] hidden # Hidden layer of NN
+    cdef public double[:] out # Output layer of NN
+    cdef public object np_In_To_Hidden_Mat
+    cdef public object np_In_To_Hidden_Bias
+    cdef public object np_Hidden_To_Out_Mat
+    cdef public object np_Hidden_To_Out_Bias
+    cdef public object np_Hidden
+    cdef public object np_Out
+    cdef public int num_inputs
     cdef public int num_outputs
     cdef public int num_units
     cdef public double fitness
     
-    def __init__(self, input_shape, num_outputs, num_units=16):
-        self.input_shape = input_shape
+    def __init__(self, num_inputs, num_outputs, num_units):
+        self.num_inputs = num_inputs
         self.num_outputs = num_outputs
-        self.num_units = num_units
+        self.num_units = num_units # Size of hidden layer
         self.fitness = 0
 
         # XAVIER INITIALIZATION
-        stdev = (3/ input_shape) ** 0.5
-        self.npInToHiddenMat = np.random.uniform(-stdev, stdev, (num_units, input_shape))
-        self.npInToHiddenBias = np.random.uniform(-stdev, stdev, num_units)
+        stdev = (3/ num_inputs) ** 0.5
+        self.np_In_To_Hidden_Mat = np.random.uniform(-stdev, stdev, (num_units, num_inputs))
+        self.np_In_To_Hidden_Bias = np.random.uniform(-stdev, stdev, num_units)
         stdev = (3/ num_units) ** 0.5
-        self.npHiddenToOutMat = np.random.uniform(-stdev, stdev, (num_outputs, num_units))
-        self.npHiddenToOutBias = np.random.uniform(-stdev, stdev, num_outputs)
+        self.np_Hidden_To_Out_Mat = np.random.uniform(-stdev, stdev, (num_outputs, num_units))
+        self.np_Hidden_To_Out_Bias = np.random.uniform(-stdev, stdev, num_outputs)
         
-        self.npHidden = np.zeros(num_units)
-        self.npOut = np.zeros(num_outputs)
+        self.np_Hidden = np.zeros(num_units)
+        self.np_Out = np.zeros(num_outputs)
         
-        self.inToHiddenMat = self.npInToHiddenMat
-        self.inToHiddenBias = self.npInToHiddenBias
-        self.hiddenToOutMat = self.npHiddenToOutMat
-        self.hiddenToOutBias = self.npHiddenToOutBias
-        self.hidden = self.npHidden
-        self.out = self.npOut
+        self.in_To_Hidden_Mat = self.np_In_To_Hidden_Mat # Input layer to hidden layer
+        self.in_To_Hidden_Bias = self.np_In_To_Hidden_Bias # Input layer biasing node
+        self.hidden_To_Out_Mat = self.np_Hidden_To_Out_Mat # Hidden layer to output layer
+        self.hidden_To_Out_Bias = self.np_Hidden_To_Out_Bias # Hidden layer biasing node
+        self.hidden = self.np_Hidden # Hidden layer
+        self.out = self.np_Out # Output layer
 
     cpdef get_action(self, double[:] state):
-        mul(self.inToHiddenMat, state, self.hidden)
-        addInPlace(self.hidden, self.inToHiddenBias)
+        mul(self.in_To_Hidden_Mat, state, self.hidden)
+        addInPlace(self.hidden, self.in_To_Hidden_Bias)
         reluInPlace(self.hidden)
-        mul(self.hiddenToOutMat, self.hidden, self.out)
-        addInPlace(self.out, self.hiddenToOutBias)
+        mul(self.hidden_To_Out_Mat, self.hidden, self.out)
+        addInPlace(self.out, self.hidden_To_Out_Bias)
         tanhInPlace(self.out)
-        return self.npOut
+        return self.np_Out
 
     cpdef mutate(self):
         cdef double m = 1
         cdef double mr = 0.01
-        mutateMat(self.inToHiddenMat, m, mr)
-        mutate(self.inToHiddenBias, m, mr)
-        mutateMat(self.hiddenToOutMat, m, mr)
-        mutate(self.hiddenToOutBias, m, mr)
+        mutateMat(self.in_To_Hidden_Mat, m, mr)
+        mutate(self.in_To_Hidden_Bias, m, mr)
+        mutateMat(self.hidden_To_Out_Mat, m, mr)
+        mutate(self.hidden_To_Out_Bias, m, mr)
 
         
     cpdef copyFrom(self, other):
-        self.input_shape = other.input_shape
+        self.num_inputs = other.num_inputs
         self.num_outputs = other.num_outputs
         self.num_units = other.num_units 
         
-        cdef double[:,:] newInToHiddenMat = other.npInToHiddenMat
-        self.inToHiddenMat[:] = newInToHiddenMat
-        cdef double[:] newInToHiddenBias = other.npInToHiddenBias
-        self.inToHiddenBias[:] = newInToHiddenBias
-        cdef double[:,:] newHiddenToOutMat = other.npHiddenToOutMat
-        self.hiddenToOutMat[:] = newHiddenToOutMat
-        cdef double[:] newHiddenToOutBias = other.npHiddenToOutBias
-        self.hiddenToOutBias[:] = newHiddenToOutBias
+        cdef double[:, :] new_In_To_Hidden_Mat = other.np_In_To_Hidden_Mat
+        self.in_To_Hidden_Mat[:] = new_In_To_Hidden_Mat
+        cdef double[:] new_In_To_Hidden_Bias = other.np_In_To_Hidden_Bias
+        self.in_To_Hidden_Bias[:] = new_In_To_Hidden_Bias
+        cdef double[:, :] new_Hidden_To_Out_Mat = other.np_Hidden_To_Out_Mat
+        self.hidden_To_Out_Mat[:] = new_Hidden_To_Out_Mat
+        cdef double[:] new_Hidden_To_Out_Bias = other.np_Hidden_To_Out_Bias
+        self.hidden_To_Out_Bias[:] = new_Hidden_To_Out_Bias
         
 
         
         
-def initCcea(input_shape, num_outputs, num_units=16):
+def init_Ccea(num_inputs, num_outputs, num_units):
     def initCceaGo(data):
         number_agents = data['Number of Agents']
 
-        populationCol = [[Evo_MLP(input_shape,num_outputs,num_units) for i in range(data['Trains per Episode'])] for j in range(number_agents)] 
+        populationCol = [[Evo_MLP(num_inputs, num_outputs, num_units) for i in range(data['Trains per Episode'])] for j in range(number_agents)]
         data['Agent Populations'] = populationCol
     return initCceaGo
     
-def initCcea2(input_shape, num_outputs, num_units=16):
+def init_Ccea2(num_inputs, num_outputs, num_units):
     def initCceaGo(data):
         number_agents = data['Number of Agents']
         policyCount = data['Number of Policies']
-        populationCol = [[Evo_MLP(input_shape,num_outputs,num_units) for i in range(policyCount)] for j in range(number_agents)] 
+        populationCol = [[Evo_MLP(num_inputs, num_outputs, num_units) for i in range(policyCount)] for j in range(number_agents)]
         data['Agent Populations'] = populationCol
     return initCceaGo
     
-def clearFitness(data):
+def clear_Fitness(data):
     populationCol = data['Agent Populations']
     number_agents = data['Number of Agents']
     
@@ -164,7 +164,7 @@ def clearFitness(data):
         for policy in populationCol[agentIndex]:
             policy.fitness = 0
     
-def assignCceaPolicies(data):
+def assign_Ccea_Policies(data):
     number_agents = data['Number of Agents']
     populationCol = data['Agent Populations']
     worldIndex = data["World Index"]
@@ -173,7 +173,7 @@ def assignCceaPolicies(data):
         policyCol[agentIndex] = populationCol[agentIndex][worldIndex]
     data["Agent Policies"] = policyCol
     
-def assignCceaPolicies2(data):
+def assign_Ccea_Policies_2(data):
     number_agents = data['Number of Agents']
     populationCol = data['Agent Populations']
     worldIndex = data["World Index"]
@@ -183,7 +183,7 @@ def assignCceaPolicies2(data):
         policyCol[agentIndex] = populationCol[agentIndex][worldIndex % policyCount]
     data["Agent Policies"] = policyCol
     
-def assignBestCceaPolicies(data):
+def assign_Best_Ccea_Policies(data):
     number_agents = data['Number of Agents']
     populationCol = data['Agent Populations']
     policyCol = [None] * number_agents
@@ -192,21 +192,21 @@ def assignBestCceaPolicies(data):
         #policyCol[agentIndex] = populationCol[agentIndex][0]
     data["Agent Policies"] = policyCol
 
-def rewardCceaPolicies(data):
+def reward_Ccea_Policies(data):
     policyCol = data["Agent Policies"]
     number_agents = data['Number of Agents']
     rewardCol = data["Agent Rewards"]
     for agentIndex in range(number_agents):
         policyCol[agentIndex].fitness = rewardCol[agentIndex]
  
-def rewardCceaPolicies2(data):
+def reward_Ccea_Policies_2(data):
     policyCol = data["Agent Policies"]
     number_agents = data['Number of Agents']
     rewardCol = data["Agent Rewards"]
     for agentIndex in range(number_agents):
         policyCol[agentIndex].fitness += rewardCol[agentIndex] 
     
-cpdef evolveCceaPolicies(data): 
+cpdef evolve_Ccea_Policies(data):
     cdef int number_agents = data['Number of Agents']
     populationCol = data['Agent Populations']
     cdef int agentIndex, matchIndex, halfPopLen

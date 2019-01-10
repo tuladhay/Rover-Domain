@@ -23,7 +23,7 @@ modCol = [
     differenceRewardCoupCurrMod3,
     differenceRewardCoupCurrMod4,
     differenceRewardCoupCurrMod5,
-    
+
 ]
 
 # modCol = [
@@ -34,11 +34,11 @@ modCol = [
 def copyTestFiles():
     copyfile("mods.py", "log/%s/mods.py"%sim.data["Specifics Name"])
     copyfile("specifics.py", "log/%s/specifics.py"%sim.data["Specifics Name"])
-    
+
 
 def main():
     getSim().run()
-    
+
 i = 0
 while True:
     print("Run %i"%(i))
@@ -49,7 +49,7 @@ while True:
         sim.run()
     i += 1
 
-    
+
 # main()
 # sim = getSim()
 # sim.run()
