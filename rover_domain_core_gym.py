@@ -4,8 +4,8 @@ import datetime
 from core import SimulationCore
 import pyximport; pyximport.install() # For cython(pyx) code
 from code.world_setup import * # Rover Domain Construction 
-from code.agent_domain_2 import * # Rover Domain Dynamic  
-from code.reward_2 import * # Agent Reward and Performance Recording 
+from code.agent_domain import * # Rover Domain Dynamic
+from code.reward import * # Agent Reward and Performance Recording
 from code.trajectory_history import * # Record trajectory of agents for calculating rewards
 
 

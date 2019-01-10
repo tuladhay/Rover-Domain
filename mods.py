@@ -1,5 +1,5 @@
 import datetime
-from code.reward_2 import * # Agent Reward 
+from code.reward import * # Agent Reward
 from code.curriculum import * # Agent Curriculum
 
 

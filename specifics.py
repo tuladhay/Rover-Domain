@@ -2,11 +2,11 @@ import datetime
 from core import SimulationCore
 import pyximport; pyximport.install() # For cython(pyx) code
 from code.world_setup import * # Rover Domain Construction 
-from code.agent_domain_2 import * # Rover Domain Dynamic  
+from code.agent_domain import * # Rover Domain Dynamic
 from code.trajectory_history import * # Agent Position Trajectory History 
-from code.reward_2 import * # Agent Reward 
+from code.reward import * # Agent Reward
 from code.reward_history import * # Performance Recording 
-from code.ccea_2 import * # CCEA 
+from code.ccea import * # CCEA
 from code.save_to_pickle import * # Save data as pickle file
 
 # from code.experience_replay import *
