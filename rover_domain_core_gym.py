@@ -27,7 +27,7 @@ Note: step function returns result of either the reward or evaluation function
 
 RoverDomainCoreGym should be mods 
 """
-class RoverDomainCoreGym(SimulationCore):
+class rover_domain_core_gym(SimulationCore):
     def __init__(self):
         SimulationCore.__init__(self)
         

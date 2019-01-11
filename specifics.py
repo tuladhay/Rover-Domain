@@ -2,11 +2,11 @@ import datetime
 from core import SimulationCore
 import pyximport; pyximport.install() # For cython(pyx) code
 from code.world_setup import * # Rover Domain Construction 
-from code.agent_domain_2 import * # Rover Domain Dynamic  
+from code.agent_domain import * # Rover Domain Dynamic
 from code.trajectory_history import * # Agent Position Trajectory History 
-from code.reward_2 import * # Agent Reward 
+from code.reward import * # Agent Reward
 from code.reward_history import * # Performance Recording 
-from code.ccea_2 import * # CCEA 
+from code.ccea import * # CCEA
 from code.save_to_pickle import * # Save data as pickle file
 
 # from code.experience_replay import *
@@ -73,17 +73,17 @@ def getSim():
     
     
     # Add Rover Domain Dynamic Functionality
-    sim.data["Observation Function"] = doAgentSense
+    sim.data["Observation Function"] = get_agent_state
     sim.worldTrainStepFuncCol.append(
         lambda data: data["Observation Function"](data)
     )
-    sim.worldTrainStepFuncCol.append(doAgentProcess)
-    sim.worldTrainStepFuncCol.append(doAgentMove)
+    sim.worldTrainStepFuncCol.append(get_agent_actions)
+    sim.worldTrainStepFuncCol.append(do_agent_move)
     sim.worldTestStepFuncCol.append(
         lambda data: data["Observation Function"](data)
     )
-    sim.worldTestStepFuncCol.append(doAgentProcess)
-    sim.worldTestStepFuncCol.append(doAgentMove)
+    sim.worldTestStepFuncCol.append(get_agent_actions)
+    sim.worldTestStepFuncCol.append(do_agent_move)
     
     # Add Agent Position Trajectory History Functionality
     sim.data["Trajectory Save File Name"] = "log/%s/%s/trajectory/traj %s.csv"%\
@@ -97,8 +97,8 @@ def getSim():
     # Add Agent Training Reward and Evaluation Functionality
     sim.data["Coupling"] = 6
     sim.data["Observation Radius"] = 4.0
-    sim.data["Reward Function"] = assignGlobalReward
-    sim.data["Evaluation Function"] = assignGlobalReward
+    sim.data["Reward Function"] = calc_global_reward
+    sim.data["Evaluation Function"] = calc_global_reward
     sim.worldTrainEndFuncCol.append(
         lambda data: data["Reward Function"](data)
     )
@@ -142,11 +142,11 @@ def getSim():
     # sim.data['Critic Hidden Count'] = 200
     # 
     # Add CCEA Functionality 
-    sim.trialBeginFuncCol.append(initCcea(input_shape= 8, num_outputs=2, num_units = 32))
-    sim.worldTrainBeginFuncCol.append(assignCceaPolicies)
-    sim.worldTrainEndFuncCol.append(rewardCceaPolicies)
-    sim.testEndFuncCol.append(evolveCceaPolicies)
-    sim.worldTestBeginFuncCol.append(assignBestCceaPolicies)
+    sim.trialBeginFuncCol.append(init_ccea(input_shape= 8, num_outputs=2, num_units = 32))
+    sim.worldTrainBeginFuncCol.append(assign_ccea_policies)
+    sim.worldTrainEndFuncCol.append(reward_ccea_policies)
+    sim.testEndFuncCol.append(evolve_ccea_policies)
+    sim.worldTestBeginFuncCol.append(assign_best_ccea_policies)
     
     
     # Save data as pickle file

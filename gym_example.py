@@ -1,6 +1,6 @@
 #! /usr/bin/python3.6
 
-from rover_domain_core_gym import RoverDomainCoreGym
+from rover_domain_core_gym import rover_domain_core_gym
 from mods import global_reward_mod, difference_reward_mod, dpp_reward_mod
 import datetime
 from code.world_setup import * # Rover Domain Construction 
@@ -13,10 +13,10 @@ from code.save_to_pickle import * # Save data as pickle file
 import random
 
 
-stepCount = 5
-trainCountXEpisode = 3
-testCountXEpisode = 1
-episodeCount =  20
+step_count = 5
+generations_per_episode = 3
+tests_per_episode = 1
+num_episodes =  20
 
 # NOTE: Add the mod functions (variables) to run to modCol here:
 modCol = [
@@ -30,55 +30,55 @@ while i < 10:
     print("Run %i"%(i))
     random.shuffle(modCol)
     for mod in modCol:
-        sim = RoverDomainCoreGym()
+        sim = rover_domain_core_gym()
         mod(sim)
         
         #Trial Begins
         createRewardHistory(sim.data)
-        initCcea(input_shape=8, num_outputs=2, num_units=32)(sim.data)
-        sim.data["Steps"] = stepCount
+        init_ccea(num_inputs=8, num_outputs=2, num_units=32)(sim.data)
+        sim.data["Steps"] = step_count
         
-        for episodeIndex in range(episodeCount):
+        for episodeIndex in range(num_episodes):
             sim.data["Episode Index"] = episodeIndex
             
             # Training Phase
             
             obs = sim.reset('Train', True)
             
-            for worldIndex in range(trainCountXEpisode):
+            for worldIndex in range(generations_per_episode):
                 sim.data["World Index"] = worldIndex
                 obs = sim.reset('Train', False)
-                assignCceaPolicies(sim.data)
+                assign_ccea_policies(sim.data)
                 
                 done = False
-                stepCount = 0
+                step_count = 0
                 while not done:
-                    doAgentProcess(sim.data)
+                    get_agent_actions(sim.data)
                     jointAction = sim.data["Agent Actions"]
                     obs, reward, done, info = sim.step(jointAction)
-                    stepCount += 1
+                    step_count += 1
                     
-                rewardCceaPolicies(sim.data)
+                reward_ccea_policies(sim.data)
                     
                     
             # Testing Phase
                     
             obs = sim.reset('Test', True)
-            assignBestCceaPolicies(sim.data)        
+            assign_best_ccea_policies(sim.data)
                     
-            for worldIndex in range(testCountXEpisode):
+            for worldIndex in range(tests_per_episode):
                 sim.data["World Index"] = worldIndex
                 obs = sim.reset('Test', False)
                 
                 done = False
-                stepCount = 0
+                step_count = 0
                 while not done:
-                    doAgentProcess(sim.data)
+                    get_agent_actions(sim.data)
                     jointAction = sim.data["Agent Actions"]
                     obs, reward, done, info = sim.step(jointAction)
-                    stepCount += 1
+                    step_count += 1
                     
-            evolveCceaPolicies(sim.data)
+            evolve_ccea_policies(sim.data)
             updateRewardHistory(sim.data)
             
             # Trial End
