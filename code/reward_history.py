@@ -3,7 +3,7 @@ import os
 import errno
 
     
-def saveRewardHistory(data):
+def save_reward_history(data):
     saveFileName  = data["Performance Save File Name"]
     # Create File Directory if it doesn't exist
     if not os.path.exists(os.path.dirname(saveFileName)):
@@ -18,13 +18,13 @@ def saveRewardHistory(data):
         writer.writerow(["*Episode"] + list(range(len(data["Reward History"]))))
         writer.writerow(['Performance'] + data["Reward History"])
 
-def createRewardHistory(data):
+def create_reward_history(data):
     data["Reward History"] = []
      
-def updateRewardHistory(data):
+def update_reward_history(data):
     data["Reward History"].append(data["Global Reward"])
         
-def printGlobalReward(data):
+def print_global_reward(data):
     if data["World Index"] == 0:
         print(data["Global Reward"])
                 

@@ -4,7 +4,7 @@ import errno
 import numpy as np
 
 
-def createTrajectoryHistories(data):
+def create_trajectory_histories(data):
     # create a history of positions for each agents in order to evalutate reward at the end
     number_agents = data['Number of Agents']
     historyStepCount = data["Steps"] + 1
@@ -21,7 +21,7 @@ def createTrajectoryHistories(data):
     data["Agent Orientation History"] = agentOrientationHistory
     
     
-def updateTrajectoryHistories(data):
+def update_trajectory_histories(data):
     number_agents = data['Number of Agents']
     stepIndex = data["Step Index"]
     historyStepCount = data["Steps"] + 1
@@ -37,7 +37,7 @@ def updateTrajectoryHistories(data):
     data["Agent Position History"] = agentPositionHistory
     data["Agent Orientation History"] = agentOrientationHistory
     
-def saveTrajectoryHistories(data):
+def save_trajectory_histories(data):
     saveFileName = data["Trajectory Save File Name"]
     number_agents = data['Number of Agents']
     number_pois = data["Number of POIs"]

@@ -1,12 +1,11 @@
 # Dependencies: numpy, cython 
 
-import datetime
-from core import SimulationCore
+#from core import simulation_core
+from parameters import parameters as p
 import pyximport; pyximport.install() # For cython(pyx) code
 from code.world_setup import * # Rover Domain Construction 
 from code.agent_domain import * # Rover Domain Dynamic
-from code.reward import * # Agent Reward and Performance Recording
-from code.trajectory_history import * # Record trajectory of agents for calculating rewards
+from code.trajectory_history import create_trajectory_histories, save_trajectory_histories, update_trajectory_histories
 
 
 """
@@ -27,36 +26,22 @@ Note: step function returns result of either the reward or evaluation function
 
 RoverDomainCoreGym should be mods 
 """
-class rover_domain_core_gym(SimulationCore):
+class rover_domain_core_gym():
     def __init__(self):
-        SimulationCore.__init__(self)
-        
-        self.data["Number of Agents"] = 30
-        self.data["Number of POIs"] = 8
-        self.data["Minimum Distance"] = 1.0 # Minimum activation distance?
-        self.data["Steps"] = 100
-        self.data["Trains per Episode"] = 50 # CCEA Generations
-        self.data["Tests per Episode"] = 1
-        self.data["Number of Episodes"] = 5000
-        self.data["Specifics Name"] = "test"
-        self.data["Mod Name"] = "global"
-        
-        # Add Rover Domain Construction Functionality
-        # Note: reset() will generate random world based on seed
-        self.data["World Width"] = 50
-        self.data["World Length"] = 50
-        self.data['Poi Static Values'] = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0])
-        self.data['Poi Relative Static Positions'] = np.array([
-            [0.0, 0.0], 
-            [0.0, 1.0], 
-            [1.0, 0.0], 
-            [1.0, 1.0], 
-            [1.0, 0.5], 
-            [0.5, 1.0], 
-            [0.0, 5.0],
-            [0.5, 0.0]
-        ])
-        self.data['Agent Initialization Size'] = 0.1 # What is this?
+
+        self.trialBeginFuncCol = []
+        self.trainBeginFuncCol = []
+        self.worldTrainBeginFuncCol = []
+        self.worldTrainStepFuncCol = []
+        self.worldTrainEndFuncCol = []
+        self.trainEndFuncCol = []
+        self.testBeginFuncCol = []
+        self.worldTestBeginFuncCol = []
+        self.worldTestStepFuncCol = []
+        self.worldTestEndFuncCol = []
+        self.testEndFuncCol = []
+        self.trialEndFuncCol = []
+
         self.trainBeginFuncCol.append(blueprintStatic)
         self.trainBeginFuncCol.append(blueprintAgentInitSize)
         self.worldTrainBeginFuncCol.append(initWorld)
@@ -77,11 +62,11 @@ class rover_domain_core_gym(SimulationCore):
             Function"].
             Dimensions are agentCount by 8.
             
-        For gym compatibility, self.data["Observation Function"] is
+        For gym compatibility, p.data["Observation Function"] is
         called automatically by this object, no need to call it in a 
         function collection
         """
-        self.data["Observation Function"] = get_agent_state
+        p.data["Observation Function"] = get_agent_state
         self.worldTrainStepFuncCol.append(do_agent_move)
         self.worldTestStepFuncCol.append(do_agent_move)
 
@@ -98,15 +83,10 @@ class rover_domain_core_gym(SimulationCore):
         step() return [reward] (double): Performance defined by 
             data["Evaluation Function"]
         """
-        self.data["Coupling"] = 6 # Required observations of PoI
-        self.data["Observation Radius"] = 4.0 # Maximum distance at which observations are counted for score
-        self.data["Reward Function"] = calc_global_reward
-        self.data["Evaluation Function"] = calc_global_reward
-        
-        self.worldTrainBeginFuncCol.append(createTrajectoryHistories)
-        self.worldTrainStepFuncCol.append(updateTrajectoryHistories)
-        self.worldTestBeginFuncCol.append(createTrajectoryHistories)
-        self.worldTestStepFuncCol.append(updateTrajectoryHistories)
+        self.worldTrainBeginFuncCol.append(create_trajectory_histories)
+        self.worldTrainStepFuncCol.append(update_trajectory_histories)
+        self.worldTestBeginFuncCol.append(create_trajectory_histories)
+        self.worldTestStepFuncCol.append(update_trajectory_histories)
         
         self.worldTrainBeginFuncCol.append(
             lambda data: data.update({"Gym Reward": np.zeros(data['Number of Agents'])})
@@ -148,51 +128,51 @@ class rover_domain_core_gym(SimulationCore):
         
         """
         # Store Action for other functions to use
-        self.data["Agent Actions"] = action
+        p.data["Agent Actions"] = action
 
         
         # If not done, do step functionality
-        if self.data["Step Index"] < self.data["Steps"]:
+        if p.data["Step Index"] < p.data["Steps"]:
             
             # Do Step Functionality
-            self.data["Agent Actions"] = action
-            if self.data["Mode"] == "Train":
+            p.data["Agent Actions"] = action
+            if p.data["Mode"] == "Train":
                 for func in self.worldTrainStepFuncCol:
-                    func(self.data)
-            elif self.data["Mode"] == "Test":
+                    func(p.data)
+            elif p.data["Mode"] == "Test":
                 for func in self.worldTestStepFuncCol:
-                    func(self.data)
+                    func(p.data)
             else:
                 raise Exception(
                     'data["Mode"] should be set to "Train" or "Test"'
                 )
             
             # Increment step index for future step() calls
-            self.data["Step Index"] += 1
+            p.data["Step Index"] += 1
             
             # Check is world is done; if so, do ending functions
-            if self.data["Step Index"] >= self.data["Steps"]:
-                if self.data["Mode"] == "Train":
+            if p.data["Step Index"] >= p.data["Steps"]:
+                if p.data["Mode"] == "Train":
                     for func in self.worldTrainEndFuncCol:
-                        func(self.data)
-                elif self.data["Mode"] == "Test":
+                        func(p.data)
+                elif p.data["Mode"] == "Test":
                     for func in self.worldTestEndFuncCol:
-                        func(self.data)
+                        func(p.data)
                 else:
                     raise Exception(
                         'data["Mode"] should be set to "Train" or "Test"'
                     )
                     
-            # Observe state, store result in self.data
-            self.data["Observation Function"](self.data)
+            # Observe state, store result in p.data
+            p.data["Observation Function"](p.data)
         
         # Check if simulation is done
         done = False
-        if self.data["Step Index"] >= self.data["Steps"]:
+        if p.data["Step Index"] >= p.data["Steps"]:
             done = True
                 
-        return self.data["Agent Observations"], self.data["Gym Reward"], \
-            done, self.data
+        return p.data["Agent Observations"], p.data["Gym Reward"], \
+            done, p.data
         
     def reset(self, newMode = None, fullyResetting = False):
         """
@@ -213,32 +193,32 @@ class rover_domain_core_gym(SimulationCore):
             __init__()
         """
         # Zero step index for future step() calls
-        self.data["Step Index"] = 0
+        p.data["Step Index"] = 0
         
         # Set mode if not None
         if newMode != None:
-            self.data["Mode"] = newMode
+            p.data["Mode"] = newMode
         
         # Execute setting functionality
-        if self.data["Mode"] == "Train":
+        if p.data["Mode"] == "Train":
             if fullyResetting:
                 for func in self.trainBeginFuncCol:
-                    func(self.data)
+                    func(p.data)
             for func in self.worldTrainBeginFuncCol:
-                func(self.data)
-        elif self.data["Mode"] == "Test":
+                func(p.data)
+        elif p.data["Mode"] == "Test":
             if fullyResetting:
                 for func in self.testBeginFuncCol:
-                    func(self.data)
+                    func(p.data)
             for func in self.worldTestBeginFuncCol:
-                func(self.data)
+                func(p.data)
         else:
             raise Exception('data["Mode"] should be set to "Train" or "Test"')
         
-        # Observe state, store result in self.data
-        self.data["Observation Function"](self.data)
+        # Observe state, store result in p.data
+        p.data["Observation Function"](p.data)
         
-        return self.data["Agent Observations"]
+        return p.data["Agent Observations"]
         
 def assign(data, key, value):
     data[key] = value
