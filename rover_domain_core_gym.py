@@ -80,7 +80,7 @@ def blueprint_static(data):
     world_width = data['World Width']
     world_length = data['World Length']
 
-    data['Agent Positions BluePrint'] = np.ones((number_agents,2)) * 0.5 * [world_width, world_length]
+    data['Agent Positions BluePrint'] = np.ones((number_agents, 2)) * 0.5 * [world_width, world_length]
     angles = np.random.uniform(-np.pi, np.pi, number_agents)
     data['Agent Orientations BluePrint'] = np.vstack((np.cos(angles), np.sin(angles))).T
     data['Poi Positions BluePrint'] = data['Poi Relative Static Positions'] * [world_width, world_length]
@@ -112,20 +112,20 @@ class rover_domain_core_gym():
 
         # Results evaluation functions:
         self.evaluate_world_results_train = []
-        self.trainEndFuncCol = []
+        self.train_end_functions = []
         self.evaluate_world_results_test = []
-        self.testEndFuncCol = []
+        self.test_end_functions = []
 
         # Other
-        self.trialBeginFuncCol = []
-        self.trialEndFuncCol = []
+        self.trial_begin_functions = []
+        self.trial_end_functions = []
 
         # Add setup functions to function call (THESE MUST BE ADDED FIRST)
-        self.agent_setup_train.append(blueprint_static)
-        self.agent_setup_train.append(blueprint_agent_init_size)
+        self.agent_setup_train.append(blueprint_poi)
+        self.agent_setup_train.append(blueprint_agent)
         self.world_setup_train.append(init_world)
-        self.agent_setup_test.append(blueprint_static)
-        self.agent_setup_test.append(blueprint_agent_init_size)
+        self.agent_setup_test.append(blueprint_poi)
+        self.agent_setup_test.append(blueprint_agent)
         self.world_setup_test.append(init_world)
 
         # Add Rover Domain Dynamic Functionality

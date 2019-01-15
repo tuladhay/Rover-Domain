@@ -28,15 +28,15 @@ Warning: Use caution when manually reseting these values within the simulation.
 class parameters():
 
     data = {
-        "Number of Agents": 30,
-        "Number of POIs": 8,
+        "Number of Agents": 12,
+        "Number of POIs": 10,
         "Minimum Distance": 1.0,
-        "Steps": 100,
-        "Trains per Episode": 50,
+        "Steps": 10,
+        "Generations per Episode": 10,
         "Tests per Episode": 1,
-        "Number of Episodes": 5000,
-        "World Width": 50,
-        "World Length": 50,
+        "Number of Episodes": 1,
+        "World Width": 30,
+        "World Length": 30,
         "Poi Static Values": np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]),
         "Poi Relative Static Positions": np.array([
         [0.0, 0.0],
@@ -49,7 +49,7 @@ class parameters():
         [0.5, 0.0]
         ]),
         "Agent Initialization Size": 0.1,
-        "Coupling": 6,
+        "Coupling": 3,
         "Observation Radius": 4.0,
         "Reward Function": calc_global_reward,
         "Evaluation Function": calc_global_reward,

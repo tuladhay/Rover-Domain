@@ -8,10 +8,10 @@ from code.trajectory_history import create_trajectory_histories, save_trajectory
 from code.reward_history import save_reward_history, create_reward_history, update_reward_history
 from code.ccea import * # CCEA
 
-step_count = 5
-generations_per_episode = 3
-tests_per_episode = 1
-num_episodes =  20
+step_count = p.data["Steps"]
+generations_per_episode = p.data["Generations per Episode"]
+tests_per_episode = p.data["Tests per Episode"]
+num_episodes = p.data["Number of Episodes"]
 
 # NOTE: Add the mod functions (variables) to run to mod_col here:
 mod_col = [
@@ -20,8 +20,9 @@ mod_col = [
     m.dpp_reward_mod
 ]
 
+stat_runs = 1
 i = 0
-while i < 1:
+while i < stat_runs:
     print("Run %i" % i)
 
     for func in mod_col:
@@ -33,8 +34,8 @@ while i < 1:
         init_ccea(num_inputs=8, num_outputs=2, num_units=32)(p.data)
         p.data["Steps"] = step_count
         
-        for episodeIndex in range(num_episodes):
-            p.data["Episode Index"] = episodeIndex
+        for episode_index in range(num_episodes):
+            p.data["Episode Index"] = episode_index
             
             # Training Phase
             obs = sim.reset('Train', True)

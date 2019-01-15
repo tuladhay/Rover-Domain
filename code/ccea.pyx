@@ -144,7 +144,7 @@ def init_ccea(num_inputs, num_outputs, num_units):
     def init_ccea_go(data):
         number_agents = data['Number of Agents']
 
-        agent_populations = [[Evo_MLP(num_inputs, num_outputs, num_units) for i in range(data['Trains per Episode'])] for j in range(number_agents)]
+        agent_populations = [[Evo_MLP(num_inputs, num_outputs, num_units) for i in range(data['Generations per Episode'])] for j in range(number_agents)]
         data['Agent Populations'] = agent_populations
     return init_ccea_go
 
