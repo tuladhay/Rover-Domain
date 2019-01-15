@@ -1,20 +1,17 @@
-from specifics import getSim
-from mods import *
+from parameters import parameters as p
 from shutil import copyfile
 import os
 import errno
 
-sim = getSim()
-
-saveFolderName = "log/%s"%\
-        (sim.data["Specifics Name"])
+save_folder_name = "log/%s"%\
+        (p.data["Specifics Name"])
         
         
 try:
-    os.makedirs(os.path.dirname(saveFolderName))
+    os.makedirs(os.path.dirname(save_folder_name))
 except OSError as exc: # Guard against race condition
     if exc.errno != errno.EEXIST:
         raise
 
-copyfile("mods.py", "log/%s/mods.py"%sim.data["Specifics Name"])
-copyfile("specifics.py", "log/%s/specifics.py"%sim.data["Specifics Name"])
+copyfile("mods.py", "log/%s/mods.py"%p.data["Specifics Name"])
+copyfile("specifics.py", "log/%s/specifics.py"%p.data["Specifics Name"])

@@ -406,7 +406,7 @@ def calc_dpp_sup_reward(data):
                     closest_rover_sqr_dist = inf
 
                     for other_agent_id in range(number_agents):
-                        # Calculate separation distance between poi and agent\
+                        # Calculate separation distance between poi and agent
                         agent_x_dist = poi_positions[poi_id, 0] - agent_pos_history[step_number, other_agent_id, 0]
                         agent_y_dist = poi_positions[poi_id, 1] - agent_pos_history[step_number, other_agent_id, 1]
                         sqr_distance = agent_x_dist * agent_x_dist + agent_y_dist * agent_y_dist

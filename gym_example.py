@@ -22,13 +22,13 @@ mod_col = [
 
 i = 0
 while i < 1:
-    print("Run %i"%(i))
+    print("Run %i" % i)
 
     for func in mod_col:
         sim = rover_domain_core_gym()
         func(p.data)
         
-        #Trial Begins
+        # Trial Begins
         create_reward_history(p.data)
         init_ccea(num_inputs=8, num_outputs=2, num_units=32)(p.data)
         p.data["Steps"] = step_count

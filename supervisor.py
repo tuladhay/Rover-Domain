@@ -22,7 +22,7 @@ mod_col = [
 
 i = 0
 while i < 1:
-    print("Run %i" % (i))
+    print("Run %i" % i)
 
     for func in mod_col:
         sim = rover_domain_core_gym()
