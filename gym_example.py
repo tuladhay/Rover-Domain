@@ -6,7 +6,8 @@ from mods import mod as m
 from code.agent_domain import get_agent_actions
 from code.trajectory_history import create_trajectory_histories, save_trajectory_histories, update_trajectory_histories
 from code.reward_history import save_reward_history, create_reward_history, update_reward_history
-from code.ccea import * # CCEA
+from code.ccea import ccea
+from code.neural_network import neural_network
 
 step_count = p.data["Steps"]
 generations_per_episode = p.data["Generations per Episode"]
@@ -31,7 +32,6 @@ while i < stat_runs:
         
         # Trial Begins
         create_reward_history(p.data)
-        init_ccea(num_inputs=8, num_outputs=2, num_units=32)(p.data)
         p.data["Steps"] = step_count
         
         for episode_index in range(num_episodes):

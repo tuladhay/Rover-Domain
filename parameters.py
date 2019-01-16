@@ -35,8 +35,11 @@ class parameters():
         "Generations per Episode": 10,
         "Tests per Episode": 1,
         "Number of Episodes": 1,
-        "World Width": 30,
-        "World Length": 30,
+        "World Width": 30,  # X-Dimension
+        "World Length": 30,  # Y-Dimension
+        "Number of Inputs": 8,  # NN inputs
+        "Number of Nodes": 10,  # NN hidden nodes
+        "Number of Outputs": 2,  # NN outputs
         "Poi Static Values": np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]),
         "Poi Relative Static Positions": np.array([
         [0.0, 0.0],
@@ -49,10 +52,13 @@ class parameters():
         [0.5, 0.0]
         ]),
         "Agent Initialization Size": 0.1,
-        "Coupling": 3,
-        "Observation Radius": 4.0,
+        "Coupling": 3,  # How many rovers are required to observe a POI
+        "Activation Radius": 4.0,  # Minimum distance at which a POI may be observed for credit
         "Reward Function": calc_global_reward,
         "Evaluation Function": calc_global_reward,
         "Mod Name": "global",
-        "Specifics Name": "30Agents_8Poi_6Coup_Long_Comparison"
+        "Specifics Name": "12Agents_10Poi_3Coup_Long_Comparison",
+        "Mutation Rate": 0.1,  # How likely a given policy is to be mutated
+        "Population Size": 20,  # Number of policies in each population
+        "Epsilon": 0.1  # Epsilon constant for e-greedy selection in CCEA
     }

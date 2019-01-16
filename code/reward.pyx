@@ -23,7 +23,7 @@ def calc_global_reward(data):
     cdef double min_sqr_dist = data["Minimum Distance"] ** 2
     cdef int total_steps = data["Steps"] + 1
     cdef int coupling = data["Coupling"]
-    cdef double sqr_activation_dist = data["Observation Radius"] ** 2
+    cdef double sqr_activation_dist = data["Activation Radius"] ** 2
     cdef double[:, :, :] agent_pos_history = data["Agent Position History"]
     cdef double[:] poi_values = data['Poi Values']
     cdef double[:, :] poi_positions = data["Poi Positions"]
@@ -88,7 +88,7 @@ def calc_difference_reward(data):
     cdef double min_sqr_dist = data["Minimum Distance"] ** 2
     cdef int total_steps = data["Steps"] + 1
     cdef int coupling = data["Coupling"]
-    cdef double sqr_activation_dist = data["Observation Radius"] ** 2
+    cdef double sqr_activation_dist = data["Activation Radius"] ** 2
     cdef double[:, :, :] agent_pos_history = data["Agent Position History"]
     cdef double[:] poi_values = data['Poi Values']
     cdef double[:, :] poi_positions = data["Poi Positions"]
@@ -104,7 +104,7 @@ def calc_difference_reward(data):
     d_reward = np.zeros(number_agents)
     cdef double[:] difference_reward = d_reward
 
-    # CALCULATE GLOBAL REWARD            closest_rover_sqr_dist = inf
+    # CALCULATE GLOBAL REWARD
     # For all POIs
     for poi_id in range(number_pois):
         current_poi_reward = 0.0
@@ -202,7 +202,7 @@ def calc_dpp_reward(data):
     cdef double min_sqr_dist = data["Minimum Distance"] ** 2
     cdef int total_steps = data["Steps"] + 1
     cdef int coupling = data["Coupling"]
-    cdef double sqr_activation_dist = data["Observation Radius"] ** 2
+    cdef double sqr_activation_dist = data["Activation Radius"] ** 2
     cdef double[:, :, :] agent_pos_history = data["Agent Position History"]
     cdef double[:] poi_values = data['Poi Values']
     cdef double[:, :] poi_positions = data["Poi Positions"]
@@ -374,7 +374,7 @@ def calc_dpp_sup_reward(data):
     cdef double min_sqr_dist = data["Minimum Distance"] ** 2
     cdef int total_steps = data["Steps"] + 1
     cdef int coupling = data["Coupling"]
-    cdef double sqr_activation_dist = data["Observation Radius"] ** 2
+    cdef double sqr_activation_dist = data["Activation Radius"] ** 2
     cdef double[:, :, :] agent_pos_history = data["Agent Position History"]
     cdef double[:] poi_values = data['Poi Values']
     cdef double[:, :] poi_positions = data["Poi Positions"]
