@@ -11,9 +11,9 @@ from code.neural_network import NeuralNetwork
 
 # NOTE: Add the mod functions (variables) to run to mod_col here:
 mod_col = [
-    m.global_reward_mod
-    #m.difference_reward_mod,
-    #m.dpp_reward_mod
+    m.global_reward_mod,
+    m.difference_reward_mod,
+    m.dpp_reward_mod
 ]
 
 sim = RoverDomainCore()

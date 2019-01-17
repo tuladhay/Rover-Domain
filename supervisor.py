@@ -1,17 +1,13 @@
 #! /usr/bin/python3.6
 
-from rover_domain_core_gym import rover_domain_core_gym
+from rover_domain_core_gym import RoverDomainCore
 from parameters import Parameters as p
-from mods import mod as m
-from code.agent_domain import get_agent_actions
+from mods import Mod as m
+from code.agent import get_agent_state, get_agent_actions
 from code.trajectory_history import create_trajectory_histories, save_trajectory_histories, update_trajectory_histories
 from code.reward_history import save_reward_history, create_reward_history, update_reward_history
-from code.ccea import *  # CCEA
-
-step_count = 5
-generations_per_episode = 3
-tests_per_episode = 1
-num_episodes = 20
+from code.ccea import Ccea
+from code.neural_network import NeuralNetwork
 
 # NOTE: Add the mod functions (variables) to run to mod_col here:
 mod_col = [
@@ -20,61 +16,72 @@ mod_col = [
     m.dpp_reward_mod
 ]
 
-i = 0
-while i < 1:
-    print("Run %i" % i)
+sim = RoverDomainCore()
+cc = Ccea()
+nn = NeuralNetwork()
 
-    for func in mod_col:
-        sim = rover_domain_core_gym()
-        func(p.data)
+for func in mod_col:
+    func(sim.data)
+
+    for s in range(p.stat_runs):
+        print("Run: %i" % s)
 
         # Trial Begins
-        create_reward_history(p.data)
-        init_ccea(num_inputs=8, num_outputs=2, num_units=32)(p.data)
-        p.data["Steps"] = step_count
+        create_reward_history(sim.data)
+        sim.data["Steps"] = p.total_steps
+        cc.reset_populations()
+        nn.reset_nn()
 
-        for episodeIndex in range(num_episodes):
-            p.data["Episode Index"] = episodeIndex
+        # Training Phase
+        obs = sim.reset('Train', True) # Fully resets rover domain (agent and POI positions/values)
 
-            # Training Phase
-            obs = sim.reset('Train', True)
+        for gen in range(p.generations):
+            print("Current Gen: %i" % gen)
+            obs = sim.reset('Train', False)
+            cc.create_new_pop()  # Create a new population via mutation
+            cc.select_policy_teams()  # Selects which policies will be grouped into which teams
+            get_agent_state(sim.data)  # Create state vector for NN inputs (might be redundant here)
+            joint_state = sim.data["Agent Observations"]  # State vector
 
-            for world_index in range(generations_per_episode):
-                p.data["World Index"] = world_index
-                obs = sim.reset('Train', False)
-                assign_ccea_policies(p.data)
-
-                done = False
-                step_count = 0
-                while not done:
-                    get_agent_actions(p.data)
-                    joint_action = p.data["Agent Actions"]
-                    obs, reward, done, info = sim.step(joint_action)
-                    step_count += 1
-
-                reward_ccea_policies(p.data)
-
-            # Testing Phase
-            obs = sim.reset('Test', True)
-            assign_best_ccea_policies(p.data)
-
-            for world_index in range(tests_per_episode):
-                p.data["World Index"] = world_index
-                obs = sim.reset('Test', False)
+            for team_number in range(cc.population_size):  # Each policy in CCEA is tested in teams
+                for rover_id in range(p.number_of_agents):
+                    policy_id = cc.team_selection[rover_id, team_number]
+                    nn.run_neural_network(joint_state[rover_id], cc.pops[rover_id, policy_id], rover_id)
+                get_agent_actions(sim.data, nn.out_layer)  # Gets outputs from all rover NNs
 
                 done = False
                 step_count = 0
+                reward = []
                 while not done:
-                    get_agent_actions(p.data)
-                    joint_action = p.data["Agent Actions"]
-                    obs, reward, done, info = sim.step(joint_action)
+                    obs, reward, done, info = sim.step()
                     step_count += 1
 
-            evolve_ccea_policies(p.data)
-            update_reward_history(p.data)
+                # Update fitness of policies using reward information
+                for pop_id in range(p.number_of_agents):
+                    policy_id = cc.team_selection[pop_id, team_number]
+                    cc.fitness[pop_id, policy_id] = reward[pop_id]
 
-            # Trial End
-            save_reward_history(p.data)
-            save_trajectory_histories(p.data)
+            cc.down_select()  # Perform down_selection after each policy has been evaluated
 
-    i += 1
+
+
+        # # Testing Phase (STILL WORKING ON THIS)
+        # obs = sim.reset('Test', True)
+        #
+        # for test in range(tests_per_episode):
+        #     sim.data["World Index"] = test
+        #     obs = sim.reset('Test', False)
+        #
+        #     done = False
+        #     step_count = 0
+        #     while not done:
+        #         get_agent_actions(sim.data)
+        #         joint_action = sim.data["Agent Actions"]
+        #         obs, reward, done, info = sim.step(joint_action)
+        #         step_count += 1
+
+        # update_reward_history(sim.data)
+
+        # Trial End (STILL WORKING ON THIS)
+        # save_reward_history(sim.data)
+        # save_trajectory_histories(sim.data)
