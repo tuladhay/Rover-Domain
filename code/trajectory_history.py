@@ -2,12 +2,13 @@ import csv
 import os
 import errno
 import numpy as np
+from parameters import Parameters as p
 
 
 def create_trajectory_histories(data):
     # create a history of positions for each agents in order to evalutate reward at the end
-    number_agents = data['Number of Agents']
-    history_step_count = data["Steps"] + 1
+    number_agents = p.number_of_agents
+    history_step_count = p.total_steps + 1
     agent_position_history = np.zeros((history_step_count, number_agents, 2))
     agent_orientation_history = np.zeros((history_step_count, number_agents, 2))
     agent_positions = data["Agent Positions"]
@@ -22,7 +23,7 @@ def create_trajectory_histories(data):
     
     
 def update_trajectory_histories(data):
-    number_agents = data['Number of Agents']
+    number_agents = p.number_of_agents
     step_index = data["Step Index"]
     history_step_count = data["Steps"] + 1
     agent_position_history = data["Agent Position History"]
@@ -39,9 +40,9 @@ def update_trajectory_histories(data):
     
 def save_trajectory_histories(data):
     save_file_name = data["Trajectory Save File Name"]
-    number_agents = data['Number of Agents']
-    number_pois = data["Number of POIs"]
-    history_step_count = data["Steps"] + 1
+    number_agents = p.number_of_agents
+    number_pois = p.number_of_pois
+    history_step_count = p.total_steps + 1
     agent_position_history = data["Agent Position History"]
     agent_orientation_history = data["Agent Orientation History"]
     poi_positions = data["Poi Positions"]

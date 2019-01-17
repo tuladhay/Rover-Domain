@@ -16,10 +16,10 @@ cdef class NeuralNetwork:
     cdef public double[:, :] out_layer
 
     def __init__(self):
-        self.n_rovers = p.data["Number of Agents"]
-        self.n_inputs = p.data["Number of Inputs"]
-        self.n_outputs = p.data["Number of Outputs"]
-        self.n_nodes = p.data["Number of Nodes"]  # Number of nodes in hidden layer
+        self.n_rovers = p.number_of_agents
+        self.n_inputs = p.number_of_inputs
+        self.n_outputs = p.number_of_outputs
+        self.n_nodes = p.number_of_nodes  # Number of nodes in hidden layer
         self.n_weights = (self.n_inputs + 1)*self.n_nodes + (self.n_nodes + 1)*self.n_outputs
         self.input_bias = 1.0
         self.hidden_bias = 1.0

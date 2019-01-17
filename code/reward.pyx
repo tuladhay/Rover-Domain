@@ -1,5 +1,6 @@
 import numpy as np
 cimport cython
+from parameters import Parameters as p
 
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing.
@@ -18,12 +19,12 @@ def rearrange_dist_vec(rov_distances):  # Rearrange distances from least to grea
 def calc_global_reward(data):
 
     # Set parameters from those found in data dictionary
-    cdef int number_agents = data['Number of Agents']
-    cdef int number_pois = data['Number of POIs'] 
-    cdef double min_sqr_dist = data["Minimum Distance"] ** 2
-    cdef int total_steps = data["Steps"] + 1
-    cdef int coupling = data["Coupling"]
-    cdef double sqr_activation_dist = data["Activation Radius"] ** 2
+    cdef int number_agents = p.number_of_agents
+    cdef int number_pois = p.number_of_pois
+    cdef double min_sqr_dist = p.min_distance ** 2
+    cdef int total_steps = p.total_steps + 1
+    cdef int coupling = p.coupling
+    cdef double sqr_activation_dist = p.activation_dist ** 2
     cdef double[:, :, :] agent_pos_history = data["Agent Position History"]
     cdef double[:] poi_values = data['Poi Values']
     cdef double[:, :] poi_positions = data["Poi Positions"]
@@ -83,12 +84,12 @@ def calc_global_reward(data):
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing.
 def calc_difference_reward(data):
-    cdef int number_agents = data['Number of Agents']
-    cdef int number_pois = data['Number of POIs'] 
-    cdef double min_sqr_dist = data["Minimum Distance"] ** 2
-    cdef int total_steps = data["Steps"] + 1
-    cdef int coupling = data["Coupling"]
-    cdef double sqr_activation_dist = data["Activation Radius"] ** 2
+    cdef int number_agents = p.number_of_agents
+    cdef int number_pois = p.number_of_pois
+    cdef double min_sqr_dist = p.min_distance ** 2
+    cdef int total_steps = p.total_steps + 1
+    cdef int coupling = p.coupling
+    cdef double sqr_activation_dist = p.activation_dist ** 2
     cdef double[:, :, :] agent_pos_history = data["Agent Position History"]
     cdef double[:] poi_values = data['Poi Values']
     cdef double[:, :] poi_positions = data["Poi Positions"]
@@ -197,12 +198,12 @@ def calc_difference_reward(data):
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing.
 def calc_dpp_reward(data):
-    cdef int number_agents = data['Number of Agents']
-    cdef int number_pois = data['Number of POIs'] 
-    cdef double min_sqr_dist = data["Minimum Distance"] ** 2
-    cdef int total_steps = data["Steps"] + 1
-    cdef int coupling = data["Coupling"]
-    cdef double sqr_activation_dist = data["Activation Radius"] ** 2
+    cdef int number_agents = p.number_of_agents
+    cdef int number_pois = p.number_of_pois
+    cdef double min_sqr_dist = p.min_distance ** 2
+    cdef int total_steps = p.total_steps + 1
+    cdef int coupling = p.coupling
+    cdef double sqr_activation_dist = p.activation_dist ** 2
     cdef double[:, :, :] agent_pos_history = data["Agent Position History"]
     cdef double[:] poi_values = data['Poi Values']
     cdef double[:, :] poi_positions = data["Poi Positions"]
@@ -369,12 +370,12 @@ def calc_dpp_reward(data):
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing.
 def calc_dpp_sup_reward(data):
-    cdef int number_agents = data['Number of Agents']
-    cdef int number_pois = data['Number of POIs']
-    cdef double min_sqr_dist = data["Minimum Distance"] ** 2
-    cdef int total_steps = data["Steps"] + 1
-    cdef int coupling = data["Coupling"]
-    cdef double sqr_activation_dist = data["Activation Radius"] ** 2
+    cdef int number_agents = p.number_of_agents
+    cdef int number_pois = p.number_of_pois
+    cdef double min_sqr_dist = p.min_distance ** 2
+    cdef int total_steps = p.total_steps + 1
+    cdef int coupling = p.coupling
+    cdef double sqr_activation_dist = p.activation_dist ** 2
     cdef double[:, :, :] agent_pos_history = data["Agent Position History"]
     cdef double[:] poi_values = data['Poi Values']
     cdef double[:, :] poi_positions = data["Poi Positions"]

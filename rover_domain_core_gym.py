@@ -1,10 +1,11 @@
 # Dependencies: numpy, cython 
 
-from parameters import Parameters as p
-import numpy as np
 import pyximport; pyximport.install() # For cython(pyx) code
+from parameters import Parameters as p
 from code.agent import * # Rover Domain Dynamic
 from code.trajectory_history import create_trajectory_histories, save_trajectory_histories, update_trajectory_histories
+import numpy as np
+from code.reward import calc_global_reward
 
 
 """
@@ -29,9 +30,9 @@ RoverDomainCoreGym should be mods
 # World Setup ----------------------------------------------------------------------------------------
 # Randomly initalize agent positions on map
 def blueprint_agent(data):
-    number_agents = data['Number of Agents']
-    world_width = data['World Width']
-    world_length = data['World Length']
+    number_agents = p.number_of_agents
+    world_width = p.world_width
+    world_length = p.world_length
 
     # Agent positions are a numpy array of size m x n, m = n_agents, n = 2
     data['Agent Positions BluePrint'] = np.random.rand(number_agents, 2) * [world_width, world_length]
@@ -40,9 +41,9 @@ def blueprint_agent(data):
 
 # Randomly initialize POI positions on map
 def blueprint_poi(data):
-    number_pois = data['Number of POIs']
-    world_width = data['World Width']
-    world_length = data['World Length']
+    number_pois = p.number_of_pois
+    world_width = p.world_width
+    world_length = p.world_length
 
     # Initialize all Pois np.randomly
     data['Poi Positions BluePrint'] = np.random.rand(number_pois, 2) * [world_width, world_length]
@@ -58,20 +59,20 @@ def init_world(data):
 
 # Agent positions are statically set on the mapblueprint_static
 def blueprint_static(data):
-    number_agents = data['Number of Agents']
-    number_pois = data['Number of POIs']
-    world_width = data['World Width']
-    world_length = data['World Length']
+    number_agents = p.number_of_agents
+    number_pois = p.number_of_pois
+    world_width = p.world_width
+    world_length = p.world_length
 
     data['Agent Positions BluePrint'] = np.ones((number_agents, 2)) * 0.5 * [world_width, world_length]
     angles = np.random.uniform(-np.pi, np.pi, number_agents)
     data['Agent Orientations BluePrint'] = np.vstack((np.cos(angles), np.sin(angles))).T
     data['Poi Positions BluePrint'] = data['Poi Relative Static Positions'] * [world_width, world_length]
-    data['Poi Values BluePrint'] =  data['Poi Static Values'].copy()
+    data['Poi Values BluePrint'] = data['Poi Static Values'].copy()
 
 
 def assign_random_policies(data):
-    number_agents = data['Number of Agents']
+    number_agents = p.number_of_agents
     agent_populations = data['Agent Populations']
     agent_policies = [None] * number_agents
     for agent_id in range(number_agents):
@@ -79,9 +80,20 @@ def assign_random_policies(data):
     data["Agent Policies"] = agent_policies
 
 
-class rover_domain_core_gym():
+class RoverDomainCore:
 
     def __init__(self):
+
+        self.data = {
+            "Agent Positions": np.zeros((p.number_of_agents, 2)),
+            "POI Positions": np.zeros((p.number_of_pois, 2)),
+            "Reward Function": calc_global_reward,
+            "Evaluation Function": calc_global_reward,
+            "Mod Name": "global",
+            "Specifics Name": "12Agents_10Poi_3Coup_Long_Comparison",  # Name of save file for data
+            "Performance Save File Name": "Test_Data",
+            "Trajectory Save File Name": "Trajectory_Data"
+        }
 
         # Setup functions:
         self.agent_setup_train = []
@@ -112,7 +124,7 @@ class rover_domain_core_gym():
         self.world_setup_test.append(init_world)
 
         # Add Rover Domain Dynamic Functionality
-        p.data["Observation Function"] = get_agent_state
+        self.data["Observation Function"] = get_agent_state
         self.world_update_functions_train.append(do_agent_move)
         self.world_update_functions_test.append(do_agent_move)
             
@@ -121,7 +133,7 @@ class rover_domain_core_gym():
         self.world_setup_train.append(create_trajectory_histories)
         self.world_setup_test.append(create_trajectory_histories)
         self.world_setup_train.append(
-            lambda data: data.update({"Gym Reward": np.zeros(data['Number of Agents'])})
+            lambda data: data.update({"Gym Reward": np.zeros(p.number_of_agents)})
         )
         self.world_setup_test.append(
             lambda data: data.update({"Gym Reward": 0})
@@ -153,75 +165,75 @@ class rover_domain_core_gym():
     def step(self): # Agents do actions for one time step
         
         # If not done, do step functionality
-        if p.data["Step Index"] < p.data["Steps"]:
+        if self.data["Step Index"] < self.data["Steps"]:
             
             # Do Step Functionality
-            if p.data["Mode"] == "Train":
+            if self.data["Mode"] == "Train":
                 for func in self.world_update_functions_train:  # do_agent_move
-                    func(p.data)
-            elif p.data["Mode"] == "Test":
+                    func(self.data)
+            elif self.data["Mode"] == "Test":
                 for func in self.world_update_functions_test:  # do_agent_move
-                    func(p.data)
+                    func(self.data)
             else:
                 raise Exception(
                     'data["Mode"] should be set to "Train" or "Test"'
                 )
             
             # Increment step index for future step() calls
-            p.data["Step Index"] += 1
+            self.data["Step Index"] += 1
             
             # Check is world is done; if so, do ending functions
-            if p.data["Step Index"] >= p.data["Steps"]:
-                if p.data["Mode"] == "Train":
+            if self.data["Step Index"] >= self.data["Steps"]:
+                if self.data["Mode"] == "Train":
                     for func in self.evaluate_world_results_train:
-                        func(p.data)
-                elif p.data["Mode"] == "Test":
+                        func(self.data)
+                elif self.data["Mode"] == "Test":
                     for func in self.evaluate_world_results_test:
-                        func(p.data)
+                        func(self.data)
                 else:
                     raise Exception(
                         'data["Mode"] should be set to "Train" or "Test"'
                     )
                     
-            # Observe state, store result in p.data
-            p.data["Observation Function"](p.data)
+            # Observe state, store result in self.data
+            self.data["Observation Function"](self.data)
         
         # Check if simulation is done
         done = False
-        if p.data["Step Index"] >= p.data["Steps"]:
+        if self.data["Step Index"] >= self.data["Steps"]:
             done = True
                 
-        return p.data["Agent Observations"], p.data["Gym Reward"], done, p.data  # Gym Reward is Agent Rewards
+        return self.data["Agent Observations"], self.data["Gym Reward"], done, self.data  # Gym Reward is Agent Rewards
 
         
     def reset(self, new_mode = None, fully_resetting = False):
 
         # Zero step index for future step() calls
-        p.data["Step Index"] = 0
+        self.data["Step Index"] = 0
         
         # Set mode if not None
         if new_mode != None:
-            p.data["Mode"] = new_mode
+            self.data["Mode"] = new_mode
         
         # Execute setting functionality
-        if p.data["Mode"] == "Train":
+        if self.data["Mode"] == "Train":
             if fully_resetting:
                 for func in self.agent_setup_train: #Go through list of functions in agent_setup_train
-                    func(p.data)
+                    func(self.data)
             for func in self.world_setup_train: #Go through list of functions in world_setup_train
-                func(p.data)
+                func(self.data)
 
-        elif p.data["Mode"] == "Test":
+        elif self.data["Mode"] == "Test":
             if fully_resetting:
                 for func in self.agent_setup_test:
-                    func(p.data)
+                    func(self.data)
             for func in self.world_setup_test:
-                func(p.data)
+                func(self.data)
         else:
             raise Exception('data["Mode"] should be set to "Train" or "Test"')
         
-        # Observe state, store result in p.data (Get initial state)
-        p.data["Observation Function"](p.data)
+        # Observe state, store result in self.data (Get initial state)
+        self.data["Observation Function"](self.data)
         
 def assign(data, key, value):
     data[key] = value

@@ -14,13 +14,13 @@ cdef class Ccea:
     cdef public int[:, :] team_selection
 
     def __init__(self):
-        self.mut_prob = p.data["Mutation Rate"]
-        self.epsilon = p.data["Epsilon"]
-        self.n_populations = p.data["Number of Agents"]  # One population for each rover
-        self.population_size  = p.data["Population Size"]*2  # Number of policies in each pop
-        n_inputs = p.data["Number of Inputs"]
-        n_outputs = p.data["Number of Outputs"]
-        n_nodes = p.data["Number of Nodes"]  # Number of nodes in hidden layer
+        self.mut_prob = p.mutation_rate
+        self.epsilon = p.epsilon
+        self.n_populations = p.number_of_agents  # One population for each rover
+        self.population_size  = p.population_size*2  # Number of policies in each pop
+        n_inputs = p.number_of_inputs
+        n_outputs = p.number_of_outputs
+        n_nodes = p.number_of_nodes  # Number of nodes in hidden layer
         self.policy_size = (n_inputs + 1)*n_nodes + (n_nodes + 1)*n_outputs  # Number of weights for NN
 
         self.pops = np.zeros((self.n_populations, self.population_size, self.policy_size))
@@ -35,7 +35,7 @@ cdef class Ccea:
                     self.pops[pop_index, policy_index, w] = random.uniform(0, 1)
                 self.team_selection[pop_index, policy_index] = -1
 
-    cpdef select_policy_teams(self):
+    cpdef select_policy_teams(self):  # Create policy teams for testing
         cdef int pop_id, policy_id, j, k, rpol
         for pop_id in range(self.n_populations):
             for policy_id in range(self.population_size):
@@ -52,7 +52,7 @@ cdef class Ccea:
                     k += 1
                 self.team_selection[pop_id, j] = rpol  # Assign policy to team
 
-    cpdef reset_populations(self):
+    cpdef reset_populations(self):  # Re-initializes CCEA populations for new run
         cdef int pop_index, policy_index, w
         for pop_index in range(self.n_populations):
             for policy_index in range(self.population_size):
@@ -85,7 +85,7 @@ cdef class Ccea:
 
         self.mutate(half_pop_length)
 
-    cpdef epsilon_greedy_select(self):
+    cpdef epsilon_greedy_select(self):  # Replace the bottom half with parents from top half
         cdef int pop_id, policy_id, k, parent
         cdef double rvar
         cdef int half_pop_length = self.population_size/2
@@ -104,7 +104,7 @@ cdef class Ccea:
 
     cpdef down_select(self):
         cdef int pop_id, j, k
-        # Reorder populations in terms of fintess (greatest to least)
+        # Reorder populations in terms of fitness (top half = best policies)
         for pop_id in range(self.n_populations):
             for j in range(self.population_size):
                 k = j + 1

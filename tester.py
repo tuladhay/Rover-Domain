@@ -37,7 +37,7 @@ for g in range(generations):
 
 # Test Neural Network Architecture
 nn = NeuralNetwork()
-n_rovers = p.data["Number of Agents"]
+n_rovers = p.number_of_agents
 input_vec = [1 for i in range(nn.n_inputs)]
 weights = [1 for i in range(nn.n_weights)]
 for i in range(n_rovers):

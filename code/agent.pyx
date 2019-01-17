@@ -1,5 +1,6 @@
 import numpy as np
 cimport cython
+from parameters import Parameters as p
 
 cdef extern from "math.h":
     double sqrt(double m)
@@ -8,9 +9,9 @@ cdef extern from "math.h":
 @cython.wraparound(False)   # Deactivate negative indexing.
 cpdef get_agent_state(data):  # Calculates join_state_vector for NN input
 
-    cdef int number_agents = data['Number of Agents']
-    cdef int number_pois = data['Number of POIs']
-    cdef double min_sqr_dist = data["Minimum Distance"] ** 2
+    cdef int number_agents = p.number_of_agents
+    cdef int number_pois = p.number_of_pois
+    cdef double min_sqr_dist = p.min_distance ** 2
     cdef double[:, :] agent_positions = data["Agent Positions"]
     cdef double[:] poi_values = data['Poi Values']
     cdef double[:, :] poi_positions = data["Poi Positions"]
@@ -95,7 +96,7 @@ cpdef get_agent_state(data):  # Calculates join_state_vector for NN input
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing.
 cpdef get_agent_actions(data, nn_output):
-    cdef int number_agents = data['Number of Agents']
+    cdef int number_agents = p.number_of_agents
     actions = np.zeros((number_agents, 2), dtype = np.float_)
 
     cdef int agent_id
@@ -107,9 +108,9 @@ cpdef get_agent_actions(data, nn_output):
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing.
 cpdef do_agent_move(data):  # Each agent moves 1 step
-    cdef float world_width = data["World Width"]
-    cdef float world_length = data["World Length"]
-    cdef int number_agents = data['Number of Agents']
+    cdef float world_width = p.world_width
+    cdef float world_length = p.world_length
+    cdef int number_agents = p.number_of_agents
     cdef double[:, :] agent_positions = data["Agent Positions"]
     cdef double[:, :] agent_orientations = data["Agent Orientations"]
     cdef double[:, :] action = data["Agent Actions"]

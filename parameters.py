@@ -1,5 +1,4 @@
 import pyximport; pyximport.install()  # For cython(pyx) code
-from code.reward import calc_global_reward, calc_difference_reward, calc_dpp_reward
 
 """
 data:
@@ -26,35 +25,28 @@ Warning: Use caution when manually reseting these values within the simulation.
 
 class Parameters:
 
-    data = {
-        # Domain parameters
-        "Number of Agents": 4,
-        "Number of POIs": 10,
-        "Minimum Distance": 1.0,  # Smallest distance which can appear in denominator of reward calculation
-        "Steps": 10,  # Number of steps agents take in each generation/test
-        "Generations per Episode": 10,
-        "Tests per Episode": 1,
-        "Number of Episodes": 1,
-        "World Width": 30,  # X-Dimension
-        "World Length": 30,  # Y-Dimension
-        "Coupling": 3,  # How many rovers are required to observe a POI
-        "Activation Radius": 4.0,  # Minimum distance at which a POI may be observed for credit
+    # Run Parameters
+    stat_runs = 1
+    generations = 20
+    tests_per_episode = 1
+    number_of_episodes = 1
 
-        # Neural network parameters
-        "Number of Inputs": 8,  # NN inputs
-        "Number of Nodes": 10,  # NN hidden nodes
-        "Number of Outputs": 2,  # NN outputs
+    # Domain parameters
+    number_of_agents = 12
+    number_of_pois = 10
+    min_distance = 1
+    total_steps = 30
+    world_width = 20
+    world_length = 30
+    coupling = 3
+    activation_dist = 4
 
-        # Reward function parameters
-        "Reward Function": calc_global_reward,
-        "Evaluation Function": calc_global_reward,
-        "Mod Name": "global",
-        "Specifics Name": "12Agents_10Poi_3Coup_Long_Comparison",  # Name of save file for data
-        "Performance Save File Name": "Test_Data",
-        "Trajectory Save File Name": "Trajectory_Data",
+    # Neural network parameters
+    number_of_inputs = 8
+    number_of_nodes = 10
+    number_of_outputs = 2
 
-        # CCEA parameters
-        "Mutation Rate": 0.9,  # How likely a given policy is to be mutated
-        "Population Size": 2,  # Number of policies in each population
-        "Epsilon": 0.1  # Epsilon constant for e-greedy selection in CCEA
-    }
+    # CCEA parameters
+    mutation_rate = 0.9
+    epsilon = 0.1
+    population_size = 10
