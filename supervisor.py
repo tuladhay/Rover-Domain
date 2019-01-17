@@ -1,7 +1,7 @@
 #! /usr/bin/python3.6
 
 from rover_domain_core_gym import rover_domain_core_gym
-from parameters import parameters as p
+from parameters import Parameters as p
 from mods import mod as m
 from code.agent_domain import get_agent_actions
 from code.trajectory_history import create_trajectory_histories, save_trajectory_histories, update_trajectory_histories

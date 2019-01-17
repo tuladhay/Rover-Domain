@@ -1,5 +1,4 @@
 import pyximport; pyximport.install()  # For cython(pyx) code
-import numpy as np
 from code.reward import calc_global_reward, calc_difference_reward, calc_dpp_reward
 
 """
@@ -25,10 +24,10 @@ Warning: Use caution when manually reseting these values within the simulation.
 """
 
 
-class parameters():
+class Parameters:
 
     data = {
-        "Number of Agents": 12,
+        "Number of Agents": 4,
         "Number of POIs": 10,
         "Minimum Distance": 1.0,
         "Steps": 10,
@@ -37,20 +36,9 @@ class parameters():
         "Number of Episodes": 1,
         "World Width": 30,  # X-Dimension
         "World Length": 30,  # Y-Dimension
-        "Number of Inputs": 8,  # NN inputs
-        "Number of Nodes": 10,  # NN hidden nodes
+        "Number of Inputs": 1,  # NN inputs
+        "Number of Nodes": 3,  # NN hidden nodes
         "Number of Outputs": 2,  # NN outputs
-        "Poi Static Values": np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]),
-        "Poi Relative Static Positions": np.array([
-        [0.0, 0.0],
-        [0.0, 1.0],
-        [1.0, 0.0],
-        [1.0, 1.0],
-        [1.0, 0.5],
-        [0.5, 1.0],
-        [0.0, 5.0],
-        [0.5, 0.0]
-        ]),
         "Agent Initialization Size": 0.1,
         "Coupling": 3,  # How many rovers are required to observe a POI
         "Activation Radius": 4.0,  # Minimum distance at which a POI may be observed for credit
@@ -58,7 +46,7 @@ class parameters():
         "Evaluation Function": calc_global_reward,
         "Mod Name": "global",
         "Specifics Name": "12Agents_10Poi_3Coup_Long_Comparison",
-        "Mutation Rate": 0.1,  # How likely a given policy is to be mutated
-        "Population Size": 20,  # Number of policies in each population
+        "Mutation Rate": 0.9,  # How likely a given policy is to be mutated
+        "Population Size": 2,  # Number of policies in each population
         "Epsilon": 0.1  # Epsilon constant for e-greedy selection in CCEA
     }

@@ -1,4 +1,4 @@
-from parameters import parameters as p
+from parameters import Parameters as p
 from shutil import copyfile
 import os
 import errno

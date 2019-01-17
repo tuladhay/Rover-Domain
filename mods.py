@@ -1,7 +1,8 @@
 import datetime
 from code.reward import * # Agent Reward
 
-class mod:
+
+class Mod:
 
     def global_reward_mod(data):
         data["Mod Name"] = "global"

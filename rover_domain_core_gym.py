@@ -1,9 +1,9 @@
 # Dependencies: numpy, cython 
 
-from parameters import parameters as p
+from parameters import Parameters as p
 import numpy as np
 import pyximport; pyximport.install() # For cython(pyx) code
-from code.agent_domain import * # Rover Domain Dynamic
+from code.agent import * # Rover Domain Dynamic
 from code.trajectory_history import create_trajectory_histories, save_trajectory_histories, update_trajectory_histories
 
 
@@ -245,7 +245,7 @@ class rover_domain_core_gym():
         # Observe state, store result in p.data
         p.data["Observation Function"](p.data)
         
-        return p.data["Agent Observations"]
+        #return p.data["Agent Observations"]
         
 def assign(data, key, value):
     data[key] = value
