@@ -27,36 +27,18 @@ RoverDomainCoreGym should be mods
 """
 
 # World Setup ----------------------------------------------------------------------------------------
-
+# Randomly initalize agent positions on map
 def blueprint_agent(data):
     number_agents = data['Number of Agents']
     world_width = data['World Width']
     world_length = data['World Length']
 
-    # Initialize all agents in the np.randomly in world
     # Agent positions are a numpy array of size m x n, m = n_agents, n = 2
     data['Agent Positions BluePrint'] = np.random.rand(number_agents, 2) * [world_width, world_length]
     rover_angles = np.random.uniform(-np.pi, np.pi, number_agents) # Rover orientations
     data['Agent Orientations BluePrint'] = np.vstack((np.cos(rover_angles), np.sin(rover_angles))).T
 
-
-def blueprint_agent_init_size(data):
-    number_agents = data['Number of Agents']
-    world_width = data['World Width']
-    world_length = data['World Length']
-    agent_init_size = data["Agent Initialization Size"]
-
-    world_size = np.array([world_width, world_length])
-
-    # Initialize all agents in the np.randomly in world
-    agent_positions = np.random.rand(number_agents, 2) * world_size
-    agent_positions *= agent_init_size
-    agent_positions += 0.5 * (1 - agent_init_size) * world_size
-    data['Agent Positions BluePrint'] = agent_positions
-    rover_angles = np.random.uniform(-np.pi, np.pi, number_agents)
-    data['Agent Orientations BluePrint'] = np.vstack((np.cos(rover_angles), np.sin(rover_angles))).T
-
-
+# Randomly initialize POI positions on map
 def blueprint_poi(data):
     number_pois = data['Number of POIs']
     world_width = data['World Width']
@@ -74,6 +56,7 @@ def init_world(data):
     data['Poi Values'] = data['Poi Values BluePrint'].copy()
 
 
+# Agent positions are statically set on the mapblueprint_static
 def blueprint_static(data):
     number_agents = data['Number of Agents']
     number_pois = data['Number of POIs']
@@ -121,9 +104,9 @@ class rover_domain_core_gym():
         self.trial_end_functions = []
 
         # Add setup functions to function call (THESE MUST BE ADDED FIRST)
-        self.agent_setup_train.append(blueprint_poi)
-        self.agent_setup_train.append(blueprint_agent)
-        self.world_setup_train.append(init_world)
+        self.agent_setup_train.append(blueprint_poi)  # Initialize POI positions and values
+        self.agent_setup_train.append(blueprint_agent)  # Initialize agent positions and orientations
+        self.world_setup_train.append(init_world)  # Set arrays equal to blueprints
         self.agent_setup_test.append(blueprint_poi)
         self.agent_setup_test.append(blueprint_agent)
         self.world_setup_test.append(init_world)
@@ -167,22 +150,17 @@ class rover_domain_core_gym():
         self.reset(new_mode = "Train", fully_resetting = True)
 
         
-    def step(self, action): # Agents do actions for one time step
-
-        # Store Action for other functions to use
-        p.data["Agent Actions"] = action
-
+    def step(self): # Agents do actions for one time step
         
         # If not done, do step functionality
         if p.data["Step Index"] < p.data["Steps"]:
             
             # Do Step Functionality
-            p.data["Agent Actions"] = action
             if p.data["Mode"] == "Train":
-                for func in self.world_update_functions_train:
+                for func in self.world_update_functions_train:  # do_agent_move
                     func(p.data)
             elif p.data["Mode"] == "Test":
-                for func in self.world_update_functions_test:
+                for func in self.world_update_functions_test:  # do_agent_move
                     func(p.data)
             else:
                 raise Exception(
@@ -213,7 +191,7 @@ class rover_domain_core_gym():
         if p.data["Step Index"] >= p.data["Steps"]:
             done = True
                 
-        return p.data["Agent Observations"], p.data["Gym Reward"], done, p.data
+        return p.data["Agent Observations"], p.data["Gym Reward"], done, p.data  # Gym Reward is Agent Rewards
 
         
     def reset(self, new_mode = None, fully_resetting = False):
@@ -242,10 +220,8 @@ class rover_domain_core_gym():
         else:
             raise Exception('data["Mode"] should be set to "Train" or "Test"')
         
-        # Observe state, store result in p.data
+        # Observe state, store result in p.data (Get initial state)
         p.data["Observation Function"](p.data)
-        
-        #return p.data["Agent Observations"]
         
 def assign(data, key, value):
     data[key] = value

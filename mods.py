@@ -1,5 +1,5 @@
 import datetime
-from code.reward import * # Agent Reward
+from code.reward import calc_global_reward, calc_difference_reward, calc_dpp_reward # Agent Reward
 
 
 class Mod:

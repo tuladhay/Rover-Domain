@@ -27,6 +27,7 @@ cdef class Ccea:
         self.fitness = np.zeros((self.n_populations, self.population_size))
         self.team_selection = np.zeros((self.n_populations, self.population_size), dtype = np.int32)
 
+        cdef int pop_index, policy_index, w
         # Initialize a random population of NN weights
         for pop_index in range(self.n_populations):
             for policy_index in range(self.population_size):
@@ -35,6 +36,7 @@ cdef class Ccea:
                 self.team_selection[pop_index, policy_index] = -1
 
     cpdef select_policy_teams(self):
+        cdef int pop_id, policy_id, j, k, rpol
         for pop_id in range(self.n_populations):
             for policy_id in range(self.population_size):
                 self.team_selection[pop_id, policy_id] = -1
@@ -51,14 +53,15 @@ cdef class Ccea:
                 self.team_selection[pop_id, j] = rpol  # Assign policy to team
 
     cpdef reset_populations(self):
+        cdef int pop_index, policy_index, w
         for pop_index in range(self.n_populations):
             for policy_index in range(self.population_size):
                 for w in range(self.policy_size):
                     self.pops[pop_index, policy_index, w] = random.uniform(0, 1)
 
     cpdef mutate(self, half_length):
-        cdef int policy_index
-        cdef int target
+        cdef int pop_index, policy_index, target
+        cdef double rvar
         for pop_index in range(self.n_populations):
             policy_index = half_length
             while policy_index < self.population_size:
@@ -69,8 +72,7 @@ cdef class Ccea:
                 policy_index += 1
 
     cpdef create_new_pop(self):
-        cdef int count
-        cdef int policy_index
+        cdef int count, policy_index, pop_index, w
         cdef int half_pop_length = self.population_size/2
         for pop_index in range(self.n_populations):
             policy_index = half_pop_length
@@ -84,6 +86,8 @@ cdef class Ccea:
         self.mutate(half_pop_length)
 
     cpdef epsilon_greedy_select(self):
+        cdef int pop_id, policy_id, k, parent
+        cdef double rvar
         cdef int half_pop_length = self.population_size/2
         for pop_id in range(self.n_populations):
             policy_id = half_pop_length
@@ -99,6 +103,7 @@ cdef class Ccea:
                 policy_id += 1
 
     cpdef down_select(self):
+        cdef int pop_id, j, k
         # Reorder populations in terms of fintess (greatest to least)
         for pop_id in range(self.n_populations):
             for j in range(self.population_size):

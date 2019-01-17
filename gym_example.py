@@ -3,12 +3,11 @@
 from rover_domain_core_gym import rover_domain_core_gym
 from parameters import Parameters as p
 from mods import Mod as m
-from code.agent import *
+from code.agent import get_agent_state, get_agent_actions
 from code.trajectory_history import create_trajectory_histories, save_trajectory_histories, update_trajectory_histories
 from code.reward_history import save_reward_history, create_reward_history, update_reward_history
 from code.ccea import Ccea
 from code.neural_network import NeuralNetwork
-import numpy as np
 
 step_count = p.data["Steps"]
 generations_per_episode = p.data["Generations per Episode"]
@@ -39,39 +38,38 @@ for func in mod_col:
         nn.reset_nn()
 
         # Training Phase
-        # obs = sim.reset('Train', True)
+        obs = sim.reset('Train', True)
 
         for gen in range(generations_per_episode):
             p.data["World Index"] = gen
             # obs = sim.reset('Train', False)
             cc.create_new_pop()  # Create a new population via mutation
             cc.select_policy_teams()
-            joint_state = get_agent_state(p.data)
+            get_agent_state(p.data)
+            joint_state = p.data["Agent Observations"]
 
-            for policies in range(cc.population_size):
-                joint_action = np.zeros((p.data["Number of Agents"], p.data["Number of Outputs"]))
-
+            for team_number in range(cc.population_size):  # Each policy in CCEA is tested in teams
                 for rover_id in range(p.data["Number of Agents"]):
-                    nn.get_inputs(joint_state[rover_id], rover_id)
-                    pol_select = cc.team_selection[rover_id, 0]
-                    nn.get_weights(cc.pops[rover_id, pol_select], rover_id)
-                    joint_action[rover_id] = nn.get_outputs(rover_id)
+                    policy_id = cc.team_selection[rover_id, team_number]
+                    nn.run_neural_network(joint_state[rover_id], cc.pops[rover_id, policy_id], rover_id)
+                get_agent_actions(p.data, nn.out_layer)  # Gets outputs from all rover NNs
 
-                # Rovers execute actions
-                # Performance is evaluated
-                # Fitness assigned
+                done = False
+                step_count = 0
+                while not done:
+                    obs, reward, done, info = sim.step()
+                    step_count += 1
 
-            # Down selection
+                # Update fitness of policies using reward information
+                for pop_id in range(p.data["Number of Agents"]):
+                    policy_id = cc.team_selection[rover_id, team_number]
+                    cc.fitness[pop_id, policy_id] = reward[pop_id]
 
-            # done = False
-            # step_count = 0
-            # while not done:
-            #     get_agent_actions(p.data)
-            #     joint_action = p.data["Agent Actions"]
-            #     obs, reward, done, info = sim.step(joint_action)
-            #     step_count += 1
+            cc.down_select()  # Perform down_selection after each policy has been evaluated
 
-        # # Testing Phase
+
+
+        # # Testing Phase (STILL WORKING ON THIS)
         # obs = sim.reset('Test', True)
         #
         # for test in range(tests_per_episode):
@@ -86,8 +84,8 @@ for func in mod_col:
         #         obs, reward, done, info = sim.step(joint_action)
         #         step_count += 1
 
-        # update_reward_history(p.data)
-        #
-        # # Trial End
+        update_reward_history(p.data)
+
+        # Trial End (STILL WORKING ON THIS)
         # save_reward_history(p.data)
         # save_trajectory_histories(p.data)

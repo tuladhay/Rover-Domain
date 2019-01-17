@@ -6,11 +6,8 @@ cdef extern from "math.h":
 
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing.
-cpdef get_agent_state(data):
-    """
-     Sensor model is <aNE, aNW, aSW, aSE, pNE, pNE, pSW, pSE>
-     Where a means (other) agent, p means poi, and the rest are the quadrants
-    """
+cpdef get_agent_state(data):  # Calculates join_state_vector for NN input
+
     cdef int number_agents = data['Number of Agents']
     cdef int number_pois = data['Number of POIs']
     cdef double min_sqr_dist = data["Minimum Distance"] ** 2
@@ -91,35 +88,31 @@ cpdef get_agent_state(data):
                 else:  # poi is south-west of agent
                     agent_state[agent_id, 6] += poi_values[poi_id]  / sqr_dist
 
-    #data["Agent Observations"] = joint_state_vec
-    return agent_state
+    data["Agent Observations"] = agent_state
+    #return agent_state
 
 
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing.
 cpdef get_agent_actions(data, nn_output):
     cdef int number_agents = data['Number of Agents']
-    action = np.zeros((number_agents, 2), dtype = np.float_)
-    agent_policies = data["Agent Policies"]
-    agent_state = data["Agent Observations"]
+    actions = np.zeros((number_agents, 2), dtype = np.float_)
 
     cdef int agent_id
     for agent_id in range(number_agents):
-        action[agent_id] = agent_policies[agent_id].get_action(agent_state[agent_id])
-    data["Agent Actions"] = action
+        actions[agent_id] = nn_output[agent_id]
+    data["Agent Actions"] = actions
 
 
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing.
-cpdef do_agent_move(data):
+cpdef do_agent_move(data):  # Each agent moves 1 step
     cdef float world_width = data["World Width"]
     cdef float world_length = data["World Length"]
     cdef int number_agents = data['Number of Agents']
     cdef double[:, :] agent_positions = data["Agent Positions"]
     cdef double[:, :] agent_orientations = data["Agent Orientations"]
-    agent_actions = np.array(data["Agent Actions"]).astype(np.float_)
-    agent_actions = np.clip(agent_actions, -1, 1)
-    cdef double[:, :] action = agent_actions
+    cdef double[:, :] action = data["Agent Actions"]
     cdef int agent_id
     cdef double dx, dy, norm # Change in x-position, change in y-position, total distance moved
 
@@ -140,8 +133,8 @@ cpdef do_agent_move(data):
             agent_orientations[agent_id, 1] = 0.0
         else:
             norm = sqrt(dx**2 +  dy**2)
-            agent_orientations[agent_id, 0] = dx /norm
-            agent_orientations[agent_id, 1] = dy /norm
+            agent_orientations[agent_id, 0] = dx/norm
+            agent_orientations[agent_id, 1] = dy/norm
 
         # # Check if action moves agent within the world bounds
         # if agent_positions[agent_id,0] > world_width:
