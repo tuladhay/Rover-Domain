@@ -7,56 +7,56 @@ class Mod:
     def global_reward_mod(data):
         data["Mod Name"] = "global"
 
-        dateTimeString = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
-        print("Starting %s test at\n\t%s\n"%(data["Mod Name"], dateTimeString))
+        date_time_string = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
+        print("Starting %s test at\n\t%s\n"%(data["Mod Name"], date_time_string))
 
         # Agent Reward
         data["Reward Function"] = calc_global_reward
 
         data["Performance Save File Name"] = "log/%s/%s/performance/perf %s.csv"%\
-            (data["Specifics Name"], data["Mod Name"], dateTimeString)
+            (data["Specifics Name"], data["Mod Name"], date_time_string)
 
         data["Trajectory Save File Name"] = "log/%s/%s/trajectory/traj %s.csv"%\
-            (data["Specifics Name"], data["Mod Name"], dateTimeString)
+            (data["Specifics Name"], data["Mod Name"], date_time_string)
 
         data["Pickle Save File Name"] = "log/%s/%s/pickle/data %s.pickle"%\
-            (data["Specifics Name"], data["Mod Name"], dateTimeString)
+            (data["Specifics Name"], data["Mod Name"], date_time_string)
 
     def difference_reward_mod(data):
         data["Mod Name"] = "difference"
 
-        dateTimeString = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
-        print("Starting %s test at\n\t%s\n"%(data["Mod Name"], dateTimeString))
+        date_time_string = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
+        print("Starting %s test at\n\t%s\n"%(data["Mod Name"], date_time_string))
 
         # Agent Reward
         data["Reward Function"] = calc_difference_reward
 
         data["Performance Save File Name"] = "log/%s/%s/performance/perf %s.csv"%\
-            (data["Specifics Name"], data["Mod Name"], dateTimeString)
+            (data["Specifics Name"], data["Mod Name"], date_time_string)
 
         data["Trajectory Save File Name"] = "log/%s/%s/trajectory/traj %s.csv"%\
-            (data["Specifics Name"], data["Mod Name"], dateTimeString)
+            (data["Specifics Name"], data["Mod Name"], date_time_string)
 
         data["Pickle Save File Name"] = "log/%s/%s/pickle/data %s.pickle"%\
-            (data["Specifics Name"], data["Mod Name"], dateTimeString)
+            (data["Specifics Name"], data["Mod Name"], date_time_string)
 
     def dpp_reward_mod(data):
         data["Mod Name"] = "dpp"
 
-        dateTimeString = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
-        print("Starting %s test at\n\t%s\n"%(data["Mod Name"], dateTimeString))
+        date_time_string = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
+        print("Starting %s test at\n\t%s\n"%(data["Mod Name"], date_time_string))
 
         # Agent Reward
         data["Reward Function"] = calc_dpp_reward
 
         data["Performance Save File Name"] = "log/%s/%s/performance/perf %s.csv"%\
-            (data["Specifics Name"], data["Mod Name"], dateTimeString)
+            (data["Specifics Name"], data["Mod Name"], date_time_string)
 
         data["Trajectory Save File Name"] = "log/%s/%s/trajectory/traj %s.csv"%\
-            (data["Specifics Name"], data["Mod Name"], dateTimeString)
+            (data["Specifics Name"], data["Mod Name"], date_time_string)
 
         data["Pickle Save File Name"] = "log/%s/%s/pickle/data %s.pickle"%\
-            (data["Specifics Name"], data["Mod Name"], dateTimeString)
+            (data["Specifics Name"], data["Mod Name"], date_time_string)
 
 
 
@@ -66,20 +66,20 @@ class Mod:
     #     trainBeginFuncCol.insert(0, setCurriculumWorldSize)
     #     testBeginFuncCol.insert(0, restoreWorldSize)
     #
-    #     dateTimeString = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
-    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], dateTimeString))
+    #     date_time_string = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
+    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], date_time_string))
     #
     #     # Agent Reward
     #     data["Reward Function"] =calc_global_reward
     #
     #     data["Performance Save File Name"] = "log/%s/%s/performance/perf %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Trajectory Save File Name"] = "log/%s/%s/trajectory/traj %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Pickle Save File Name"] = "log/%s/%s/pickle/data %s.pickle"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     # def globalRewardSizeCurrMod20(data):
     #     data["Schedule"] = ((20.0, 2000), (50.0,3000))
@@ -87,20 +87,20 @@ class Mod:
     #     trainBeginFuncCol.insert(0, setCurriculumWorldSize)
     #     testBeginFuncCol.insert(0, restoreWorldSize)
     #calc_dpp_reward
-    #     dateTimeString = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
-    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], dateTimeString))
+    #     date_time_string = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
+    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], date_time_string))
     #
     #     # Agent Reward
     #     data["Reward Function"] =calc_global_reward
     #
     #     data["Performance Save File Name"] = "log/%s/%s/performance/perf %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Trajectory Save File Name"] = "log/%s/%s/trajectory/traj %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Pickle Save File Name"] = "log/%s/%s/pickle/data %s.pickle"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #
     # def globalRewardSizeCurrMod30(data):
@@ -109,20 +109,20 @@ class Mod:
     #     trainBeginFuncCol.insert(0, setCurriculumWorldSize)
     #     testBeginFuncCol.insert(0, restoreWorldSize)
     #
-    #     dateTimeString = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
-    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], dateTimeString))
+    #     date_time_string = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
+    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], date_time_string))
     #
     #     # Agent Reward
     #     data["Reward Function"] =calc_global_reward
     #
     #     data["Performance Save File Name"] = "log/%s/%s/performance/perf %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Trajectory Save File Name"] = "log/%s/%s/trajectory/traj %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Pickle Save File Name"] = "log/%s/%s/pickle/data %s.pickle"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     # def globalRewardSizeCurrMod40(data):
     #     data["Schedule"] = ((40.0, 2000), (50.0,3000))
@@ -130,20 +130,20 @@ class Mod:
     #     trainBeginFuncCol.insert(0, setCurriculumWorldSize)
     #     testBeginFuncCol.insert(0, restoreWorldSize)
     #
-    #     dateTimeString = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
-    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], dateTimeString))
+    #     date_time_string = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
+    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], date_time_string))
     #
     #     # Agent Reward
     #     data["Reward Function"] =calc_global_reward
     #
     #     data["Performance Save File Name"] = "log/%s/%s/performance/perf %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Trajectory Save File Name"] = "log/%s/%s/trajectory/traj %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Pickle Save File Name"] = "log/%s/%s/pickle/data %s.pickle"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #
     #
@@ -153,21 +153,21 @@ class Mod:
     #     trainBeginFuncCol.insert(0, setCurriculumCoupling)
     #     testBeginFuncCol.insert(0, restoreCoupling)
     #
-    #     dateTimeString = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
-    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], dateTimeString))
+    #     date_time_string = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
+    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], date_time_string))
     #
     #     # Agent Reward
     #     data["Reward Function"] = calc_global_reward
     #
     #
     #     data["Performance Save File Name"] = "log/%s/%s/performance/perf %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Trajectory Save File Name"] = "log/%s/%s/trajectory/traj %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Pickle Save File Name"] = "log/%s/%s/pickle/data %s.pickle"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     # def globalRewardCoupCurrMod2(data):
     #     data["Schedule"] = data["Schedule"] = ((2, 2000), (6, 3000))
@@ -175,21 +175,21 @@ class Mod:
     #     trainBeginFuncCol.insert(0, setCurriculumCoupling)
     #     testBeginFuncCol.insert(0, restoreCoupling)
     #
-    #     dateTimeString = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
-    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], dateTimeString))
+    #     date_time_string = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
+    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], date_time_string))
     #
     #     # Agent Reward
     #     data["Reward Function"] = calc_global_reward
     #
     #
     #     data["Performance Save File Name"] = "log/%s/%s/performance/perf %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Trajectory Save File Name"] = "log/%s/%s/trajectory/traj %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Pickle Save File Name"] = "log/%s/%s/pickle/data %s.pickle"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     # def globalRewardCoupCurrMod3(data):
     #     data["Schedule"] = data["Schedule"] = ((3, 2000), (6, 3000))
@@ -197,21 +197,21 @@ class Mod:
     #     trainBeginFuncCol.insert(0, setCurriculumCoupling)
     #     testBeginFuncCol.insert(0, restoreCoupling)
     #
-    #     dateTimeString = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
-    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], dateTimeString))
+    #     date_time_string = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
+    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], date_time_string))
     #
     #     # Agent Reward
     #     data["Reward Function"] = calc_global_reward
     #
     #
     #     data["Performance Save File Name"] = "log/%s/%s/performance/perf %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Trajectory Save File Name"] = "log/%s/%s/trajectory/traj %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Pickle Save File Name"] = "log/%s/%s/pickle/data %s.pickle"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     # def globalRewardCoupCurrMod4(data):
     #     data["Schedule"] = data["Schedule"] = ((4, 2000), (6, 3000))
@@ -219,21 +219,21 @@ class Mod:
     #     trainBeginFuncCol.insert(0, setCurriculumCoupling)
     #     testBeginFuncCol.insert(0, restoreCoupling)
     #
-    #     dateTimeString = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
-    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], dateTimeString))
+    #     date_time_string = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
+    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], date_time_string))
     #
     #     # Agent Reward
     #     data["Reward Function"] = calc_global_reward
     #
     #
     #     data["Performance Save File Name"] = "log/%s/%s/performance/perf %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Trajectory Save File Name"] = "log/%s/%s/trajectory/traj %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Pickle Save File Name"] = "log/%s/%s/pickle/data %s.pickle"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     # def globalRewardCoupCurrMod5(data):
     #     data["Schedule"] = data["Schedule"] = ((5, 2000), (6, 3000))
@@ -241,21 +241,21 @@ class Mod:
     #     trainBeginFuncCol.insert(0, setCurriculumCoupling)
     #     testBeginFuncCol.insert(0, restoreCoupling)
     #
-    #     dateTimeString = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
-    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], dateTimeString))
+    #     date_time_string = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
+    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], date_time_string))
     #
     #     # Agent Reward
     #     data["Reward Function"] = calc_global_reward
     #
     #
     #     data["Performance Save File Name"] = "log/%s/%s/performance/perf %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Trajectory Save File Name"] = "log/%s/%s/trajectory/traj %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Pickle Save File Name"] = "log/%s/%s/pickle/data %s.pickle"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     # ##################################################################################
     #
@@ -267,20 +267,20 @@ class Mod:
     #     trainBeginFuncCol.insert(0, setCurriculumWorldSize)
     #     testBeginFuncCol.insert(0, restoreWorldSize)
     #
-    #     dateTimeString = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
-    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], dateTimeString))
+    #     date_time_string = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
+    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], date_time_string))
     #
     #     # Agent Reward
     #     data["Reward Function"] = calc_difference_reward
     #
     #     data["Performance Save File Name"] = "log/%s/%s/performance/perf %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Trajectory Save File Name"] = "log/%s/%s/trajectory/traj %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Pickle Save File Name"] = "log/%s/%s/pickle/data %s.pickle"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     # def differenceRewardSizeCurrMod20(data):
     #     data["Schedule"] = ((20.0, 2000), (50.0,3000))
@@ -288,20 +288,20 @@ class Mod:
     #     trainBeginFuncCol.insert(0, setCurriculumWorldSize)
     #     testBeginFuncCol.insert(0, restoreWorldSize)
     #
-    #     dateTimeString = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
-    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], dateTimeString))
+    #     date_time_string = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
+    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], date_time_string))
     #
     #     # Agent Reward
     #     data["Reward Function"] = calc_difference_reward
     #
     #     data["Performance Save File Name"] = "log/%s/%s/performance/perf %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Trajectory Save File Name"] = "log/%s/%s/trajectory/traj %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Pickle Save File Name"] = "log/%s/%s/pickle/data %s.pickle"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #
     # def differenceRewardSizeCurrMod30(data):
@@ -310,20 +310,20 @@ class Mod:
     #     trainBeginFuncCol.insert(0, setCurriculumWorldSize)
     #     testBeginFuncCol.insert(0, restoreWorldSize)
     #
-    #     dateTimeString = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
-    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], dateTimeString))
+    #     date_time_string = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
+    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], date_time_string))
     #
     #     # Agent Reward
     #     data["Reward Function"] = calc_difference_reward
     #
     #     data["Performance Save File Name"] = "log/%s/%s/performance/perf %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Trajectory Save File Name"] = "log/%s/%s/trajectory/traj %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Pickle Save File Name"] = "log/%s/%s/pickle/data %s.pickle"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     # def differenceRewardSizeCurrMod40(data):
     #     data["Schedule"] = ((40.0, 2000), (50.0,3000))
@@ -331,20 +331,20 @@ class Mod:
     #     trainBeginFuncCol.insert(0, setCurriculumWorldSize)
     #     testBeginFuncCol.insert(0, restoreWorldSize)
     #
-    #     dateTimeString = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
-    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], dateTimeString))
+    #     date_time_string = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
+    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], date_time_string))
     #
     #     # Agent Reward
     #     data["Reward Function"] = calc_difference_reward
     #
     #     data["Performance Save File Name"] = "log/%s/%s/performance/perf %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Trajectory Save File Name"] = "log/%s/%s/trajectory/traj %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Pickle Save File Name"] = "log/%s/%s/pickle/data %s.pickle"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #
     #
@@ -354,21 +354,21 @@ class Mod:
     #     trainBeginFuncCol.insert(0, setCurriculumCoupling)
     #     testBeginFuncCol.insert(0, restoreCoupling)
     #
-    #     dateTimeString = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
-    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], dateTimeString))
+    #     date_time_string = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
+    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], date_time_string))
     #
     #     # Agent Reward
     #     data["Reward Function"] = calc_difference_reward
     #
     #
     #     data["Performance Save File Name"] = "log/%s/%s/performance/perf %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Trajectory Save File Name"] = "log/%s/%s/trajectory/traj %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Pickle Save File Name"] = "log/%s/%s/pickle/data %s.pickle"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     # def differenceRewardCoupCurrMod2(data):
     #     data["Schedule"] = data["Schedule"] = ((2, 2000), (6, 3000))
@@ -376,21 +376,21 @@ class Mod:
     #     trainBeginFuncCol.insert(0, setCurriculumCoupling)
     #     testBeginFuncCol.insert(0, restoreCoupling)
     #
-    #     dateTimeString = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
-    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], dateTimeString))
+    #     date_time_string = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
+    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], date_time_string))
     #
     #     # Agent Reward
     #     data["Reward Function"] = calc_difference_reward
     #
     #
     #     data["Performance Save File Name"] = "log/%s/%s/performance/perf %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Trajectory Save File Name"] = "log/%s/%s/trajectory/traj %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Pickle Save File Name"] = "log/%s/%s/pickle/data %s.pickle"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     # def differenceRewardCoupCurrMod3(data):
     #     data["Schedule"] = data["Schedule"] = ((3, 2000), (6, 3000))
@@ -398,21 +398,21 @@ class Mod:
     #     trainBeginFuncCol.insert(0, setCurriculumCoupling)
     #     testBeginFuncCol.insert(0, restoreCoupling)
     #
-    #     dateTimeString = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
-    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], dateTimeString))
+    #     date_time_string = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
+    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], date_time_string))
     #
     #     # Agent Reward
     #     data["Reward Function"] = calc_difference_reward
     #
     #
     #     data["Performance Save File Name"] = "log/%s/%s/performance/perf %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Trajectory Save File Name"] = "log/%s/%s/trajectory/traj %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Pickle Save File Name"] = "log/%s/%s/pickle/data %s.pickle"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     # def differenceRewardCoupCurrMod4(data):
     #     data["Schedule"] = data["Schedule"] = ((4, 2000), (6, 3000))
@@ -420,21 +420,21 @@ class Mod:
     #     trainBeginFuncCol.insert(0, setCurriculumCoupling)
     #     testBeginFuncCol.insert(0, restoreCoupling)
     #
-    #     dateTimeString = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
-    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], dateTimeString))
+    #     date_time_string = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
+    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], date_time_string))
     #
     #     # Agent Reward
     #     data["Reward Function"] = calc_difference_reward
     #
     #
     #     data["Performance Save File Name"] = "log/%s/%s/performance/perf %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Trajectory Save File Name"] = "log/%s/%s/trajectory/traj %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Pickle Save File Name"] = "log/%s/%s/pickle/data %s.pickle"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     # def differenceRewardCoupCurrMod5(data):
     #     data["Schedule"] = data["Schedule"] = ((5, 2000), (6, 3000))
@@ -442,18 +442,18 @@ class Mod:
     #     trainBeginFuncCol.insert(0, setCurriculumCoupling)
     #     testBeginFuncCol.insert(0, restoreCoupling)
     #
-    #     dateTimeString = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
-    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], dateTimeString))
+    #     date_time_string = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
+    #     print("Starting %s test at\n\t%s\n"%(data["Mod Name"], date_time_string))
     #
     #     # Agent Reward
     #     data["Reward Function"] = calc_difference_reward
     #
     #
     #     data["Performance Save File Name"] = "log/%s/%s/performance/perf %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Trajectory Save File Name"] = "log/%s/%s/trajectory/traj %s.csv"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)
     #
     #     data["Pickle Save File Name"] = "log/%s/%s/pickle/data %s.pickle"%\
-    #         (data["Specifics Name"], data["Mod Name"], dateTimeString)
+    #         (data["Specifics Name"], data["Mod Name"], date_time_string)

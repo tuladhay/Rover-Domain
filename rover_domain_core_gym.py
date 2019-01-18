@@ -32,7 +32,7 @@ data:
 A dictionary shared amongst all functions in the simulation.
 User may add any property they may want to have shared by all provided functions
 SimulationCore provides and manages the following keys during run() execution:
-    "Steps": duration of world measured in time steps,
+    "Total Steps": duration of world measured in time steps,
     "Trains per Episode":  number of world instances for training to generate
         in sequence each episode
     "Tests per Episode":  number of world instances for testing to generate
@@ -93,28 +93,39 @@ def blueprint_static(data):
     data['Poi Values BluePrint'] = data['Poi Static Values'].copy()
 
 
-def assign_random_policies(data):
-    number_agents = p.number_of_agents
-    agent_populations = data['Agent Populations']
-    agent_policies = [None] * number_agents
-    for agent_id in range(number_agents):
-        agent_policies[agent_id] = np.random.choice(agent_populations[agent_id])
-    data["Agent Policies"] = agent_policies
-
-
 class RoverDomainCore:
 
     def __init__(self):
 
         self.data = {
+            # Agent values
             "Agent Positions": np.zeros((p.number_of_agents, 2)),
-            "POI Positions": np.zeros((p.number_of_pois, 2)),
+            "Agent Orientations": np.zeros((p.number_of_agents, 2)),
+            "Agent Positions BluePrint": np.zeros((p.number_of_agents, 2)),
+            "Agent Orientations BluePrint": np.zeros((p.number_of_agents, 2)),
+            "Agent Observations": np.zeros((p.number_of_agents, 8)),
+            "Agent Position History": np.zeros((p.number_of_agents, p.total_steps, 2)),
+            "Agent Orientation History": np.zeros((p.number_of_agents, p.total_steps, 2)),
+
+            # POI values
+            "Poi Positions": np.zeros((p.number_of_pois, 2)),
+            "Poi Values": np.zeros((p.number_of_pois, 1)),
+            "Poi Values BluePrint": np.zeros((p.number_of_pois, 1)),
+            "Poi Positions BluePrint": np.zeros((p.number_of_pois, 2)),
+
+            # Domain values
             "Reward Function": calc_global_reward,
             "Evaluation Function": calc_global_reward,
+            "Total Steps": p.total_steps,
             "Mod Name": "global",
+            "Step Index": 0,
+            "Global Reward": 0.0,
+
+            # Data file values
             "Specifics Name": "12Agents_10Poi_3Coup_Long_Comparison",  # Name of save file for data
             "Performance Save File Name": "Test_Data",
-            "Trajectory Save File Name": "Trajectory_Data"
+            "Trajectory Save File Name": "Trajectory_Data",
+            "Pickle Save File Name": "pickle_data"
         }
 
         # Setup functions:
@@ -187,7 +198,7 @@ class RoverDomainCore:
     def step(self): # Agents do actions for one time step
         
         # If not done, do step functionality
-        if self.data["Step Index"] < self.data["Steps"]:
+        if self.data["Step Index"] < self.data["Total Steps"]:
             
             # Do Step Functionality
             if self.data["Mode"] == "Train":
@@ -205,7 +216,7 @@ class RoverDomainCore:
             self.data["Step Index"] += 1
             
             # Check is world is done; if so, do ending functions
-            if self.data["Step Index"] >= self.data["Steps"]:
+            if self.data["Step Index"] >= self.data["Total Steps"]:
                 if self.data["Mode"] == "Train":
                     for func in self.evaluate_world_results_train:
                         func(self.data)
@@ -222,7 +233,7 @@ class RoverDomainCore:
         
         # Check if simulation is done
         done = False
-        if self.data["Step Index"] >= self.data["Steps"]:
+        if self.data["Step Index"] >= self.data["Total Steps"]:
             done = True
                 
         return self.data["Agent Observations"], self.data["Gym Reward"], done, self.data  # Gym Reward is Agent Rewards

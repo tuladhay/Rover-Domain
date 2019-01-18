@@ -4,7 +4,7 @@ from rover_domain_core_gym import RoverDomainCore
 from parameters import Parameters as p
 from mods import Mod as m
 from code.agent import get_agent_state, get_agent_actions
-from code.trajectory_history import create_trajectory_histories, save_trajectory_histories, update_trajectory_histories
+from code.trajectory_history import save_trajectory_histories
 from code.reward_history import save_reward_history, create_reward_history, update_reward_history
 from code.ccea import Ccea
 from code.neural_network import NeuralNetwork
@@ -22,22 +22,21 @@ nn = NeuralNetwork()
 
 for func in mod_col:
     func(sim.data)
+    create_reward_history(sim.data)
 
-    for s in range(p.stat_runs):
-        print("Run: %i" % s)
+    for srun in range(p.stat_runs):
+        print("Run: %i" % srun)
 
         # Trial Begins
-        create_reward_history(sim.data)
-        sim.data["Steps"] = p.total_steps
         cc.reset_populations()
         nn.reset_nn()
 
         # Training Phase
-        obs = sim.reset('Train', True) # Fully resets rover domain (agent and POI positions/values)
+        sim.reset('Train', True) # Fully resets rover domain (agent and POI positions/values)
 
         for gen in range(p.generations):
-            print("Current Gen: %i" % gen)
-            obs = sim.reset('Train', False)
+            #print("Current Gen: %i" % gen)
+            sim.reset('Train', False)
             cc.create_new_pop()  # Create a new population via mutation
             cc.select_policy_teams()  # Selects which policies will be grouped into which teams
             get_agent_state(sim.data)  # Create state vector for NN inputs (might be redundant here)
@@ -63,25 +62,26 @@ for func in mod_col:
 
             cc.down_select()  # Perform down_selection after each policy has been evaluated
 
+            # Testing Phase (STILL WORKING ON THIS)
+            # sim.reset('Test', True)  # Set mode to test and re-initialize world
 
+            for test in range(p.tests_per_gen):
+                sim.data["World Index"] = test
+                sim.reset('Test', False)  # Set mode to test and do not reset the world
+                get_agent_state(sim.data)
+                joint_state = sim.data["Agent Observations"]
 
-        # # Testing Phase (STILL WORKING ON THIS)
-        # obs = sim.reset('Test', True)
-        #
-        # for test in range(tests_per_episode):
-        #     sim.data["World Index"] = test
-        #     obs = sim.reset('Test', False)
-        #
-        #     done = False
-        #     step_count = 0
-        #     while not done:
-        #         get_agent_actions(sim.data)
-        #         joint_action = sim.data["Agent Actions"]
-        #         obs, reward, done, info = sim.step(joint_action)
-        #         step_count += 1
+                done = False
+                step_count = 0
+                while not done:
+                    for rover_id in range(p.number_of_agents):
+                        nn.run_neural_network(joint_state[rover_id], cc.pops[rover_id, 0], rover_id)
+                    get_agent_actions(sim.data, nn.out_layer)
+                    obs, reward, done, info = sim.step()
+                    step_count += 1
 
-        # update_reward_history(sim.data)
+                update_reward_history(sim.data, gen, srun)
 
-        # Trial End (STILL WORKING ON THIS)
-        # save_reward_history(sim.data)
-        # save_trajectory_histories(sim.data)
+    #  Trial End (STILL WORKING ON THIS)
+    save_reward_history(sim.data)
+    save_trajectory_histories(sim.data)

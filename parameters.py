@@ -7,9 +7,8 @@ class Parameters:
 
     # Run Parameters
     stat_runs = 1
-    generations = 20
-    tests_per_episode = 1
-    number_of_episodes = 1
+    generations = 10000
+    tests_per_gen = 1
 
     # Domain parameters
     number_of_agents = 12
@@ -23,10 +22,10 @@ class Parameters:
 
     # Neural network parameters
     number_of_inputs = 8
-    number_of_nodes = 10
+    number_of_nodes = 9
     number_of_outputs = 2
 
     # CCEA parameters
-    mutation_rate = 0.9
+    mutation_rate = 0.25
     epsilon = 0.1
-    population_size = 10
+    population_size = 20
