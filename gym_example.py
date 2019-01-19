@@ -82,6 +82,6 @@ for srun in range(p.stat_runs):
 
                 update_reward_history(sim.data)
 
-    #  Trial End (STILL WORKING ON THIS)
-    save_reward_history(sim.data)
-    save_trajectory_histories(sim.data)
+        #  Trial End (STILL WORKING ON THIS)
+        save_reward_history(sim.data)
+        save_trajectory_histories(sim.data)

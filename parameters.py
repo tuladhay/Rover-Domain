@@ -6,8 +6,8 @@ location for convenience.
 class Parameters:
 
     # Run Parameters
-    stat_runs = 5
-    generations = 100
+    stat_runs = 1
+    generations = 200
     tests_per_gen = 1
 
     # Domain parameters

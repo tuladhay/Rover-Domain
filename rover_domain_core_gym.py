@@ -250,14 +250,14 @@ class RoverDomainCore:
         
         # Execute setting functionality
         if self.data["Mode"] == "Train":
-            if fully_resetting:
+            if fully_resetting == True:
                 for func in self.agent_setup_train: #Go through list of functions in agent_setup_train
                     func(self.data)
             for func in self.world_setup_train: #Go through list of functions in world_setup_train
                 func(self.data)
 
         elif self.data["Mode"] == "Test":
-            if fully_resetting:
+            if fully_resetting == True:
                 for func in self.agent_setup_test:
                     func(self.data)
             for func in self.world_setup_test:
