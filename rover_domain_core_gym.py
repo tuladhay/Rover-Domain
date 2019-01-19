@@ -3,7 +3,7 @@
 import pyximport; pyximport.install() # For cython(pyx) code
 from parameters import Parameters as p
 from code.agent import * # Rover Domain Dynamic
-from code.trajectory_history import create_trajectory_histories, save_trajectory_histories, update_trajectory_histories
+from code.trajectory_history import create_trajectory_histories, update_trajectory_histories
 import numpy as np
 from code.reward import calc_global_reward
 

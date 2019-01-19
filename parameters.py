@@ -6,8 +6,8 @@ location for convenience.
 class Parameters:
 
     # Run Parameters
-    stat_runs = 1
-    generations = 10000
+    stat_runs = 5
+    generations = 100
     tests_per_gen = 1
 
     # Domain parameters
@@ -17,7 +17,7 @@ class Parameters:
     total_steps = 30  # Number of steps rovers take during each run of the world
     world_width = 30
     world_length = 30
-    coupling = 3  # Number of rovers required to view a POI for credit
+    coupling = 2  # Number of rovers required to view a POI for credit
     activation_dist = 4  # Minimum distance rovers must be to observe POIs
 
     # Neural network parameters
@@ -26,6 +26,6 @@ class Parameters:
     number_of_outputs = 2
 
     # CCEA parameters
-    mutation_rate = 0.25
+    mutation_rate = 0.9
     epsilon = 0.1
     population_size = 20

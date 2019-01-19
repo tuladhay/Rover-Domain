@@ -1,6 +1,7 @@
 import numpy as np
 cimport cython
 from parameters import Parameters as p
+import math
 
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing.
@@ -21,10 +22,10 @@ def calc_global_reward(data):
     # Set parameters from those found in data dictionary
     cdef int number_agents = p.number_of_agents
     cdef int number_pois = p.number_of_pois
-    cdef double min_sqr_dist = p.min_distance ** 2
+    cdef double min_sqr_dist = p.min_distance
     cdef int total_steps = p.total_steps + 1
     cdef int coupling = p.coupling
-    cdef double sqr_activation_dist = p.activation_dist ** 2
+    cdef double sqr_activation_dist = p.activation_dist
     cdef double[:, :, :] agent_pos_history = data["Agent Position History"]
     cdef double[:] poi_values = data['Poi Values']
     cdef double[:, :] poi_positions = data["Poi Positions"]
@@ -54,7 +55,7 @@ def calc_global_reward(data):
                 agent_x_dist = poi_positions[poi_id, 0] - agent_pos_history[step_number, agent_id, 0]
                 agent_y_dist = poi_positions[poi_id, 1] - agent_pos_history[step_number, agent_id, 1]
                 sqr_distance = agent_x_dist * agent_x_dist + agent_y_dist * agent_y_dist
-                observer_distances[agent_id] = sqr_distance
+                observer_distances[agent_id] = math.sqrt(sqr_distance)
                 
                 # Check if agent observes poi
                 if sqr_distance < sqr_activation_dist: # Rover is in observation range
@@ -86,10 +87,10 @@ def calc_global_reward(data):
 def calc_difference_reward(data):
     cdef int number_agents = p.number_of_agents
     cdef int number_pois = p.number_of_pois
-    cdef double min_sqr_dist = p.min_distance ** 2
+    cdef double min_sqr_dist = p.min_distance
     cdef int total_steps = p.total_steps + 1
     cdef int coupling = p.coupling
-    cdef double sqr_activation_dist = p.activation_dist ** 2
+    cdef double sqr_activation_dist = p.activation_dist
     cdef double[:, :, :] agent_pos_history = data["Agent Position History"]
     cdef double[:] poi_values = data['Poi Values']
     cdef double[:, :] poi_positions = data["Poi Positions"]
@@ -123,7 +124,7 @@ def calc_difference_reward(data):
                 agent_x_dist = poi_positions[poi_id, 0] - agent_pos_history[step_number, agent_id, 0]
                 agent_y_dist = poi_positions[poi_id, 1] - agent_pos_history[step_number, agent_id, 1]
                 sqr_distance = agent_x_dist * agent_x_dist + agent_y_dist * agent_y_dist
-                observer_distances[agent_id] = sqr_distance
+                observer_distances[agent_id] = math.sqrt(sqr_distance)
 
                 # Check if agent observes poi, update closest step distance
                 if sqr_distance < sqr_activation_dist: # Rover is in observation range
@@ -164,7 +165,7 @@ def calc_difference_reward(data):
                         agent_x_dist = poi_positions[poi_id, 0] - agent_pos_history[step_number, other_agent_id, 0]
                         agent_y_dist = poi_positions[poi_id, 1] - agent_pos_history[step_number, other_agent_id, 1]
                         sqr_distance = agent_x_dist * agent_x_dist + agent_y_dist * agent_y_dist
-                        observer_distances[other_agent_id] = sqr_distance
+                        observer_distances[other_agent_id] = math.sqrt(sqr_distance)
                         
                         # Check if agent observes poi, update closest step distance
                         if sqr_distance < sqr_activation_dist:
@@ -200,10 +201,10 @@ def calc_difference_reward(data):
 def calc_dpp_reward(data):
     cdef int number_agents = p.number_of_agents
     cdef int number_pois = p.number_of_pois
-    cdef double min_sqr_dist = p.min_distance ** 2
+    cdef double min_sqr_dist = p.min_distance
     cdef int total_steps = p.total_steps + 1
     cdef int coupling = p.coupling
-    cdef double sqr_activation_dist = p.activation_dist ** 2
+    cdef double sqr_activation_dist = p.activation_dist
     cdef double[:, :, :] agent_pos_history = data["Agent Position History"]
     cdef double[:] poi_values = data['Poi Values']
     cdef double[:, :] poi_positions = data["Poi Positions"]
@@ -240,7 +241,7 @@ def calc_dpp_reward(data):
                 agent_x_dist = poi_positions[poi_id, 0] - agent_pos_history[step_number, agent_id, 0]
                 agent_y_dist = poi_positions[poi_id, 1] - agent_pos_history[step_number, agent_id, 1]
                 sqr_distance = agent_x_dist * agent_x_dist + agent_y_dist * agent_y_dist
-                observer_distances[agent_id] = sqr_distance
+                observer_distances[agent_id] = math.sqrt(sqr_distance)
 
                 # Check if agent observes poi, update closest step distance
                 if sqr_distance < sqr_activation_dist: # Rover is in observation range
@@ -280,7 +281,7 @@ def calc_dpp_reward(data):
                         agent_x_dist = poi_positions[poi_id, 0] - agent_pos_history[step_number, other_agent_id, 0]
                         agent_y_dist = poi_positions[poi_id, 1] - agent_pos_history[step_number, other_agent_id, 1]
                         sqr_distance = agent_x_dist * agent_x_dist + agent_y_dist * agent_y_dist
-                        observer_distances[other_agent_id] = sqr_distance
+                        observer_distances[other_agent_id] = math.sqrt(sqr_distance)
 
                         # Check if agent observes poi, update closest step distance
                         if sqr_distance < sqr_activation_dist:
@@ -327,7 +328,7 @@ def calc_dpp_reward(data):
                         agent_x_dist = poi_positions[poi_id, 0] - agent_pos_history[step_number, other_agent_id, 0]
                         agent_y_dist = poi_positions[poi_id, 1] - agent_pos_history[step_number, other_agent_id, 1]
                         sqr_distance = agent_x_dist * agent_x_dist + agent_y_dist * agent_y_dist
-                        observer_distances[other_agent_id] = sqr_distance
+                        observer_distances[other_agent_id] = math.sqrt(sqr_distance)
 
                         if other_agent_id == agent_id:
                             self_dist = sqr_distance # Track distance from self for counterfactuals

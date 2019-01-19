@@ -20,12 +20,12 @@ sim = RoverDomainCore()
 cc = Ccea()
 nn = NeuralNetwork()
 
-for func in mod_col:
-    func(sim.data)
-    create_reward_history(sim.data)
+for srun in range(p.stat_runs):
+    print("Run: %i" % srun)
 
-    for srun in range(p.stat_runs):
-        print("Run: %i" % srun)
+    for func in mod_col:
+        func(sim.data)
+        create_reward_history(sim.data)
 
         # Trial Begins
         cc.reset_populations()
@@ -80,7 +80,7 @@ for func in mod_col:
                     obs, reward, done, info = sim.step()
                     step_count += 1
 
-                update_reward_history(sim.data, gen, srun)
+                update_reward_history(sim.data)
 
     #  Trial End (STILL WORKING ON THIS)
     save_reward_history(sim.data)
