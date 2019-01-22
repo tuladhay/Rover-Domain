@@ -1,9 +1,7 @@
-#! /usr/bin/python3.6
-
 from rover_domain_core_gym import RoverDomainCore
 from parameters import Parameters as p
 from mods import Mod as m
-from code.agent import get_agent_state, get_agent_actions
+from code.agent import get_agent_state, get_agent_actions, do_agent_move
 from code.trajectory_history import save_trajectory_histories
 from code.reward_history import save_reward_history, create_reward_history, update_reward_history
 from code.ccea import Ccea
@@ -43,7 +41,9 @@ for srun in range(p.stat_runs):
             joint_state = sim.data["Agent Observations"]  # State vector
 
             for team_number in range(cc.population_size):  # Each policy in CCEA is tested in teams
+                # print('Team: ', team_number)
                 for rover_id in range(p.number_of_agents):
+                    # print('Rover: ', rover_id)
                     policy_id = cc.team_selection[rover_id, team_number]
                     nn.run_neural_network(joint_state[rover_id], cc.pops[rover_id, policy_id], rover_id)
                 get_agent_actions(sim.data, nn.out_layer)  # Gets outputs from all rover NNs
@@ -51,18 +51,23 @@ for srun in range(p.stat_runs):
                 done = False
                 step_count = 0
                 reward = []
-                while not done:
-                    obs, reward, done, info = sim.step()
+                while done == False:
+                    # print('While')
+                    sim.data["Step Index"] = step_count
+                    obs, done = sim.step()
                     step_count += 1
+                rewards = sim.data["Agent Rewards"]
 
                 # Update fitness of policies using reward information
                 for pop_id in range(p.number_of_agents):
                     policy_id = cc.team_selection[pop_id, team_number]
-                    cc.fitness[pop_id, policy_id] = reward[pop_id]
+                    # print(policy_id)
+                    # print(reward[pop_id])
+                    cc.fitness[pop_id, policy_id] = rewards[pop_id]
 
             cc.down_select()  # Perform down_selection after each policy has been evaluated
 
-            # Testing Phase (STILL WORKING ON THIS)
+            # Testing Phase
             # sim.reset('Test', True)  # Set mode to test and re-initialize world
 
             for test in range(p.tests_per_gen):
@@ -73,11 +78,12 @@ for srun in range(p.stat_runs):
 
                 done = False
                 step_count = 0
-                while not done:
+                while done == False:
+                    sim.data["Step Index"] = step_count
                     for rover_id in range(p.number_of_agents):
                         nn.run_neural_network(joint_state[rover_id], cc.pops[rover_id, 0], rover_id)
                     get_agent_actions(sim.data, nn.out_layer)
-                    obs, reward, done, info = sim.step()
+                    obs, done = sim.step()
                     step_count += 1
 
                 update_reward_history(sim.data)

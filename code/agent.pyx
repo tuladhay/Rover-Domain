@@ -119,10 +119,11 @@ cpdef do_agent_move(data):  # Each agent moves 1 step
 
     # move all agents
     for agent_id in range(number_agents):
-
+        # print('AGENT: ', action[agent_id, 0], action[agent_id, 1])
         # turn action into global frame motion
         dx = agent_orientations[agent_id, 0] * action[agent_id, 0] - agent_orientations[agent_id, 1] * action[agent_id, 1]
         dy = agent_orientations[agent_id, 0] * action[agent_id, 1] + agent_orientations[agent_id, 1] * action[agent_id, 0]
+        # print('AGENT: ', dx, dy)
 
 
         # globally move and reorient agent

@@ -79,6 +79,7 @@ cdef class NeuralNetwork:
 
         for i in range(self.n_outputs):  # Pass through sigmoid
             self.out_layer[rov_id, i] = self.sigmoid(self.out_layer[rov_id, i])
+        # print('NN: ', self.out_layer[rov_id, 0], self.out_layer[rov_id, 1])
 
     cpdef tanh(self, inp): # Tanh function as activation function
         cdef double tanh

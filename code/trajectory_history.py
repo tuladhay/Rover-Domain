@@ -9,13 +9,14 @@ def create_trajectory_histories(data):
     # create a history of positions for each agents in order to evalutate reward at the end
     number_agents = p.number_of_agents
     history_step_count = p.total_steps + 1
-    agent_position_history = np.zeros((history_step_count, number_agents, 2))
-    agent_orientation_history = np.zeros((history_step_count, number_agents, 2))
+    agent_position_history = np.zeros((number_agents, history_step_count, 2))
+    agent_orientation_history = np.zeros((number_agents, history_step_count, 2))
     agent_positions = data["Agent Positions"]
     agent_orientations = data["Agent Orientations"]
 
-    agent_position_history[0] = agent_positions
-    agent_orientation_history[0] = agent_orientations
+    for rover_id in range(p.number_of_agents):
+        agent_position_history[rover_id, 0] = agent_positions[rover_id]
+        agent_orientation_history[rover_id, 0] = agent_orientations[rover_id]
     
     
     data["Agent Position History"] = agent_position_history
@@ -31,9 +32,9 @@ def update_trajectory_histories(data):
     agent_positions = data["Agent Positions"]
     agent_orientations = data["Agent Orientations"]
     
-    
-    agent_position_history[step_index + 1] = agent_positions
-    agent_orientation_history[step_index + 1] = agent_orientations
+    for rover_id in range(p.number_of_agents):
+        agent_position_history[rover_id, step_index + 1] = agent_positions[rover_id]
+        agent_orientation_history[rover_id, step_index + 1] = agent_orientations[rover_id]
         
     data["Agent Position History"] = agent_position_history
     data["Agent Orientation History"] = agent_orientation_history
@@ -58,10 +59,10 @@ def save_trajectory_histories(data):
         writer = csv.writer(csvfile)
 
         for agent_id in range(number_agents):
-            writer.writerow(["Agent %d Position 0" % agent_id] + [pos[0] for pos in agent_position_history[:, agent_id, :]])
-            writer.writerow(["Agent %d Position 1" % agent_id] + [pos[1] for pos in agent_position_history[:, agent_id, :]])
-            writer.writerow(["Agent %d Orientation 0" % agent_id] + [ori[0] for ori in agent_orientation_history[:, agent_id, :]])
-            writer.writerow(["Agent %d Orientation 1" % agent_id] + [ori[1] for ori in agent_orientation_history[:, agent_id, :]])
+            writer.writerow(["Agent %d Position 0" % agent_id] + [pos[0] for pos in agent_position_history[agent_id, :, :]])
+            writer.writerow(["Agent %d Position 1" % agent_id] + [pos[1] for pos in agent_position_history[agent_id, :, :]])
+            writer.writerow(["Agent %d Orientation 0" % agent_id] + [ori[0] for ori in agent_orientation_history[agent_id, :, :]])
+            writer.writerow(["Agent %d Orientation 1" % agent_id] + [ori[1] for ori in agent_orientation_history[agent_id, :, :]])
 
         for poi_id in range(number_pois):
             writer.writerow(["Poi %d Position 0" % poi_id] + [poi_positions[poi_id, 0]])

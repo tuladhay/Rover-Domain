@@ -57,8 +57,9 @@ def blueprint_agent(data):
     world_length = p.world_length
 
     # Agent positions are a numpy array of size m x n, m = n_agents, n = 2
-    data['Agent Positions BluePrint'] = np.random.rand(number_agents, 2) * [world_width, world_length]
-    rover_angles = np.random.uniform(-np.pi, np.pi, number_agents) # Rover orientations
+    # data['Agent Positions BluePrint'] = np.random.rand(number_agents, 2) * [world_width, world_length]
+    data['Agent Positions BluePrint'] = np.ones((number_agents, 2))*(world_length/2)
+    rover_angles = np.random.uniform(-np.pi, np.pi, number_agents)  # Rover orientations
     data['Agent Orientations BluePrint'] = np.vstack((np.cos(rover_angles), np.sin(rover_angles))).T
 
 # Randomly initialize POI positions on map
@@ -69,7 +70,7 @@ def blueprint_poi(data):
 
     # Initialize all Pois np.randomly
     data['Poi Positions BluePrint'] = np.random.rand(number_pois, 2) * [world_width, world_length]
-    data['Poi Values BluePrint'] = np.arange(number_pois) + 1.0
+    data['Poi Values BluePrint'] = np.ones(number_pois)*5.0
 
 
 def init_world(data):
@@ -106,6 +107,7 @@ class RoverDomainCore:
             "Agent Observations": np.zeros((p.number_of_agents, 8)),
             "Agent Position History": np.zeros((p.number_of_agents, p.total_steps, 2)),
             "Agent Orientation History": np.zeros((p.number_of_agents, p.total_steps, 2)),
+            "Agent Rewards": np.zeros(p.number_of_agents),
 
             # POI values
             "Poi Positions": np.zeros((p.number_of_pois, 2)),
@@ -114,10 +116,10 @@ class RoverDomainCore:
             "Poi Positions BluePrint": np.zeros((p.number_of_pois, 2)),
 
             # Domain values
-            "Reward Function": calc_global_reward,
+            "Reward Function": [],
             "Evaluation Function": calc_global_reward,
             "Total Steps": p.total_steps,
-            "Mod Name": "global",
+            "Mod Name": [],
             "Step Index": 0,
             "Global Reward": 0.0,
 
@@ -196,7 +198,7 @@ class RoverDomainCore:
 
         
     def step(self): # Agents do actions for one time step
-        
+
         # If not done, do step functionality
         if self.data["Step Index"] < self.data["Total Steps"]:
             
@@ -214,19 +216,6 @@ class RoverDomainCore:
             
             # Increment step index for future step() calls
             self.data["Step Index"] += 1
-            
-            # Check is world is done; if so, do ending functions
-            if self.data["Step Index"] >= self.data["Total Steps"]:
-                if self.data["Mode"] == "Train":
-                    for func in self.evaluate_world_results_train:
-                        func(self.data)
-                elif self.data["Mode"] == "Test":
-                    for func in self.evaluate_world_results_test:
-                        func(self.data)
-                else:
-                    raise Exception(
-                        'data["Mode"] should be set to "Train" or "Test"'
-                    )
                     
             # Observe state, store result in self.data
             self.data["Observation Function"](self.data)
@@ -235,8 +224,21 @@ class RoverDomainCore:
         done = False
         if self.data["Step Index"] >= self.data["Total Steps"]:
             done = True
+
+        # Check is world is done; if so, do ending functions
+        if done == True:
+            if self.data["Mode"] == "Train":
+                for func in self.evaluate_world_results_train:
+                    func(self.data)
+            elif self.data["Mode"] == "Test":
+                for func in self.evaluate_world_results_test:
+                    func(self.data)
+            else:
+                raise Exception(
+                    'data["Mode"] should be set to "Train" or "Test"'
+                )
                 
-        return self.data["Agent Observations"], self.data["Gym Reward"], done, self.data  # Gym Reward is Agent Rewards
+        return self.data["Agent Observations"], done  # Gym Reward is Agent Rewards
 
         
     def reset(self, new_mode = None, fully_resetting = False):
@@ -251,9 +253,9 @@ class RoverDomainCore:
         # Execute setting functionality
         if self.data["Mode"] == "Train":
             if fully_resetting == True:
-                for func in self.agent_setup_train: #Go through list of functions in agent_setup_train
+                for func in self.agent_setup_train:  # Go through list of functions in agent_setup_train
                     func(self.data)
-            for func in self.world_setup_train: #Go through list of functions in world_setup_train
+            for func in self.world_setup_train:  # Go through list of functions in world_setup_train
                 func(self.data)
 
         elif self.data["Mode"] == "Test":

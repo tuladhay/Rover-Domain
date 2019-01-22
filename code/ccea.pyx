@@ -32,7 +32,7 @@ cdef class Ccea:
         for pop_index in range(self.n_populations):
             for policy_index in range(self.population_size):
                 for w in range(self.policy_size):
-                    self.pops[pop_index, policy_index, w] = random.uniform(0, 1)
+                    self.pops[pop_index, policy_index, w] = random.uniform(-1, 1)
                 self.team_selection[pop_index, policy_index] = -1
 
     cpdef select_policy_teams(self):  # Create policy teams for testing
@@ -51,13 +51,14 @@ cdef class Ccea:
                         k = -1
                     k += 1
                 self.team_selection[pop_id, j] = rpol  # Assign policy to team
+                # print('Pop: ', pop_id, ' Policy Team: ', self.team_selection[pop_id, j])
 
     cpdef reset_populations(self):  # Re-initializes CCEA populations for new run
         cdef int pop_index, policy_index, w
         for pop_index in range(self.n_populations):
             for policy_index in range(self.population_size):
                 for w in range(self.policy_size):
-                    self.pops[pop_index, policy_index, w] = random.uniform(0, 1)
+                    self.pops[pop_index, policy_index, w] = random.uniform(-1, 1)
 
     cpdef mutate(self, half_length):
         cdef int pop_index, policy_index, target
@@ -68,7 +69,7 @@ cdef class Ccea:
                 rvar = random.uniform(0, 1)
                 if rvar <= self.mut_prob:
                     target = random.randint(0, (self.policy_size - 1))
-                    self.pops[pop_index, policy_index, target] = random.uniform(0, 1)
+                    self.pops[pop_index, policy_index, target] = random.uniform(-1, 1)
                 policy_index += 1
 
     cpdef create_new_pop(self):
@@ -93,11 +94,12 @@ cdef class Ccea:
             policy_id = half_pop_length
             while policy_id < self.population_size:
                 rvar = random.uniform(0, 1)
-                if rvar <= self.epsilon:  # Choose best policy
+                if rvar >= self.epsilon:  # Choose best policy
+                    # print('Keep Best')
                     for k in range(self.policy_size):
                         self.pops[pop_id, policy_id, k] = self.pops[pop_id, 0, k]  # Best policy
                 else:
-                    parent = random.randint(0, self.population_size - 1)  # Choose a random parent
+                    parent = random.randint(0, self.population_size/2)  # Choose a random parent
                     for k in range(self.policy_size):
                         self.pops[pop_id, policy_id, k] = self.pops[pop_id, parent, k]  # Random policy
                 policy_id += 1
@@ -113,5 +115,11 @@ cdef class Ccea:
                         self.fitness[pop_id, j], self.fitness[pop_id, k] = self.fitness[pop_id, k], self.fitness[pop_id, j]
                         self.pops[pop_id, j], self.pops[pop_id, k] = self.pops[pop_id, k], self.pops[pop_id, j]
                     k += 1
+
+        # print('Pop-Size: ', self.population_size)
+        # for pop_id in range(self.n_populations):
+        #     print('Population: ', pop_id)
+        #     for j in range(self.population_size):
+        #         print(self.fitness[pop_id, j])
 
         self.epsilon_greedy_select()
