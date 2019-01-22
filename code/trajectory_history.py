@@ -26,7 +26,7 @@ def create_trajectory_histories(data):
 def update_trajectory_histories(data):
     number_agents = p.number_of_agents
     step_index = data["Step Index"]
-    history_step_count = data["Total Steps"] + 1
+    history_step_count = p.total_steps + 1
     agent_position_history = data["Agent Position History"]
     agent_orientation_history = data["Agent Orientation History"]
     agent_positions = data["Agent Positions"]

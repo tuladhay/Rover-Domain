@@ -7,7 +7,7 @@ cdef extern from "math.h":
 
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing.
-cpdef get_agent_state(data):  # Calculates join_state_vector for NN input
+cpdef get_state_vec(data):  # Calculates join_state_vector for NN input
 
     cdef int number_agents = p.number_of_agents
     cdef int number_pois = p.number_of_pois

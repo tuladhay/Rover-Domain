@@ -29,10 +29,10 @@ cdef class NeuralNetwork:
         self.out_layer = np.zeros((self.n_rovers, self.n_outputs), dtype = np.float64)
 
     cpdef reset_nn(self): # Clear current network
-        self.weights = np.zeros((self.n_rovers, self.n_weights))
-        self.in_layer = np.zeros((self.n_rovers, self.n_inputs))
-        self.hid_layer = np.zeros((self.n_rovers, self.n_nodes))
-        self.out_layer = np.zeros((self.n_rovers, self.n_outputs))
+        self.weights = np.zeros((self.n_rovers, self.n_weights), dtype = np.float64)
+        self.in_layer = np.zeros((self.n_rovers, self.n_inputs), dtype = np.float64)
+        self.hid_layer = np.zeros((self.n_rovers, self.n_nodes), dtype = np.float64)
+        self.out_layer = np.zeros((self.n_rovers, self.n_outputs), dtype = np.float64)
 
     cpdef get_inputs(self, state_vec, rov_id):  # Get inputs from state-vector
         cdef int i
