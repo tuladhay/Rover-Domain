@@ -68,23 +68,13 @@ cdef class Ccea:
             while policy_index < self.population_size:
                 rvar = random.uniform(0, 1)
                 if rvar <= self.mut_prob:
-                    target = random.randint(0, (self.policy_size - 1))
+                    target = random.randint(0, (self.policy_size - 1))  # Select random weight to mutate
                     self.pops[pop_index, policy_index, target] = random.uniform(-1, 1)
                 policy_index += 1
 
     cpdef create_new_pop(self):
-        cdef int count, policy_index, pop_index, w
         cdef int half_pop_length = self.population_size/2
-        for pop_index in range(self.n_populations):
-            policy_index = half_pop_length
-            count = 0
-            while policy_index < self.population_size:
-                for w in range(self.policy_size):
-                    self.pops[pop_index, policy_index, w] = self.pops[pop_index, count, w]
-                policy_index += 1
-                count += 1
-
-        self.mutate(half_pop_length)
+        self.mutate(half_pop_length)  # Bottom half goes through mutation
 
     cpdef epsilon_greedy_select(self):  # Replace the bottom half with parents from top half
         cdef int pop_id, policy_id, k, parent
