@@ -1,7 +1,8 @@
 import pickle
 import os
+import errno
 
-def savePickle(data):
+def save_pickle(data):
     save_file_name = data["Pickle Save File Name"]
     
     if not os.path.exists(os.path.dirname(save_file_name)):

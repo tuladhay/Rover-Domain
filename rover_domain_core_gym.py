@@ -127,7 +127,8 @@ class RoverDomainCore:
             "Specifics Name": "12Agents_10Poi_3Coup_Long_Comparison",  # Name of save file for data
             "Performance Save File Name": "Test_Data",
             "Trajectory Save File Name": "Trajectory_Data",
-            "Pickle Save File Name": "pickle_data"
+            "Pickle Save File Name": "pickle_data",
+            "Reward History": [[] for i in range(p.stat_runs)]
         }
 
         # Setup functions:
@@ -192,12 +193,10 @@ class RoverDomainCore:
             lambda data: data.update({"Gym Reward": data["Global Reward"]}) 
         )    
 
-
         # Setup world for first time
-        self.reset(new_mode = "Train", fully_resetting = True)
+        self.reset(new_mode="Train", fully_resetting = True)
 
-        
-    def step(self): # Agents do actions for one time step
+    def step(self):  # Agents do actions for one time step
 
         # If not done, do step functionality
         if self.data["Step Index"] < self.data["Total Steps"]:
@@ -240,7 +239,6 @@ class RoverDomainCore:
                 
         return self.data["Agent Observations"], done  # Gym Reward is Agent Rewards
 
-        
     def reset(self, new_mode = None, fully_resetting = False):
 
         # Zero step index for future step() calls
@@ -269,6 +267,7 @@ class RoverDomainCore:
         
         # Observe state, store result in self.data (Get initial state)
         self.data["Observation Function"](self.data)
-        
+
+
 def assign(data, key, value):
     data[key] = value

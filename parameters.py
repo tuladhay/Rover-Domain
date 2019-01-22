@@ -6,7 +6,7 @@ location for convenience.
 class Parameters:
 
     # Run Parameters
-    stat_runs = 1
+    stat_runs = 5
     generations = 500
     tests_per_gen = 1
 

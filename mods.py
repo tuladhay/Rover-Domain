@@ -8,7 +8,7 @@ class Mod:
         data["Mod Name"] = "global"
 
         date_time_string = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
-        print("Starting %s test at\n\t%s\n"%(data["Mod Name"], date_time_string))
+        print("Starting %s test at\n\t%s"%(data["Mod Name"], date_time_string))
 
         # Agent Reward
         data["Reward Function"] = calc_global_reward
@@ -26,7 +26,7 @@ class Mod:
         data["Mod Name"] = "difference"
 
         date_time_string = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
-        print("Starting %s test at\n\t%s\n"%(data["Mod Name"], date_time_string))
+        print("Starting %s test at\n\t%s"%(data["Mod Name"], date_time_string))
 
         # Agent Reward
         data["Reward Function"] = calc_difference_reward
@@ -44,7 +44,7 @@ class Mod:
         data["Mod Name"] = "dpp"
 
         date_time_string = datetime.datetime.now().strftime("%m_%d_%Y %H_%M_%S_%f")
-        print("Starting %s test at\n\t%s\n"%(data["Mod Name"], date_time_string))
+        print("Starting %s test at\n\t%s"%(data["Mod Name"], date_time_string))
 
         # Agent Reward
         data["Reward Function"] = calc_dpp_reward

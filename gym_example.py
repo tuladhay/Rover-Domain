@@ -18,22 +18,22 @@ sim = RoverDomainCore()
 cc = Ccea()
 nn = NeuralNetwork()
 
-for srun in range(p.stat_runs):
-    print("Run: %i" % srun)
+for func in mod_col:
+    func(sim.data)
+    create_reward_history(sim.data)
 
-    for func in mod_col:
-        func(sim.data)
-        create_reward_history(sim.data)
+    for srun in range(p.stat_runs):  # Perform statistical runs
+        print("Run: %i" % srun)
 
         # Trial Begins
         cc.reset_populations()
         nn.reset_nn()
 
         # Training Phase
-        sim.reset('Train', True) # Fully resets rover domain (agent and POI positions/values)
+        sim.reset('Train', True)  # Fully resets rover domain (agent and POI positions/values)
 
         for gen in range(p.generations):
-            #print("Current Gen: %i" % gen)
+            # print("Current Gen: %i" % gen)
             sim.reset('Train', False)
             cc.create_new_pop()  # Create a new population via mutation
             cc.select_policy_teams()  # Selects which policies will be grouped into which teams
@@ -86,8 +86,9 @@ for srun in range(p.stat_runs):
                     obs, done = sim.step()
                     step_count += 1
 
-                update_reward_history(sim.data)
-
-        #  Trial End (STILL WORKING ON THIS)
-        save_reward_history(sim.data)
+                update_reward_history(sim.data, srun)
         save_trajectory_histories(sim.data)
+
+    #  Trial End save data to file
+    save_reward_history(sim.data)
+    print('\n')
