@@ -7,18 +7,18 @@ class Parameters:
 
     # Run Parameters
     stat_runs = 1
-    generations = 100  # Number of generations for CCEA in each stat run
+    generations = 500  # Number of generations for CCEA in each stat run
     tests_per_gen = 1  # Number of tests run after each generation
 
     # Domain parameters
-    number_of_agents = 6
-    number_of_pois = 4
+    number_of_agents = 4
+    number_of_pois = 6
     min_distance = 0.5  # Minimum distance which may appear in the denominator of credit eval functions
     total_steps = 30  # Number of steps rovers take during each run of the world
     world_width = 10
     world_length = 10
-    coupling = 3  # Number of rovers required to view a POI for credit
-    activation_dist = 4.0  # Minimum distance rovers must be to observe POIs
+    coupling = 1  # Number of rovers required to view a POI for credit
+    activation_dist = 2.0  # Minimum distance rovers must be to observe POIs
 
     # Neural network parameters
     number_of_inputs = 8

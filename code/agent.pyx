@@ -1,6 +1,7 @@
 import numpy as np
 cimport cython
 from parameters import Parameters as p
+import math
 
 cdef extern from "math.h":
     double sqrt(double m)
@@ -11,16 +12,15 @@ cpdef get_state_vec(data):  # Calculates join_state_vector for NN input
 
     cdef int number_agents = p.number_of_agents
     cdef int number_pois = p.number_of_pois
-    cdef double min_sqr_dist = p.min_distance ** 2
+    cdef double min_dist = p.min_distance
     cdef double[:, :] agent_positions = data["Agent Positions"]
     cdef double[:] poi_values = data['Poi Values']
     cdef double[:, :] poi_positions = data["Poi Positions"]
     cdef double[:, :] agent_orientations = data["Agent Orientations"]
     cdef double[:, :] agent_state = np.zeros((number_agents, 8), dtype = np.float64)
-    cdef int agent_id, other_agent_id, poi_id
-    cdef double pos_vec_global_x, pos_vec_global_y
-    cdef double pos_vec_agent_x, pos_vec_agent_y
-    cdef double sqr_dist
+    cdef int agent_id, other_agent_id, poi_id, quadrant
+    cdef double x_distance, y_distance
+    cdef double dist, angle
 
     for agent_id in range(number_agents):
 
@@ -32,62 +32,57 @@ cpdef get_state_vec(data):  # Calculates join_state_vector for NN input
                 continue
 
             # Calculate position vectors between agents with respect to global coordinate frame
-            pos_vec_global_x = agent_positions[other_agent_id, 0] - agent_positions[agent_id, 0] # X-direction
-            pos_vec_global_y = agent_positions[other_agent_id, 1] - agent_positions[agent_id, 1] # Y-direction
+            x_distance = agent_positions[other_agent_id, 0] - agent_positions[agent_id, 0] # X-direction
+            y_distance = agent_positions[other_agent_id, 1] - agent_positions[agent_id, 1] # Y-direction
 
-            # Calculate position vectors between agents with respect to local agent coordinate frame using rotation mat
-            pos_vec_agent_x = agent_orientations[agent_id, 0] * pos_vec_global_x + agent_orientations[agent_id, 1] * pos_vec_global_y
-            pos_vec_agent_y = agent_orientations[agent_id, 0] * pos_vec_global_y - agent_orientations[agent_id, 1] * pos_vec_global_x
-            sqr_dist = pos_vec_agent_x * pos_vec_agent_x + pos_vec_agent_y * pos_vec_agent_y
+            # Calculate distance between POI and Rover and get angle for quadrant
+            dist = math.sqrt((x_distance*x_distance)+(y_distance*y_distance))
+            angle = math.atan2(y_distance, x_distance)*(180/math.pi)
+            if angle < 0:
+                angle += 360
+            quadrant = int(angle/90)
 
             # By bounding distance value we implicitly bound sensor values
-            if sqr_dist < min_sqr_dist:
-                sqr_dist = min_sqr_dist
+            if dist < min_dist:
+                dist = min_dist
 
             # other is east of agent
-            if pos_vec_agent_x > 0:
-                # other is north-east of agent
-                if pos_vec_agent_y > 0:
-                    agent_state[agent_id, 0] += 1.0 / sqr_dist
-                else: # other is south-east of agent
-                    agent_state[agent_id, 3] += 1.0  / sqr_dist
-            else:  # other is west of agent
-                # other is north-west of agent
-                if pos_vec_agent_y > 0:
-                    agent_state[agent_id, 1] += 1.0  / sqr_dist
-                else:  # other is south-west of agent
-                    agent_state[agent_id, 2] += 1.0  / sqr_dist
+            if quadrant == 0:
+                agent_state[agent_id, 0] += 1.0/dist
+            elif quadrant == 1: # other is south-east of agent
+                agent_state[agent_id, 1] += 1.0/dist
+            elif quadrant == 2:  # other is west of agent
+                agent_state[agent_id, 2] += 1.0/dist
+            else:
+                agent_state[agent_id, 3] += 1.0/dist
 
 
         # calculate observation values due to pois
         for poi_id in range(number_pois):
 
             # Calculate position vectors between agent and POI with respect to global coordinate frame
-            pos_vec_global_x = poi_positions[poi_id, 0] - agent_positions[agent_id, 0]
-            pos_vec_global_y = poi_positions[poi_id, 1] - agent_positions[agent_id, 1]
+            x_distance = poi_positions[poi_id, 0] - agent_positions[agent_id, 0]
+            y_distance = poi_positions[poi_id, 1] - agent_positions[agent_id, 1]
 
-            # Calculate position vectors between agent and POI with respect to local agent coordinate frame
-            pos_vec_agent_x = agent_orientations[agent_id, 0] * pos_vec_global_x + agent_orientations[agent_id, 1] * pos_vec_global_y
-            pos_vec_agent_y = agent_orientations[agent_id, 0] * pos_vec_global_y - agent_orientations[agent_id, 1] * pos_vec_global_x
-            sqr_dist = pos_vec_agent_x * pos_vec_agent_x + pos_vec_agent_y * pos_vec_agent_y
+            # Calculate distance between POI and Rover and get angle for quadrant
+            dist = math.sqrt((x_distance*x_distance)+(y_distance*y_distance))
+            angle = math.atan2(y_distance, x_distance)*(180/math.pi)
+            if angle < 0:
+                angle += 360
+            quadrant = int(angle/90)
 
             # By bounding distance value we implicitly bound sensor values
-            if sqr_dist < min_sqr_dist:
-                sqr_dist = min_sqr_dist
+            if dist < min_dist:
+                dist = min_dist
 
-            # poi is east of agent
-            if pos_vec_agent_x > 0:
-                # poi is north-east of agent
-                if pos_vec_agent_y > 0:
-                    agent_state[agent_id, 4] += poi_values[poi_id]  / sqr_dist
-                else: # poi is south-east of agent
-                    agent_state[agent_id, 7] += poi_values[poi_id]  / sqr_dist
-            else:  # poi is west of agent
-                # poi is north-west of agent
-                if pos_vec_agent_y > 0:
-                    agent_state[agent_id, 5] += poi_values[poi_id]  / sqr_dist
-                else:  # poi is south-west of agent
-                    agent_state[agent_id, 6] += poi_values[poi_id]  / sqr_dist
+            if quadrant == 0:
+                agent_state[agent_id, 4] += poi_values[poi_id]/dist
+            elif quadrant == 1:
+                agent_state[agent_id, 5] += poi_values[poi_id]/dist
+            elif quadrant == 2:
+                agent_state[agent_id, 6] += poi_values[poi_id]/dist
+            else:
+                agent_state[agent_id, 7] += poi_values[poi_id]/dist
 
     data["Agent Observations"] = agent_state
     #return agent_state
@@ -113,18 +108,16 @@ cpdef do_agent_move(data):  # Each agent moves 1 step
     cdef int number_agents = p.number_of_agents
     cdef double[:, :] agent_positions = data["Agent Positions"]
     cdef double[:, :] agent_orientations = data["Agent Orientations"]
-    cdef double[:, :] action = data["Agent Actions"]
+    cdef double[:, :] actions = data["Agent Actions"]
     cdef int agent_id
     cdef double dx, dy, norm # Change in x-position, change in y-position, total distance moved
 
     # move all agents
     for agent_id in range(number_agents):
-        # print('AGENT: ', action[agent_id, 0], action[agent_id, 1])
         # turn action into global frame motion
-        dx = agent_orientations[agent_id, 0] * action[agent_id, 0] - agent_orientations[agent_id, 1] * action[agent_id, 1]
-        dy = agent_orientations[agent_id, 0] * action[agent_id, 1] + agent_orientations[agent_id, 1] * action[agent_id, 0]
+        dx = actions[agent_id, 0]
+        dy = actions[agent_id, 1]
         # print('AGENT: ', dx, dy)
-
 
         # globally move and reorient agent
         agent_positions[agent_id, 0] += dx
@@ -137,18 +130,6 @@ cpdef do_agent_move(data):  # Each agent moves 1 step
             norm = sqrt(dx**2 +  dy**2)
             agent_orientations[agent_id, 0] = dx/norm
             agent_orientations[agent_id, 1] = dy/norm
-
-        # # Check if action moves agent within the world bounds
-        # if agent_positions[agent_id,0] > world_width:
-        #     agent_positions[agent_id,0] = world_width
-        # elif agent_positions[agent_id,0] < 0.0:
-        #     agent_positions[agent_id,0] = 0.0
-        #
-        # if agent_positions[agent_id,1] > world_length:
-        #     agent_positions[agent_id,1] = world_length
-        # elif agent_positions[agent_id,1] < 0.0:
-        #     agent_positions[agent_id,1] = 0.0
-
 
     data["Agent Positions"]  = agent_positions
     data["Agent Orientations"] = agent_orientations
