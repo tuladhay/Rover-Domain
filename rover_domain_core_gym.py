@@ -28,7 +28,9 @@ def init_pois(data):
 
     # Initialize all Pois np.randomly
     data['Poi Positions BluePrint'] = np.random.rand(number_pois, 2) * [world_width, world_length]
-    data['Poi Values BluePrint'] = np.ones(number_pois)*5.0
+    data['Poi Values BluePrint'] = np.ones(number_pois)
+    for i in range(number_pois):
+        data['Poi Values BluePrint'][i] *= np.random.randint(1, 10)
 
 
 def init_world(data):

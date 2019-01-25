@@ -18,8 +18,6 @@ def rearrange_dist_vec(rov_distances):  # Rearrange distances from least to grea
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing.
 def calc_global_reward(data):
-    # print('Global')
-
     # Set parameters from those found in data dictionary
     cdef int number_agents = p.number_of_agents
     cdef int number_pois = p.number_of_pois
@@ -67,9 +65,8 @@ def calc_global_reward(data):
             # update closest distance only if poi is observed    
             if observer_count >= coupling:
                 for rv in range(coupling):
-                    assert(observer_distances[rv <= activation_dist])
                     summed_distances += observer_distances[rv]
-                temp_reward = poi_values[poi_id]/(0.5*summed_distances)
+                temp_reward = poi_values[poi_id]/summed_distances
             else:
                 temp_reward = 0.0
 
@@ -77,8 +74,6 @@ def calc_global_reward(data):
                 current_poi_reward = temp_reward
 
         g_reward += current_poi_reward
-
-    # print('Global Reward: ', g_reward)
     
     data["Global Reward"] = g_reward
     data["Agent Rewards"] = np.ones(number_agents) * g_reward
@@ -137,9 +132,8 @@ def calc_difference_reward(data):
             # update closest distance only if poi is observed
             if observer_count >= coupling:
                 for rv in range(coupling):
-                    assert(observer_distances[rv <= activation_dist])
                     summed_distances += observer_distances[rv]
-                temp_reward = poi_values[poi_id]/(0.5*summed_distances)
+                temp_reward = poi_values[poi_id]/summed_distances
             else:
                 temp_reward = 0.0
 
@@ -174,16 +168,15 @@ def calc_difference_reward(data):
                         if distance < activation_dist:
                             observer_count += 1
                     else:
-                        observer_distances[other_agent_id] = inf
+                        observer_distances[agent_id] = inf
 
                 rearrange_dist_vec(observer_distances)
                             
                 # update closest distance only if poi is observed    
                 if observer_count >= coupling:
                     for rv in range(coupling):
-                        assert(observer_distances[rv <= activation_dist])
                         summed_distances += observer_distances[rv]
-                    temp_reward = poi_values[poi_id]/(0.5*summed_distances)
+                    temp_reward = poi_values[poi_id]/summed_distances
                 else:
                     temp_reward = 0.0
 
@@ -192,9 +185,6 @@ def calc_difference_reward(data):
 
             g_without_self += current_poi_reward
         difference_reward[agent_id] = g_reward - g_without_self
-
-    # for rover_id in range(p.number_of_agents):
-    #     print('Agent ', rover_id, ' Reward: ', difference_reward[rover_id])
 
     data["Agent Rewards"] = difference_reward
     data["Global Reward"] = g_reward
@@ -367,9 +357,6 @@ def calc_dpp_reward(data):
             temp_dpp_reward = (g_with_counterfactuals - g_reward)/(1 + counterfactual_count)
             if temp_dpp_reward > dplusplus_reward[agent_id]:
                 dplusplus_reward[agent_id] = temp_dpp_reward
-
-    # for rover_id in range(p.number_of_agents):
-    #     print('Agent ', rover_id, ' Reward: ', dplusplus_reward[rover_id])
 
     data["Agent Rewards"] = dplusplus_reward
     data["Global Reward"] = g_reward

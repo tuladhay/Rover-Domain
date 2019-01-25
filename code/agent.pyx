@@ -122,13 +122,4 @@ cpdef do_agent_move(data):  # Each agent moves 1 step
         agent_positions[agent_id, 0] += dx
         agent_positions[agent_id, 1] += dy
 
-        if dx == 0.0 and dy == 0.0:
-            agent_orientations[agent_id, 0] = 1.0
-            agent_orientations[agent_id, 1] = 0.0
-        else:
-            norm = sqrt(dx**2 +  dy**2)
-            agent_orientations[agent_id, 0] = dx/norm
-            agent_orientations[agent_id, 1] = dy/norm
-
     data["Agent Positions"]  = agent_positions
-    data["Agent Orientations"] = agent_orientations

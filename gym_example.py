@@ -51,8 +51,6 @@ for func in reward_functions:
             cc.down_select()  # Perform down_selection after each policy has been evaluated
 
             # Testing Phase
-            # sim.reset_domain('Test', True)  # Set mode to test and fully reset world
-
             for test in range(p.tests_per_gen):
                 sim.reset_world('Test', False)  # Set mode to test and do not fully reset the world
                 joint_state = sim.data["Agent Observations"]

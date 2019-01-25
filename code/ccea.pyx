@@ -63,9 +63,11 @@ cdef class Ccea:
         cdef double rnum
         for pop_index in range(self.n_populations):
             policy_index = half_pop_length
+            # print(policy_index)
             while policy_index < self.population_size:
                 rnum = random.uniform(0, 1)
                 if rnum <= self.mut_prob:
+                    # print('mutate')
                     target = random.randint(0, (self.policy_size - 1))  # Select random weight to mutate
                     self.pops[pop_index, policy_index, target] = random.uniform(-1, 1)
                 policy_index += 1
@@ -78,14 +80,17 @@ cdef class Ccea:
         cdef int half_pop_length = self.population_size/2
         for pop_id in range(self.n_populations):
             policy_id = half_pop_length
+            # print(policy_id)
             while policy_id < self.population_size:
                 rnum = random.uniform(0, 1)
+                # print(rnum)
                 if rnum >= self.epsilon:  # Choose best policy
                     # print('Keep Best')
                     for k in range(self.policy_size):
                         self.pops[pop_id, policy_id, k] = self.pops[pop_id, 0, k]  # Best policy
                 else:
-                    parent = random.randint(0, self.population_size/2)  # Choose a random parent
+                    parent = random.randint(0, half_pop_length)  # Choose a random parent
+                    # print(parent)
                     for k in range(self.policy_size):
                         self.pops[pop_id, policy_id, k] = self.pops[pop_id, parent, k]  # Random policy
                 policy_id += 1
