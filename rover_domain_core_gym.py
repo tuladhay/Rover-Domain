@@ -23,14 +23,20 @@ def init_agents(data):
 # Randomly initialize POI positions on map
 def init_pois(data):
     number_pois = p.number_of_pois
-    world_width = p.world_width
-    world_length = p.world_length
+    x_dim = p.world_width
+    y_dim = p.world_length
 
     # Initialize all Pois np.randomly
-    data['Poi Positions BluePrint'] = np.random.rand(number_pois, 2) * [world_width, world_length]
-    data['Poi Values BluePrint'] = np.ones(number_pois)
-    for i in range(number_pois):
-        data['Poi Values BluePrint'][i] *= np.random.randint(1, 10)
+    # data['Poi Positions BluePrint'] = np.random.rand(number_pois, 2) * [world_width, world_length]
+    # Below is a specific training case with one POI in each corner
+    data['Poi Positions BluePrint'] = np.zeros((number_pois, 2))
+    data['Poi Positions BluePrint'][0, 0] = 0; data['Poi Positions BluePrint'][0, 1] = 0
+    data['Poi Positions BluePrint'][1, 0] = 0; data['Poi Positions BluePrint'][1, 1] = (y_dim-1)
+    data['Poi Positions BluePrint'][2, 0] = (x_dim-1); data['Poi Positions BluePrint'][2, 1] = 0
+    data['Poi Positions BluePrint'][3, 0] = (x_dim-1); data['Poi Positions BluePrint'][3, 1] = (y_dim-1)
+    data['Poi Values BluePrint'] = np.ones(number_pois) * 5
+    # for i in range(number_pois):
+    #     data['Poi Values BluePrint'][i] *= np.random.randint(1, 10)
 
 
 def init_world(data):
@@ -38,6 +44,10 @@ def init_world(data):
     data['Agent Orientations'] = data['Agent Orientations BluePrint'].copy()
     data['Poi Positions'] = data['Poi Positions BluePrint'].copy()
     data['Poi Values'] = data['Poi Values BluePrint'].copy()
+    # for rov_id in range(p.number_of_agents):
+    #     print('Rover: ', data['Agent Positions'][rov_id, 0], data['Agent Positions'][rov_id, 1])
+    # for poi_id in range(p.number_of_pois):
+    #     print('POI: ', data['Poi Positions'][poi_id, 0], data['Poi Positions'][poi_id, 1])
 
 
 # Agent positions are statically set on the mapblueprint_static

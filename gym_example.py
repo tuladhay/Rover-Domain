@@ -9,8 +9,8 @@ from code.neural_network import NeuralNetwork; nn = NeuralNetwork()
 
 reward_functions = [  # List reward functions you would like to train on (functions execute in order listed)
     m.global_reward_mod,
-    m.difference_reward_mod
-    #m.dpp_reward_mod
+    m.difference_reward_mod,
+    m.dpp_reward_mod
 ]
 
 for func in reward_functions:
@@ -26,11 +26,11 @@ for func in reward_functions:
         sim.reset_world('Train', True)  # Fully resets rover domain (agent and POI positions/values)
 
         for gen in range(p.generations):
-            sim.reset_world('Train', False)
             cc.select_policy_teams()  # Selects which policies will be grouped into which teams
-            joint_state = sim.data["Agent Observations"]  # State vector
 
             for team_number in range(cc.population_size):  # Each policy in CCEA is tested in teams
+                sim.reset_world('Train', False)
+                joint_state = sim.data["Agent Observations"]  # State vector
                 done = False
                 step_count = 0
                 while done == False:

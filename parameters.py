@@ -6,13 +6,13 @@ location for convenience.
 class Parameters:
 
     # Run Parameters
-    stat_runs = 1
+    stat_runs = 5
     generations = 500  # Number of generations for CCEA in each stat run
     tests_per_gen = 1  # Number of tests run after each generation
 
     # Domain parameters
-    number_of_agents = 10
-    number_of_pois = 12
+    number_of_agents = 4
+    number_of_pois = 4
     min_distance = 1.0  # Minimum distance which may appear in the denominator of credit eval functions
     total_steps = 30  # Number of steps rovers take during each run of the world
     world_width = 30
