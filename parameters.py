@@ -6,8 +6,8 @@ location for convenience.
 class Parameters:
 
     # Run Parameters
-    stat_runs = 5
-    generations = 500  # Number of generations for CCEA in each stat run
+    stat_runs = 1
+    generations = 100  # Number of generations for CCEA in each stat run
     tests_per_gen = 1  # Number of tests run after each generation
 
     # Domain parameters

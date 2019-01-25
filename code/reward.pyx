@@ -53,8 +53,10 @@ def calc_global_reward(data):
             for agent_id in range(number_agents):
                 agent_x_dist = poi_positions[poi_id, 0] - agent_pos_history[agent_id, step_number, 0]
                 agent_y_dist = poi_positions[poi_id, 1] - agent_pos_history[agent_id, step_number, 1]
-                distance = agent_x_dist * agent_x_dist + agent_y_dist * agent_y_dist
-                observer_distances[agent_id] = math.sqrt(distance)
+                distance = math.sqrt((agent_x_dist * agent_x_dist) + (agent_y_dist * agent_y_dist))
+                if distance < min_dist:
+                    distance = min_dist
+                observer_distances[agent_id] = distance
                 
                 # Check if agent observes poi
                 if distance < activation_dist: # Rover is in observation range
@@ -74,7 +76,7 @@ def calc_global_reward(data):
                 current_poi_reward = temp_reward
 
         g_reward += current_poi_reward
-    
+
     data["Global Reward"] = g_reward
     data["Agent Rewards"] = np.ones(number_agents) * g_reward
 
@@ -120,8 +122,11 @@ def calc_difference_reward(data):
             for agent_id in range(number_agents):
                 agent_x_dist = poi_positions[poi_id, 0] - agent_pos_history[agent_id, step_number, 0]
                 agent_y_dist = poi_positions[poi_id, 1] - agent_pos_history[agent_id, step_number, 1]
-                distance = agent_x_dist * agent_x_dist + agent_y_dist * agent_y_dist
-                observer_distances[agent_id] = math.sqrt(distance)
+                distance = math.sqrt((agent_x_dist * agent_x_dist) + (agent_y_dist * agent_y_dist))
+                if distance < min_dist:
+                    distance = min_dist
+                assert(distance > 0)
+                observer_distances[agent_id] = distance
 
                 # Check if agent observes poi, update closest step distance
                 if distance < activation_dist: # Rover is in observation range
@@ -161,8 +166,10 @@ def calc_difference_reward(data):
                     if agent_id != other_agent_id:
                         agent_x_dist = poi_positions[poi_id, 0] - agent_pos_history[other_agent_id, step_number, 0]
                         agent_y_dist = poi_positions[poi_id, 1] - agent_pos_history[other_agent_id, step_number, 1]
-                        distance = agent_x_dist * agent_x_dist + agent_y_dist * agent_y_dist
-                        observer_distances[other_agent_id] = math.sqrt(distance)
+                        distance = math.sqrt((agent_x_dist * agent_x_dist) + (agent_y_dist * agent_y_dist))
+                        if distance < min_dist:
+                            distance = min_dist
+                        observer_distances[other_agent_id] = distance
                         
                         # Check if agent observes poi, update closest step distance
                         if distance < activation_dist:
@@ -234,8 +241,10 @@ def calc_dpp_reward(data):
             for agent_id in range(number_agents):
                 agent_x_dist = poi_positions[poi_id, 0] - agent_pos_history[agent_id, step_number, 0]
                 agent_y_dist = poi_positions[poi_id, 1] - agent_pos_history[agent_id, step_number, 1]
-                distance = agent_x_dist * agent_x_dist + agent_y_dist * agent_y_dist
-                observer_distances[agent_id] = math.sqrt(distance)
+                distance = math.sqrt((agent_x_dist * agent_x_dist) + (agent_y_dist * agent_y_dist))
+                if distance < min_dist:
+                    distance = min_dist
+                observer_distances[agent_id] = distance
 
                 # Check if agent observes poi, update closest step distance
                 if distance < activation_dist: # Rover is in observation range
@@ -275,8 +284,10 @@ def calc_dpp_reward(data):
                     if agent_id != other_agent_id:
                         agent_x_dist = poi_positions[poi_id, 0] - agent_pos_history[other_agent_id, step_number, 0]
                         agent_y_dist = poi_positions[poi_id, 1] - agent_pos_history[other_agent_id, step_number, 1]
-                        distance = agent_x_dist * agent_x_dist + agent_y_dist * agent_y_dist
-                        observer_distances[other_agent_id] = math.sqrt(distance)
+                        distance = math.sqrt((agent_x_dist * agent_x_dist) + (agent_y_dist * agent_y_dist))
+                        if distance < min_dist:
+                            distance = min_dist
+                        observer_distances[other_agent_id] = distance
 
                         # Check if agent observes poi, update closest step distance
                         if distance < activation_dist:
@@ -323,8 +334,10 @@ def calc_dpp_reward(data):
                     for other_agent_id in range(number_agents):
                         agent_x_dist = poi_positions[poi_id, 0] - agent_pos_history[other_agent_id, step_number, 0]
                         agent_y_dist = poi_positions[poi_id, 1] - agent_pos_history[other_agent_id, step_number, 1]
-                        distance = agent_x_dist * agent_x_dist + agent_y_dist * agent_y_dist
-                        observer_distances[other_agent_id] = math.sqrt(distance)
+                        distance = math.sqrt((agent_x_dist * agent_x_dist) + (agent_y_dist * agent_y_dist))
+                        if distance < min_dist:
+                            distance = min_dist
+                        observer_distances[other_agent_id] = distance
 
                         if other_agent_id == agent_id:
                             self_dist = distance # Track distance from self for counterfactuals
