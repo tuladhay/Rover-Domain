@@ -19,8 +19,7 @@ cpdef get_state_vec(data):  # Calculates join_state_vector for NN input
     cdef double[:, :] agent_orientations = data["Agent Orientations"]
     cdef double[:, :] agent_state = np.zeros((number_agents, 8), dtype = np.float64)
     cdef int agent_id, other_agent_id, poi_id, quadrant
-    cdef double x_distance, y_distance
-    cdef double dist, angle
+    cdef double x_distance, y_distance, dist, angle
 
     for agent_id in range(number_agents):
 
@@ -85,18 +84,18 @@ cpdef get_state_vec(data):  # Calculates join_state_vector for NN input
                 agent_state[agent_id, 7] += poi_values[poi_id]/dist
 
     data["Agent Observations"] = agent_state
-    #return agent_state
 
 
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing.
 cpdef get_agent_actions(data, nn_output):
-    cdef int number_agents = p.number_of_agents
-    actions = np.zeros((number_agents, 2), dtype = np.float_)
-
     cdef int agent_id
+    cdef int number_agents = p.number_of_agents
+    cdef double[:, :] actions = np.zeros((number_agents, 2), dtype = np.float_)
+
     for agent_id in range(number_agents):
-        actions[agent_id] = nn_output[agent_id]
+        actions[agent_id, 0] = nn_output[agent_id, 0]
+        actions[agent_id, 1] = nn_output[agent_id, 1]
     data["Agent Actions"] = actions
 
 

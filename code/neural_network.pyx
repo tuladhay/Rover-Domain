@@ -1,6 +1,7 @@
 import numpy as np
 from parameters import Parameters as p
 import math
+cimport cython
 
 cdef class NeuralNetwork:
     cdef public int n_rovers
@@ -28,22 +29,30 @@ cdef class NeuralNetwork:
         self.hid_layer = np.zeros((self.n_rovers, self.n_nodes), dtype = np.float64)
         self.out_layer = np.zeros((self.n_rovers, self.n_outputs), dtype = np.float64)
 
+    @cython.boundscheck(False)  # Deactivate bounds checking
+    @cython.wraparound(False)   # Deactivate negative indexing.
     cpdef reset_nn(self): # Clear current network
         self.weights = np.zeros((self.n_rovers, self.n_weights), dtype = np.float64)
         self.in_layer = np.zeros((self.n_rovers, self.n_inputs), dtype = np.float64)
         self.hid_layer = np.zeros((self.n_rovers, self.n_nodes), dtype = np.float64)
         self.out_layer = np.zeros((self.n_rovers, self.n_outputs), dtype = np.float64)
 
+    @cython.boundscheck(False)  # Deactivate bounds checking
+    @cython.wraparound(False)   # Deactivate negative indexing.
     cpdef get_inputs(self, state_vec, rov_id):  # Get inputs from state-vector
         cdef int i
         for i in range(self.n_inputs):
             self.in_layer[rov_id, i] = state_vec[i]
 
+    @cython.boundscheck(False)  # Deactivate bounds checking
+    @cython.wraparound(False)   # Deactivate negative indexing.
     cpdef get_weights(self, nn_weights, rov_id):  # Get weights from CCEA population
         cdef int i
         for i in range(self.n_weights):
             self.weights[rov_id, i] = nn_weights[i]
 
+    @cython.boundscheck(False)  # Deactivate bounds checking
+    @cython.wraparound(False)   # Deactivate negative indexing.
     cpdef reset_layers(self, rov_id):  # Clear hidden layers and output layers
         cdef int i, j
         for i in range(self.n_nodes):
@@ -51,6 +60,8 @@ cdef class NeuralNetwork:
         for j in range(self.n_outputs):
             self.out_layer[rov_id, j] = 0.0
 
+    @cython.boundscheck(False)  # Deactivate bounds checking
+    @cython.wraparound(False)   # Deactivate negative indexing.
     cpdef get_outputs(self, rov_id):
         cdef int i, j, count
         count = 0  # Keeps count of which weight is being applied
@@ -66,7 +77,7 @@ cdef class NeuralNetwork:
             count += 1
 
         for i in range(self.n_nodes):  # Pass through sigmoid
-            self.hid_layer[rov_id, i] = self.sigmoid(self.hid_layer[rov_id, i])
+            self.hid_layer[rov_id, i] = self.tanh(self.hid_layer[rov_id, i])
 
         for i in range(self.n_nodes):  # Pass from hidden layer to output layer
             for j in range(self.n_outputs):
@@ -78,19 +89,24 @@ cdef class NeuralNetwork:
             count += 1
 
         for i in range(self.n_outputs):  # Pass through sigmoid
-            self.out_layer[rov_id, i] = self.sigmoid(self.out_layer[rov_id, i])
-        # print('NN: ', self.out_layer[rov_id, 0], self.out_layer[rov_id, 1])
+            self.out_layer[rov_id, i] = self.tanh(self.out_layer[rov_id, i])
 
+    @cython.boundscheck(False)  # Deactivate bounds checking
+    @cython.wraparound(False)   # Deactivate negative indexing.
     cpdef tanh(self, inp): # Tanh function as activation function
         cdef double tanh
         tanh = (2/(1 + math.exp(-2*inp)))-1
         return tanh
 
+    @cython.boundscheck(False)  # Deactivate bounds checking
+    @cython.wraparound(False)   # Deactivate negative indexing.
     cpdef sigmoid(self, inp): # Sigmoid function as activation function
         cdef double sig
         sig = 1/(1 + math.exp(-inp))
         return sig
 
+    @cython.boundscheck(False)  # Deactivate bounds checking
+    @cython.wraparound(False)   # Deactivate negative indexing.
     cpdef run_neural_network(self, state_vec, weight_vec, rover_id):
         self.get_inputs(state_vec, rover_id)
         self.get_weights(weight_vec, rover_id)

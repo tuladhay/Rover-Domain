@@ -1,7 +1,7 @@
 import numpy as np
 from parameters import Parameters as p
 import random
-import pyximport; pyximport.install() # For cython(pyx) code
+cimport cython
 
 cdef class Ccea:
     cdef public double mut_prob
@@ -26,6 +26,8 @@ cdef class Ccea:
         self.fitness = np.zeros((self.n_populations, self.population_size))
         self.team_selection = np.zeros((self.n_populations, self.population_size), dtype = np.int32)
 
+    @cython.boundscheck(False)  # Deactivate bounds checking
+    @cython.wraparound(False)   # Deactivate negative indexing.
     cpdef reset_populations(self):  # Re-initializes CCEA populations for new run
         cdef int pop_index, policy_index, w
         for pop_index in range(self.n_populations):
@@ -34,6 +36,8 @@ cdef class Ccea:
                     self.pops[pop_index, policy_index, w] = random.uniform(-1, 1)
                 self.team_selection[pop_index, policy_index] = -1
 
+    @cython.boundscheck(False)  # Deactivate bounds checking
+    @cython.wraparound(False)   # Deactivate negative indexing.
     cpdef select_policy_teams(self):  # Create policy teams for testing
         cdef int pop_id, policy_id, j, k, rpol
         for pop_id in range(self.n_populations):
@@ -51,6 +55,8 @@ cdef class Ccea:
                     k += 1
                 self.team_selection[pop_id, j] = rpol  # Assign policy to team
 
+    @cython.boundscheck(False)  # Deactivate bounds checking
+    @cython.wraparound(False)   # Deactivate negative indexing.
     cpdef mutate(self):
         cdef int pop_index, policy_index, target
         cdef int half_pop_length = self.population_size/2
@@ -64,6 +70,8 @@ cdef class Ccea:
                     self.pops[pop_index, policy_index, target] = random.uniform(-1, 1)
                 policy_index += 1
 
+    @cython.boundscheck(False)  # Deactivate bounds checking
+    @cython.wraparound(False)   # Deactivate negative indexing.
     cpdef epsilon_greedy_select(self):  # Replace the bottom half with parents from top half
         cdef int pop_id, policy_id, k, parent
         cdef double rnum
@@ -82,6 +90,8 @@ cdef class Ccea:
                         self.pops[pop_id, policy_id, k] = self.pops[pop_id, parent, k]  # Random policy
                 policy_id += 1
 
+    @cython.boundscheck(False)  # Deactivate bounds checking
+    @cython.wraparound(False)   # Deactivate negative indexing.
     cpdef down_select(self):  # Create a new offspring population using parents from top 50% of policies
         cdef int pop_id, j, k
         # Reorder populations in terms of fitness (top half = best policies)
