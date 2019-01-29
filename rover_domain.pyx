@@ -186,7 +186,7 @@ cdef class RoverDomain:
             # (step_id = 0) must be stored in rover_position_histories[1]
             self.record_rover_positions()
             
-        self.done = self.step_id < self.n_steps
+        self.done = self.step_id >= self.n_steps
         if evaluate:
             evaluate(self)
         else:
