@@ -11,12 +11,11 @@ from code.reward import calc_global_reward
 # Randomly initalize agent positions on map
 def init_agents(data):
     number_agents = p.number_of_agents
-    world_width = p.world_width
-    world_length = p.world_length
+    x_dim = p.world_width
+    y_dim = p.world_length
 
     # Agent positions are a numpy array of size m x n, m = n_agents, n = 2
-    # data['Agent Positions BluePrint'] = np.random.rand(number_agents, 2) * [world_width, world_length]
-    data['Agent Positions BluePrint'] = np.ones((number_agents, 2))*(world_length/2)
+    data['Agent Positions BluePrint'] = np.random.rand(number_agents, 2) * [x_dim, y_dim]
     rover_angles = np.random.uniform(-np.pi, np.pi, number_agents)  # Rover orientations
     data['Agent Orientations BluePrint'] = np.vstack((np.cos(rover_angles), np.sin(rover_angles))).T
 
@@ -27,16 +26,10 @@ def init_pois(data):
     y_dim = p.world_length
 
     # Initialize all Pois np.randomly
-    # data['Poi Positions BluePrint'] = np.random.rand(number_pois, 2) * [world_width, world_length]
-    # Below is a specific training case with one POI in each corner
-    data['Poi Positions BluePrint'] = np.zeros((number_pois, 2))
-    data['Poi Positions BluePrint'][0, 0] = 0; data['Poi Positions BluePrint'][0, 1] = 0
-    data['Poi Positions BluePrint'][1, 0] = 0; data['Poi Positions BluePrint'][1, 1] = (y_dim-1)
-    data['Poi Positions BluePrint'][2, 0] = (x_dim-1); data['Poi Positions BluePrint'][2, 1] = 0
-    data['Poi Positions BluePrint'][3, 0] = (x_dim-1); data['Poi Positions BluePrint'][3, 1] = (y_dim-1)
-    data['Poi Values BluePrint'] = np.ones(number_pois) * 5
-    # for i in range(number_pois):
-    #     data['Poi Values BluePrint'][i] *= np.random.randint(1, 10)
+    data['Poi Positions BluePrint'] = np.random.rand(number_pois, 2) * [x_dim, y_dim]
+    data['Poi Values BluePrint'] = np.ones(number_pois)
+    for i in range(number_pois):
+        data['Poi Values BluePrint'][i] *= np.random.randint(1, 10)
 
 
 def init_world(data):

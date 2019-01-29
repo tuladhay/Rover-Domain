@@ -527,7 +527,7 @@ def calc_sdpp_reward(data):
 
                     if observer_count < coupling and self_dist <= activation_dist:  # Suggest counterfactual partners
                         for rovid in range(counterfactual_count):
-                            observer_distances.append(activation_dist)
+                            observer_distances.append(observer_distances[rovid])  # Append n closest
                         observer_count += counterfactual_count
 
                     rearrange_dist_vec(observer_distances)
