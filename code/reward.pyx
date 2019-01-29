@@ -1,6 +1,7 @@
 import numpy as np
 cimport cython
 from parameters import Parameters as p
+from code.supervisor import generate_partners
 import math
 
 @cython.boundscheck(False)  # Deactivate bounds checking
@@ -85,7 +86,6 @@ def calc_global_reward(data):
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing.
 def calc_difference_reward(data):
-    # print('Difference')
     cdef int number_agents = p.number_of_agents
     cdef int number_pois = p.number_of_pois
     cdef double min_dist = p.min_distance
@@ -201,7 +201,6 @@ def calc_difference_reward(data):
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing.
 def calc_dpp_reward(data):
-    # print('DPP')
     cdef int number_agents = p.number_of_agents
     cdef int number_pois = p.number_of_pois
     cdef double min_dist = p.min_distance
@@ -378,7 +377,6 @@ def calc_dpp_reward(data):
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing.
 def calc_sdpp_reward(data):
-    # print('DPP')
     cdef int number_agents = p.number_of_agents
     cdef int number_pois = p.number_of_pois
     cdef double min_dist = p.min_distance
@@ -388,6 +386,7 @@ def calc_sdpp_reward(data):
     cdef double[:, :, :] agent_pos_history = data["Agent Position History"]
     cdef double[:] poi_values = data['Poi Values']
     cdef double[:, :] poi_positions = data["Poi Positions"]
+    cdef double[:] rov_partners
     cdef int poi_id, step_number, agent_id, observer_count, other_agent_id, counterfactual_count
     cdef double agent_x_dist, agent_y_dist, distance
     cdef double inf = float("inf")
@@ -523,11 +522,10 @@ def calc_sdpp_reward(data):
                         if distance <= activation_dist:
                             observer_count += 1
 
-                    rearrange_dist_vec(observer_distances)  # Rearrange rovers in terms of dist to POI
-
-                    if observer_count < coupling and self_dist <= activation_dist:  # Suggest counterfactual partners
+                    if observer_count < coupling:  # Suggest counterfactual partners
+                        rov_partners = generate_partners(data, step_number, counterfactual_count, agent_id)
                         for rovid in range(counterfactual_count):
-                            observer_distances.append(observer_distances[rovid])  # Append n closest
+                            observer_distances.append(rov_partners[rovid])  # Append n closest
                         observer_count += counterfactual_count
 
                     rearrange_dist_vec(observer_distances)  # Rearrange rover distances with added counterfactuals
