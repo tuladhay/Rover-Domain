@@ -60,4 +60,3 @@ def folderToData(folderName, count = None):
         rawData[label] = rawData[label]
         
     return rawData
-    

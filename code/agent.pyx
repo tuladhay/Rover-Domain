@@ -16,7 +16,6 @@ cpdef get_state_vec(data):  # Calculates join_state_vector for NN input
     cdef double[:, :] agent_positions = data["Agent Positions"]
     cdef double[:] poi_values = data['Poi Values']
     cdef double[:, :] poi_positions = data["Poi Positions"]
-    cdef double[:, :] agent_orientations = data["Agent Orientations"]
     cdef double[:, :] agent_state = np.zeros((number_agents, 8), dtype = np.float64)
     cdef int agent_id, other_agent_id, poi_id, quadrant
     cdef double x_distance, y_distance, dist, angle
@@ -106,7 +105,6 @@ cpdef do_agent_move(data):  # Each agent moves 1 step
     cdef float world_length = p.world_length
     cdef int number_agents = p.number_of_agents
     cdef double[:, :] agent_positions = data["Agent Positions"]
-    cdef double[:, :] agent_orientations = data["Agent Orientations"]
     cdef double[:, :] actions = data["Agent Actions"]
     cdef int agent_id
     cdef double dx, dy, norm # Change in x-position, change in y-position, total distance moved

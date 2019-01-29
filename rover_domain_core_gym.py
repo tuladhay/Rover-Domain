@@ -9,18 +9,25 @@ from code.reward import calc_global_reward
 
 # World Setup ----------------------------------------------------------------------------------------
 # Randomly initalize agent positions on map
-def init_agents(data):
+def init_agents_random(data):
     number_agents = p.number_of_agents
     x_dim = p.world_width
     y_dim = p.world_length
 
     # Agent positions are a numpy array of size m x n, m = n_agents, n = 2
     data['Agent Positions BluePrint'] = np.random.rand(number_agents, 2) * [x_dim, y_dim]
-    rover_angles = np.random.uniform(-np.pi, np.pi, number_agents)  # Rover orientations
-    data['Agent Orientations BluePrint'] = np.vstack((np.cos(rover_angles), np.sin(rover_angles))).T
+
+# Initialze agents statically
+def init_agents_static(data):
+    number_agents = p.number_of_agents
+    x_dim = p.world_width
+    y_dim = p.world_length
+
+    # Agent positions are a numpy array of size m x n, m = n_agents, n = 2
+    data['Agent Positions BluePrint'] = np.ones((number_agents, 2)) * (x_dim/2)
 
 # Randomly initialize POI positions on map
-def init_pois(data):
+def init_pois_random(data):
     number_pois = p.number_of_pois
     x_dim = p.world_width
     y_dim = p.world_length
@@ -31,10 +38,19 @@ def init_pois(data):
     for i in range(number_pois):
         data['Poi Values BluePrint'][i] *= np.random.randint(1, 10)
 
+# Initialize POIs statically
+def init_pois_static(data):
+    number_pois = p.number_of_pois
+    x_dim = p.world_width
+    y_dim = p.world_length
+
+    # Initialize all Pois np.randomly
+    data['Poi Positions BluePrint'] = np.random.rand(number_pois, 2) * [x_dim, y_dim]
+    data['Poi Values BluePrint'] = np.ones(number_pois) * 5
+
 
 def init_world(data):
     data['Agent Positions'] = data['Agent Positions BluePrint'].copy()
-    data['Agent Orientations'] = data['Agent Orientations BluePrint'].copy()
     data['Poi Positions'] = data['Poi Positions BluePrint'].copy()
     data['Poi Values'] = data['Poi Values BluePrint'].copy()
     # for rov_id in range(p.number_of_agents):
@@ -51,8 +67,6 @@ def blueprint_static(data):
     world_length = p.world_length
 
     data['Agent Positions BluePrint'] = np.ones((number_agents, 2)) * 0.5 * [world_width, world_length]
-    angles = np.random.uniform(-np.pi, np.pi, number_agents)
-    data['Agent Orientations BluePrint'] = np.vstack((np.cos(angles), np.sin(angles))).T
     data['Poi Positions BluePrint'] = data['Poi Relative Static Positions'] * [world_width, world_length]
     data['Poi Values BluePrint'] = data['Poi Static Values'].copy()
 
@@ -62,12 +76,9 @@ class RoverDomainCore:
         self.data = {
             # Agent values
             "Agent Positions": np.zeros((p.number_of_agents, 2)),
-            "Agent Orientations": np.zeros((p.number_of_agents, 2)),
             "Agent Positions BluePrint": np.zeros((p.number_of_agents, 2)),
-            "Agent Orientations BluePrint": np.zeros((p.number_of_agents, 2)),
             "Agent Observations": np.zeros((p.number_of_agents, 8)),
             "Agent Position History": np.zeros((p.number_of_agents, p.total_steps, 2)),
-            "Agent Orientation History": np.zeros((p.number_of_agents, p.total_steps, 2)),
             "Agent Rewards": np.zeros(p.number_of_agents),
 
             # POI values
@@ -128,8 +139,8 @@ class RoverDomainCore:
         if fully_resetting == False:
             init_world(self.data)
         else:
-            init_agents(self.data)
-            init_pois(self.data)
+            init_agents_random(self.data)
+            init_pois_random(self.data)
             init_world(self.data)
 
         create_trajectory_histories(self.data)
