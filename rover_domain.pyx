@@ -185,7 +185,7 @@ cdef class RoverDomain:
             # index because the initial position before any movement
             # is stored in rover_position_histories[0], so the first step
             # (step_id = 0) must be stored in rover_position_histories[1]
-            self.record_rover_positions()
+            self.rover_position_histories[0,...] = self.init_rover_positions
             
         self.done = self.step_id >= self.n_steps
         if evaluate:
