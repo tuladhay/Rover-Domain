@@ -523,14 +523,14 @@ def calc_sdpp_reward(data):
                         if distance <= activation_dist:
                             observer_count += 1
 
-                    rearrange_dist_vec(observer_distances)
+                    rearrange_dist_vec(observer_distances)  # Rearrange rovers in terms of dist to POI
 
                     if observer_count < coupling and self_dist <= activation_dist:  # Suggest counterfactual partners
                         for rovid in range(counterfactual_count):
                             observer_distances.append(observer_distances[rovid])  # Append n closest
                         observer_count += counterfactual_count
 
-                    rearrange_dist_vec(observer_distances)
+                    rearrange_dist_vec(observer_distances)  # Rearrange rover distances with added counterfactuals
 
                     # update closest distance only if poi is observed
                     if observer_count >= coupling:
