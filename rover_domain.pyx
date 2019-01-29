@@ -177,7 +177,8 @@ cdef class RoverDomain:
         Provided for convenience, not recommended for performance
         """
         if self.done:
-            self.move_rovers(actions)
+            if actions:
+                self.move_rovers(actions)
             self.step_id += 1
             
             # We must record rover positions after increasing the step 
