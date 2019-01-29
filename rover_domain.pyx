@@ -176,7 +176,7 @@ cdef class RoverDomain:
         """
         Provided for convenience, not recommended for performance
         """
-        if self.done:
+        if not self.done:
             if actions:
                 self.move_rovers(actions)
             self.step_id += 1
