@@ -431,7 +431,7 @@ cdef class RoverDomain:
             sec_id = <Py_ssize_t>min(max(0, sec_id_temp), self.n_obs_sections-1)
                 
             
-            self.rover_observation[rover_id, type_id, sec_id] += val/(dist*dist)
+            self.rover_observations[rover_id,type_id,sec_id] += val/(dist*dist)
         
     cpdef void update_observations(self):
         
