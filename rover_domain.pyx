@@ -172,12 +172,12 @@ cdef class RoverDomain:
         self.n_steps = self.step_id
         self.done = True
 
-    def step(self, actions, evaluate = None):
+    def step(self, double[:, :] actions, evaluate = None):
         """
         Provided for convenience, not recommended for performance
         """
         if not self.done:
-            if actions:
+            if actions is not None:
                 self.move_rovers(actions)
             self.step_id += 1
             
