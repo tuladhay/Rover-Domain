@@ -10,7 +10,8 @@ from code.neural_network import NeuralNetwork; nn = NeuralNetwork()
 reward_functions = [  # List reward functions you would like to train on (functions execute in order listed)
     m.global_reward_mod,
     m.difference_reward_mod,
-    m.dpp_reward_mod
+    m.dpp_reward_mod,
+    m.sdpp_reward_mod
 ]
 
 for func in reward_functions:
