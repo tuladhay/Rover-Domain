@@ -172,26 +172,28 @@ cdef class RoverDomain:
         self.n_steps = self.step_id
         self.done = True
 
-    # def step(self, actions, evaluate = None):
-    #     """
-    #     Provided for convenience, not recommended for performance
-    #     """
-    #     if self.done:
-    #         self.move_rovers(actions)
-    #         self.step_id += 1
-    #         
-    #         # We must record rover positions after increasing the step 
-    #         # index because the initial position before any movement
-    #         # is stored in rover_position_histories[0], so the first step
-    #         # (step_id = 0) must be stored in rover_position_histories[1]
-    #         self.record_rover_positions()
-    #         
-    #     self.done = self.step_id < self.n_steps
-    #     eval = 0.
-    #     if evaluate:
-    #         eval = evaluate(self)
-    #     return self.get_observations(), eval, self.done, self
-    # 
+    def step(self, actions, evaluate = None):
+        """
+        Provided for convenience, not recommended for performance
+        """
+        if self.done:
+            self.move_rovers(actions)
+            self.step_id += 1
+            
+            # We must record rover positions after increasing the step 
+            # index because the initial position before any movement
+            # is stored in rover_position_histories[0], so the first step
+            # (step_id = 0) must be stored in rover_position_histories[1]
+            self.record_rover_positions()
+            
+        self.done = self.step_id < self.n_steps
+        if evaluate:
+            evaluate(self)
+        else:
+            self.update_rewards_step_global_eval()
+        self.update_observations()
+        return self.rover_observations, self.rover_rewards, self.done, self
+    
 
     cpdef void move_rovers(self, double[:, :] actions):
         cdef Py_ssize_t rover_id
@@ -436,7 +438,7 @@ cdef class RoverDomain:
         cdef Py_ssize_t rover_id, poi_id, other_rover_id
         
         # Zero all observations
-        for rover_id in range(self.n_rover):
+        for rover_id in range(self.n_rovers):
             for type_id in range(2):
                 for section_id in range(self.n_obs_sections):
                     self.rover_observations[rover_id, type_id, section_id] = 0.
