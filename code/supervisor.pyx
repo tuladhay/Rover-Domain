@@ -51,7 +51,7 @@ def closest_others(data, tstep, c_number, current_rov, current_poi):
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing.
 def random_partners(data, tstep, c_number, current_rov, current_poi):
-    cdef double act_distance = p.activation_dist
+    cdef double n_rovers = p.number_of_agents
     cdef double[:] partners = np.zeros(c_number)
     cdef double[:, :, :] rover_positions = data["Agent Position History"]
     cdef double[:, :] poi_positions = data["Poi Positions"]
@@ -60,9 +60,9 @@ def random_partners(data, tstep, c_number, current_rov, current_poi):
 
 
     for i in range(c_number):  # Computes distances from closest others to POI
-        partner_id = random.randint(0, p.number_of_agents-1)
+        partner_id = random.randint(0, n_rovers-1)
         while partner_id == current_rov:
-            partner_id = random.randint(0, p.number_of_agents-1)
+            partner_id = random.randint(0, n_rovers-1)
 
         agent_x = rover_positions[partner_id, tstep, 0]
         agent_y = rover_positions[partner_id, tstep, 1]
