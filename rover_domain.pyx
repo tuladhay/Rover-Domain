@@ -447,6 +447,7 @@ cdef class RoverDomain:
         
         
         for rover_id in range(self.n_rovers):
+
             
             # Update rover type observations
             for other_rover_id in range(self.n_rovers):
@@ -462,7 +463,7 @@ cdef class RoverDomain:
             # Update POI type observations
             for poi_id in range(self.n_pois):
             
-                self.add_to_sensor(rover_id, 0, 
+                self.add_to_sensor(rover_id, 1,
                     self.poi_positions[poi_id, 0], 
                     self.poi_positions[poi_id, 1], 1.) 
                     
