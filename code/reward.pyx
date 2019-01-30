@@ -1,7 +1,7 @@
 import numpy as np
 cimport cython
 from parameters import Parameters as p
-from code.supervisor import generate_partners
+from code.supervisor import closest_others, random_partners, value_based_partners
 import math
 
 @cython.boundscheck(False)  # Deactivate bounds checking
@@ -530,7 +530,10 @@ def calc_sdpp_reward(data):
                             observer_count += 1
 
                     if observer_count < coupling:  # Suggest counterfactual partners
-                        rov_partners = generate_partners(data, step_number, counterfactual_count, agent_id, poi_id)
+                        rov_partners = closest_others(data, step_number, counterfactual_count, agent_id, poi_id)
+                        # rov_partners = random_partners(data, step_number, counterfactual_count, agent_id, poi_id)
+                        # rov_partners = value_based_partners(data, counterfactual_count, poi_id)
+
                         for rovid in range(counterfactual_count):
                             observer_distances.append(rov_partners[rovid])  # Append n closest
                         observer_count += counterfactual_count
