@@ -24,7 +24,7 @@ def init_agents_static(data):
     y_dim = p.world_length
 
     # Agent positions are a numpy array of size m x n, m = n_agents, n = 2
-    data['Agent Positions BluePrint'] = np.ones((number_agents, 2)) * (x_dim/2)
+    data['Agent Positions BluePrint'] = np.ones((number_agents, 2)) * (x_dim/2)  # Rovers start in the center
 
 # Randomly initialize POI positions on map
 def init_pois_random(data):
@@ -41,12 +41,16 @@ def init_pois_random(data):
 # Initialize POIs statically
 def init_pois_static(data):
     number_pois = p.number_of_pois
-    x_dim = p.world_width
-    y_dim = p.world_length
 
-    # Initialize all Pois np.randomly
-    data['Poi Positions BluePrint'] = np.random.rand(number_pois, 2) * [x_dim, y_dim]
-    data['Poi Values BluePrint'] = np.ones(number_pois) * 5
+    # Initialize POI values
+    data['Poi Values BluePrint'] = np.ones(number_pois) * 5  # 5 is the value of the POIs
+
+    # Take POI positions from txt file
+    poifile = open('poi_coords.txt', 'r')
+    for poi_id in range(number_pois):
+        data['Poi Positions BluePrint'][poi_id, 0] = float(poifile.readline().rstrip('\n'))
+        data['Poi Positions BluePrint'][poi_id, 1] = float(poifile.readline().rstrip('\n'))
+    poifile.close()
 
 
 def init_world(data):
@@ -57,18 +61,6 @@ def init_world(data):
     #     print('Rover: ', data['Agent Positions'][rov_id, 0], data['Agent Positions'][rov_id, 1])
     # for poi_id in range(p.number_of_pois):
     #     print('POI: ', data['Poi Positions'][poi_id, 0], data['Poi Positions'][poi_id, 1])
-
-
-# Agent positions are statically set on the mapblueprint_static
-def blueprint_static(data):
-    number_agents = p.number_of_agents
-    number_pois = p.number_of_pois
-    world_width = p.world_width
-    world_length = p.world_length
-
-    data['Agent Positions BluePrint'] = np.ones((number_agents, 2)) * 0.5 * [world_width, world_length]
-    data['Poi Positions BluePrint'] = data['Poi Relative Static Positions'] * [world_width, world_length]
-    data['Poi Values BluePrint'] = data['Poi Static Values'].copy()
 
 
 class RoverDomainCore:
@@ -139,8 +131,14 @@ class RoverDomainCore:
         if fully_resetting == False:
             init_world(self.data)
         else:
-            init_agents_random(self.data)
-            init_pois_random(self.data)
+            if p.static_rovers == False:
+                init_agents_random(self.data)
+            else:
+                init_agents_static(self.data)
+            if p.static_poi == False:
+                init_pois_random(self.data)
+            else:
+                init_pois_static(self.data)
             init_world(self.data)
 
         create_trajectory_histories(self.data)

@@ -19,6 +19,8 @@ class Parameters:
     world_length = 30
     coupling = 3  # Number of rovers required to view a POI for credit
     activation_dist = 4.0  # Minimum distance rovers must be to observe POIs
+    static_rovers = False  # False -> random initialization, True -> static initialization
+    static_poi = False  # False -> random initialization, True -> static initialization
 
     # Neural network parameters
     number_of_inputs = 8
