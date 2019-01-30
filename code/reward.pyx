@@ -60,7 +60,7 @@ def calc_global_reward(data):
                 observer_distances[agent_id] = distance
                 
                 # Check if agent observes poi
-                if distance < activation_dist: # Rover is in observation range
+                if distance <= activation_dist: # Rover is in observation range
                     observer_count += 1
 
             rearrange_dist_vec(observer_distances)
@@ -69,6 +69,7 @@ def calc_global_reward(data):
             if observer_count >= coupling:
                 for rv in range(coupling):
                     summed_distances += observer_distances[rv]
+                    assert(observer_distances[rv] <= activation_dist)
                 temp_reward = poi_values[poi_id]/summed_distances
             else:
                 temp_reward = 0.0
@@ -125,7 +126,6 @@ def calc_difference_reward(data):
                 distance = math.sqrt((agent_x_dist * agent_x_dist) + (agent_y_dist * agent_y_dist))
                 if distance < min_dist:
                     distance = min_dist
-                assert(distance > 0)
                 observer_distances[agent_id] = distance
 
                 # Check if agent observes poi, update closest step distance
@@ -138,6 +138,7 @@ def calc_difference_reward(data):
             if observer_count >= coupling:
                 for rv in range(coupling):
                     summed_distances += observer_distances[rv]
+                    assert(observer_distances[rv] <= activation_dist)
                 temp_reward = poi_values[poi_id]/summed_distances
             else:
                 temp_reward = 0.0
@@ -183,6 +184,7 @@ def calc_difference_reward(data):
                 if observer_count >= coupling:
                     for rv in range(coupling):
                         summed_distances += observer_distances[rv]
+                        assert(observer_distances[rv] <= activation_dist)
                     temp_reward = poi_values[poi_id]/summed_distances
                 else:
                     temp_reward = 0.0
@@ -255,6 +257,7 @@ def calc_dpp_reward(data):
             if observer_count >= coupling:
                 for rv in range(coupling):
                     summed_distances += observer_distances[rv]
+                    assert(observer_distances[rv] <= activation_dist)
                 temp_reward = poi_values[poi_id]/(0.5*summed_distances)
             else:
                 temp_reward = 0.0
@@ -300,6 +303,7 @@ def calc_dpp_reward(data):
                 if observer_count >= coupling:
                     for rv in range(coupling):
                         summed_distances += observer_distances[rv]
+                        assert(observer_distances[rv] <= activation_dist)
                     temp_reward = poi_values[poi_id]/(0.5*summed_distances)
                 else:
                     temp_reward = 0.0
@@ -357,6 +361,7 @@ def calc_dpp_reward(data):
                     if observer_count >= coupling:
                         for rv in range(coupling):
                             summed_distances += observer_distances[rv]
+                            assert(observer_distances[rv] <= activation_dist)
                         temp_reward = poi_values[poi_id]/(0.5*summed_distances)
                     else:
                         temp_reward = 0.0
@@ -432,6 +437,7 @@ def calc_sdpp_reward(data):
             if observer_count >= coupling:
                 for rv in range(coupling):
                     summed_distances += observer_distances[rv]
+                    assert(observer_distances[rv] <= activation_dist)
                 temp_reward = poi_values[poi_id]/(0.5*summed_distances)
             else:
                 temp_reward = 0.0
@@ -477,6 +483,7 @@ def calc_sdpp_reward(data):
                 if observer_count >= coupling:
                     for rv in range(coupling):
                         summed_distances += observer_distances[rv]
+                        assert(observer_distances[rv] <= activation_dist)
                     temp_reward = poi_values[poi_id]/(0.5*summed_distances)
                 else:
                     temp_reward = 0.0
@@ -488,10 +495,10 @@ def calc_sdpp_reward(data):
 
         dplusplus_reward[agent_id] = g_reward - g_without_self
 
-    # CALCULATE DPP REWARD
+    # CALCULATE S-DPP REWARD
     for counterfactual_count in range(coupling):
 
-        # Calculate Difference with Extra Me Reward
+        # Calculate reward with suggested counterfacual partners
         for agent_id in range(number_agents):
             g_with_counterfactuals = 0.0
             self_dist = 0.0
@@ -523,7 +530,7 @@ def calc_sdpp_reward(data):
                             observer_count += 1
 
                     if observer_count < coupling:  # Suggest counterfactual partners
-                        rov_partners = generate_partners(data, step_number, counterfactual_count, agent_id)
+                        rov_partners = generate_partners(data, step_number, counterfactual_count, agent_id, poi_id)
                         for rovid in range(counterfactual_count):
                             observer_distances.append(rov_partners[rovid])  # Append n closest
                         observer_count += counterfactual_count
@@ -534,6 +541,7 @@ def calc_sdpp_reward(data):
                     if observer_count >= coupling:
                         for rv in range(coupling):
                             summed_distances += observer_distances[rv]
+                            # assert(observer_distances[rv] <= activation_dist)
                         temp_reward = poi_values[poi_id]/(0.5*summed_distances)
                     else:
                         temp_reward = 0.0
