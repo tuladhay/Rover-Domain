@@ -176,6 +176,7 @@ cdef class RoverDomain:
         """
         Provided for convenience, not recommended for performance
         """
+        # TODO what on earth is the "evaluate"
         if not self.done:
             if actions is not None:
                 self.move_rovers(actions)
