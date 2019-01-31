@@ -213,14 +213,10 @@ cdef class RoverDomain:
             for rover_id in range(self.n_rovers):
         
                 # turn action into global frame motion
-                dx = (self.rover_orientations[rover_id, 0]
-                    * actions[rover_id, 0] 
-                    - self.rover_orientations[rover_id, 1] 
-                    * actions[rover_id, 1])
-                dy = (self.rover_orientations[rover_id, 0] 
-                    * actions[rover_id, 1] 
-                    + self.rover_orientations[rover_id, 1] 
-                    * actions[rover_id, 0])
+                dx = (self.rover_orientations[rover_id, 0] * actions[rover_id, 0]
+                    - self.rover_orientations[rover_id, 1] * actions[rover_id, 1])
+                dy = (self.rover_orientations[rover_id, 0] * actions[rover_id, 1]
+                    + self.rover_orientations[rover_id, 1] * actions[rover_id, 0])
                 
             
                 # globally move and reorient agent
@@ -251,10 +247,8 @@ cdef class RoverDomain:
         
         # Get the rover square distances to POIs.
         for rover_id in range(self.n_rovers):
-            displ_x = (self.rover_positions[rover_id, 0]
-                - self.poi_positions[poi_id, 0])
-            displ_y = (self.rover_positions[rover_id, 1]
-                - self.poi_positions[poi_id, 1])
+            displ_x = (self.rover_positions[rover_id, 0] - self.poi_positions[poi_id, 0])
+            displ_y = (self.rover_positions[rover_id, 1] - self.poi_positions[poi_id, 1])
             sqr_dists_to_poi[rover_id] = displ_x*displ_x + displ_y*displ_y
                
                
@@ -266,8 +260,7 @@ cdef class RoverDomain:
         
         # Is there (n_req) rovers observing? Only need to check the (n_req)th
         # closest rover
-        if (sqr_dists_to_poi[self.n_req-1] > 
-                self.interaction_dist * self.interaction_dist):
+        if sqr_dists_to_poi[self.n_req-1] > self.interaction_dist * self.interaction_dist:
             # Not close enough?, then there is no reward for this POI
             return 0.
         #Yes? Continue evaluation
@@ -294,7 +287,7 @@ cdef class RoverDomain:
     cpdef double calc_step_cfact_global_eval(self, Py_ssize_t rover_id):
         # Hack: simulate counterfactual by moving agent FAR AWAY, then calculate
         
-        cdef double actual_x, actual_y, far, eval
+        cdef double actual_x, actual_y, far, evaluation
         far = 1000000. # That's far enough, right?
         
         # Store actual positions for later reassignment
@@ -306,20 +299,19 @@ cdef class RoverDomain:
         self.rover_positions[rover_id, 1] = far
         
         # Calculate /counterfactual/ evaluation
-        eval = self.calc_step_global_eval()
+        evaluation = self.calc_step_global_eval()
         
         # Move rover back
         self.rover_positions[rover_id, 0] = actual_x
         self.rover_positions[rover_id, 1] = actual_y
         
-        return eval
+        return evaluation
         
 
     cpdef double calc_traj_global_eval(self):
         cdef Py_ssize_t step_id, poi_id
         cdef TempArray[double] poi_evals
-        cdef double eval
-        
+        cdef double evaluation
         # Only evaluate trajectories at the end
         if not self.done:
             return 0.
@@ -345,15 +337,15 @@ cdef class RoverDomain:
         
         # Set evaluation to the sum of all POI-specific evaluations
         for poi_id in range(self.n_pois):
-            eval += poi_evals[poi_id]
+            evaluation += poi_evals[poi_id]
         
-        return eval
+        return evaluation
        
 
     cpdef double calc_traj_cfact_global_eval(self, Py_ssize_t rover_id):
         # Hack: simulate counterfactual by moving agent FAR AWAY, then calculate
         cdef TempArray[double] actual_x_hist, actual_y_hist,
-        cdef double  far, eval
+        cdef double  far, evaluation
         cdef Py_ssize_t step_id
         far = 1000000. # That's far enough, right?
         
@@ -372,7 +364,7 @@ cdef class RoverDomain:
             self.rover_position_histories[step_id, rover_id, 1] = far
         
         # Calculate /counterfactual/ evaluation
-        eval = self.calc_traj_global_eval()
+        evaluation = self.calc_traj_global_eval()
         
         for step_id in range(self.n_steps+1):
             # Move rover back
@@ -382,60 +374,51 @@ cdef class RoverDomain:
                 actual_y_hist[step_id]
 
                 
-        return eval
+        return evaluation
 
-    cpdef void add_to_sensor(self, Py_ssize_t rover_id, 
-        Py_ssize_t type_id, double other_x, double other_y, double val):
-            
-            cdef double gf_displ_x, gf_displ_y, displ_x, displ_y, 
-            cdef double rf_displ_x, rf_displ_y, dist, angle,  sec_id_temp
-            cdef Py_ssize_t sec_id
-            
-            # Get global (gf) frame displacement
-            gf_displ_x = (other_x - self.rover_positions[rover_id, 0])
-            gf_displ_y = (other_y - self.rover_positions[rover_id, 1])
-            
-            # Set displacement value used by sensor to global frame
-            displ_x = gf_displ_x
-            displ_y = gf_displ_y
-            
-            # /May/ reorient displacement for observations
-            if self.reorients:
-                # Get rover frame (rf) displacement
-                rf_displ_x = (self.rover_orientations[rover_id, 0] 
-                    * displ_x
-                    + self.rover_orientations[rover_id, 1]
-                    * displ_y)
-                rf_displ_y = (self.rover_orientations[rover_id, 0]
-                    * displ_y
-                    - self.rover_orientations[rover_id, 1]
-                    * displ_x)
-                # Set displacement value used by sensor to rover frame
-                displ_x = rf_displ_x
-                displ_y = rf_displ_y
-                
-            dist = cmath.sqrt(displ_x*displ_x + displ_y*displ_y)
-                
-            # By bounding distance value we 
-            # implicitly bound sensor values
-            if dist < self.min_dist:
-                dist = self.min_dist
-            
-            # Get arc tangent (angle) of displacement 
-            angle = cmath.atan2(displ_y, displ_x) 
-            
-            #  Get intermediate Section Index by discretizing angle
-            sec_id_temp = cmath.floor(
-                (angle + cmath.pi)
-                / (2 * cmath.pi) 
-                * self.n_obs_sections)
-                
-            # Clip and convert to get Section id
-            sec_id = <Py_ssize_t>min(max(0, sec_id_temp), self.n_obs_sections-1)
-                
-            
-            self.rover_observations[rover_id,type_id,sec_id] += val/(dist*dist)
-        
+    cpdef void add_to_sensor(self, Py_ssize_t rover_id, Py_ssize_t type_id, double other_x, double other_y, double val):
+        cdef double gf_displ_x, gf_displ_y, displ_x, displ_y,
+        cdef double rf_displ_x, rf_displ_y, dist, angle,  sec_id_temp
+        cdef Py_ssize_t sec_id
+
+        # Get global (gf) frame displacement
+        gf_displ_x = (other_x - self.rover_positions[rover_id, 0])
+        gf_displ_y = (other_y - self.rover_positions[rover_id, 1])
+
+        # Set displacement value used by sensor to global frame
+        displ_x = gf_displ_x
+        displ_y = gf_displ_y
+
+        # /May/ reorient displacement for observations
+        if self.reorients:
+            # Get rover frame (rf) displacement
+            rf_displ_x = (self.rover_orientations[rover_id, 0] * displ_x
+                        + self.rover_orientations[rover_id, 1] * displ_y)
+            rf_displ_y = (self.rover_orientations[rover_id, 0] * displ_y
+                        - self.rover_orientations[rover_id, 1] * displ_x)
+            # Set displacement value used by sensor to rover frame
+            displ_x = rf_displ_x
+            displ_y = rf_displ_y
+
+        dist = cmath.sqrt(displ_x*displ_x + displ_y*displ_y)
+
+        # By bounding distance value we
+        # implicitly bound sensor values
+        if dist < self.min_dist:
+            dist = self.min_dist
+
+        # Get arc tangent (angle) of displacement
+        angle = cmath.atan2(displ_y, displ_x)
+
+        #  Get intermediate Section Index by discretizing angle
+        sec_id_temp = cmath.floor( (angle + cmath.pi) / (2 * cmath.pi) * self.n_obs_sections)
+
+        # Clip and convert to get Section id
+        sec_id = <Py_ssize_t>min(max(0, sec_id_temp), self.n_obs_sections-1)
+
+
+        self.rover_observations[rover_id,type_id,sec_id] += val/(dist*dist)
+
     cpdef void update_observations(self):
         
         cdef Py_ssize_t rover_id, poi_id, other_rover_id
