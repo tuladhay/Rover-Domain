@@ -23,6 +23,10 @@ class SequentialPOIRD(rover_domain.RoverDomain):
             self.poi_visited[t] = False
 
     def reset(self):
+        """
+        Resets the "poi_visited" dictionary to entirely false, in addition to the parent reset behavior.
+        :return: None
+        """
         super(SequentialPOIRD, self).reset()
         for t in self.poi_types:
             self.poi_visited[t] = False
