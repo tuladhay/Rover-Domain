@@ -10,17 +10,21 @@ class SequentialPOIRD(rover_domain.RoverDomain):
     """
     def __init__(self):
         super(SequentialPOIRD, self).__init__()
-        self.poi_types = ['C', 'A', 'B']
+        self.poi_types = [2, 1, 0]
         self.n_pois = len(self.poi_types)
 
         # store the sequence as a graph, with each type pointing to the immediate parent(s) which must be satisfied
         # for it to be counted as a score.
-        self.sequence = {"A": None, "B": ["A"], "C": ["B"]}
+        self.sequence = {0: None, 1: [0], 2: [1]}
 
         # POI visited is a dictionary which keeps track of which types have been visited
         self.poi_visited = {}
         for t in self.sequence:
             self.poi_visited[t] = False
+
+        # Override the size of the observations matrix
+        self.rover_observations = np.zeros((self.n_rovers, 1 + len(self.poi_visited), self.n_obs_sections))
+
 
     def reset(self):
         """
@@ -31,7 +35,7 @@ class SequentialPOIRD(rover_domain.RoverDomain):
         for t in self.poi_types:
             self.poi_visited[t] = False
 
-    def update_POI_observation(self, poi_type):
+    def mark_POI_observed(self, poi_type):
         """
         Updates the self.poi_visited[poi_type] if the dependencies are properly met
         Only does the update for the type being queried.
@@ -63,7 +67,7 @@ class SequentialPOIRD(rover_domain.RoverDomain):
                 # POI is within observation distance
                 # print("Distance to {} : {}".format(np.array(poi), np.linalg.norm(np.array(rover) - np.array(poi))))
                 if np.linalg.norm(np.array(rover) - np.array(poi)) < self.interaction_dist:
-                    self.update_POI_observation(self.poi_types[i])
+                    self.mark_POI_observed(self.poi_types[i])
 
     def sequential_score(self):
         """
@@ -77,6 +81,52 @@ class SequentialPOIRD(rover_domain.RoverDomain):
             return 1
         else:
             return 0
+
+    # Needs to observe the different types of poi, and also make the observed POI dictionary into the state as well
+    def update_observations(self):
+        """
+        Updates the internally held observations of each agent.
+        State is represented as:
+        <agents, poi type A, poi type B, ... , poi type N, poi A observed, poi B observed, ... , poi N observed>
+        Where "agents" and each "poi type" are split into the quadrants centered around the rover.
+        "poi X observed" is a 0-1 flag on whether or not a POI of type A has been successfully observed.
+
+        Accommodates the reorienting/fixed frame differences.
+
+        :return: None
+        """
+        # Reset the observation matrix
+        for rover_id in range(self.n_rovers):
+            for type_id in range(1 + len(self.poi_visited)):
+                for section_id in range(self.n_obs_sections):
+                    self.rover_observations[rover_id, type_id, section_id] = 0.
+
+        for rover_id in range(self.n_rovers):
+            # Update rover type observations
+            for other_rover_id in range(self.n_rovers):
+                # agents do not sense self (ergo skip self comparison)
+                if rover_id == other_rover_id:
+                    continue
+                self.add_to_sensor(
+                    rover_id,
+                    0,
+                    self.rover_positions[other_rover_id, 0],
+                    self.rover_positions[other_rover_id, 1],
+                    1.
+                )
+            # Update POI type observations
+            for poi_id in range(self.n_pois):
+                poi_type = self.poi_types[poi_id]
+                # The index in this call is the poi type +1 (to offset the rovers first)
+                # and then is assigned to it's respective section
+                self.add_to_sensor(
+                    rover_id,
+                    poi_type+1,
+                    self.poi_positions[poi_id, 0],
+                    self.poi_positions[poi_id, 1],
+                    1.
+                )
+            # TODO add the "is observed section"
 
 
 if __name__ == '__main__':
@@ -107,3 +157,6 @@ if __name__ == '__main__':
     print(rd.poi_visited)
     print("Score: ", rd.sequential_score())
 
+    print("Initial observations:", np.array(rd.rover_observations))
+    rd.update_observations()
+    print("Updated observations:", np.array(rd.rover_observations)[0])
