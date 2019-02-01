@@ -1,2 +1,2 @@
 To setup:
-import rover_domain_w_setup.py
+- simply import RoverDomainCython from env_wrapper.py
