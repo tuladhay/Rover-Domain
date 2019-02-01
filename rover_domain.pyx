@@ -29,6 +29,13 @@ cdef cython.numeric sqr(cython.numeric x):
     
 
 cdef class RoverDomain:
+    """
+    The base RoverDomain class. Stores the positions of rovers in a world,
+    and can move them about and return observations for each agent.
+
+    Keeps track of the path history and calculates the final score based on
+    which Points of Interest (POI) are observed.
+    """
     cdef public Py_ssize_t n_rovers
     cdef public Py_ssize_t n_pois
     cdef public Py_ssize_t n_steps
@@ -72,8 +79,7 @@ cdef class RoverDomain:
         self.n_obs_sections = 4
         self.reorients = False
         self.discounts_eval = False
-        
-        # Set positions to zero lets rover domain generate self for you
+
         self.init_rover_positions = None
         self.init_rover_orientations =  None
         self.rover_positions =  None
@@ -85,64 +91,58 @@ cdef class RoverDomain:
         self.rover_observations = None
         self.rover_rewards = None
 
-
-    cpdef void reset(self):
-        # Reset is the only function that allocates
-        # permanent (but managed) memory
-        
-        self.step_id = 0
-        self.done = False
-        
         # If user has not specified initial data, the domain provides
         # automatic initialization 
         if self.init_rover_positions is None:
-            self.init_rover_positions = 0.5 * self.setup_size * np.ones(
-                (self.n_rovers, 2))  
+            self.init_rover_positions = 0.5 * self.setup_size * np.ones((self.n_rovers, 2))
         if self.init_rover_orientations is None:
             rand_angles = np.random.uniform(-np.pi, np.pi, self.n_rovers)
-            self.init_rover_orientations = np.vstack((np.cos(rand_angles),
-                np.sin(rand_angles))).T
+            self.init_rover_orientations = np.vstack((np.cos(rand_angles), np.sin(rand_angles))).T
         if self.poi_values is None:
             self.poi_values = np.arange(self.n_pois) + 1.
         if self.poi_positions is None:
-            self.poi_positions = (np.random.rand(self.n_pois, 2) * 
-                self.setup_size)
+            self.poi_positions = (np.random.rand(self.n_pois, 2) * self.setup_size)
     
         # If initial data is invalid (e.g. number of initial rovers does not  
         # match init_rover_positions.shape[0]), we need to raise an error
         if self.init_rover_positions.shape[0] != self.n_rovers:
-            raise ValueError(
-                'Number of rovers does not match number of initial ' 
-                + 'rover positions')
+            raise ValueError('Number of rovers does not match number of initial ' + 'rover positions')
         if self.init_rover_orientations.shape[0] != self.n_rovers:
-            raise ValueError(
-                'Number of rovers does not match number of initial ' 
-                + 'rover orientations')
+            raise ValueError('Number of rovers does not match number of initial ' + 'rover orientations')
         if self.poi_values.shape[0] != self.n_pois:
-            raise ValueError(
-                'Number of POIs does not match number of POI values')
+            raise ValueError('Number of POIs does not match number of POI values')
         if self.poi_positions.shape[0] != self.n_pois:
-            raise ValueError(
-                'Number of POIs does not match number of POI positions')
+            raise ValueError('Number of POIs does not match number of POI positions')
+
+
+    cpdef void reset(self):
+        """
+        Resets the simulation. This encapsulates:
+        - Resetting rover positions to initial locations
+        - 
+
+        """
+
+        self.step_id = 0
+        self.done = False
+
          
-        # Create all unspecified working data
+        # Allocate space for all unspecified working data
         if self.rover_positions is  None:
             self.rover_positions = np.zeros((self.n_rovers, 2))
         if self.rover_orientations is  None:
             self.rover_orientations = np.zeros((self.n_rovers, 2))
         if self.rover_position_histories is None:
-            self.rover_position_histories = np.zeros((self.n_steps + 1, 
-                self.n_rovers, 2))
+            self.rover_position_histories = np.zeros((self.n_steps + 1, self.n_rovers, 2))
         
-        # Create all unspecified return data
+        # Allocate space for all unspecified return data
         if self.rover_observations is None:
-            self.rover_observations = np.zeros((self.n_rovers, 2, 
-                self.n_obs_sections))
+            self.rover_observations = np.zeros((self.n_rovers, 2, self.n_obs_sections))
         if self.rover_rewards is None:
             self.rover_rewards = np.zeros(self.n_rovers)
             
         
-        # Recreate all invalid working data
+        # Reallocate all invalid working data arrays
         if self.rover_positions.shape[0] != self.n_rovers:
             self.rover_positions = np.zeros((self.n_rovers, 2))
         if self.rover_orientations.shape[0] != self.n_rovers:
