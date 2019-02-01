@@ -255,7 +255,6 @@ cdef class RoverDomain:
     cpdef double calc_step_eval_from_poi(self, Py_ssize_t poi_id):
         # todo profile the benefit (or loss) of TempArray
         cdef TempArray[double] sqr_dists_to_poi
-        cdef TempArray[double] srq_dists_to_poi_unsorted
         cdef double displ_x, displ_y, sqr_dist_sum
         cdef Py_ssize_t rover_id, near_rover_id
         
@@ -340,7 +339,7 @@ cdef class RoverDomain:
                 sqr_dist_sum)
         # Do not discount POI evaluation
         else:
-            l_reward self.poi_values[poi_id] 
+            l_reward =  self.poi_values[poi_id] 
             
         #Yes? Continue evaluation
         for rover_id in range(self.n_rovers):
