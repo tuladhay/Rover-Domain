@@ -267,7 +267,6 @@ cdef class RoverDomain:
             displ_y = (self.rover_positions[rover_id, 1]
                 - self.poi_positions[poi_id, 1])
             sqr_dists_to_poi[rover_id] = displ_x*displ_x + displ_y*displ_y
-            srq_dists_to_poi_unsorted[rover_id] = sqr_dists_to_poi[rover_id]
             
                
                
@@ -299,12 +298,12 @@ cdef class RoverDomain:
     cpdef void update_local_step_reward_from_poi(self, Py_ssize_t poi_id):
         # todo profile the benefit (or loss) of TempArray
         cdef TempArray[double] sqr_dists_to_poi
-        cdef TempArray[double] srq_dists_to_poi_unsorted
+        cdef TempArray[double] sqr_dists_to_poi_unsorted
         cdef double displ_x, displ_y, sqr_dist_sum, l_reward
         cdef Py_ssize_t rover_id, near_rover_id
         
         sqr_dists_to_poi.alloc(buf, self.n_rovers)
-        srq_dists_to_poi_unsorted.alloc(buf, self.n_rovers)
+        sqr_dists_to_poi_unsorted.alloc(buf, self.n_rovers)
         # Get the rover square distances to POIs.
         for rover_id in range(self.n_rovers):
             displ_x = (self.rover_positions[rover_id, 0]
@@ -312,7 +311,7 @@ cdef class RoverDomain:
             displ_y = (self.rover_positions[rover_id, 1]
                 - self.poi_positions[poi_id, 1])
             sqr_dists_to_poi[rover_id] = displ_x*displ_x + displ_y*displ_y
-            srq_dists_to_poi_unsorted[rover_id] = sqr_dists_to_poi[rover_id]
+            sqr_dists_to_poi_unsorted[rover_id] = sqr_dists_to_poi[rover_id]
             
                
                
@@ -345,7 +344,7 @@ cdef class RoverDomain:
         for rover_id in range(self.n_rovers):
             for closest_rover_id in range(self.n_req):
                 if sqr_dists_to_poi[closest_rover_id] == (
-                        srq_dists_to_poi_unsorted[rover_id]):
+                        sqr_dists_to_poi_unsorted[rover_id]):
                     self.rover_rewards[rover_id] += l_reward
                     sqr_dists_to_poi[closest_rover_id] = -1.
 
