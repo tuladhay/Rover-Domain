@@ -453,7 +453,7 @@ cdef class RoverDomain:
             for other_rover_id in range(self.n_rovers):
                 
                 # agents do not sense self (ergo skip self comparison)
-                if rover_id != other_rover_id:
+                if rover_id == other_rover_id:
                     continue
 
                 self.add_to_sensor(rover_id, 0, 
