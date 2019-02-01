@@ -62,7 +62,7 @@ cdef class RoverDomain:
     
     
     def __cinit__(self):
-        self.n_rovers = 1
+        self.n_rovers = 10
         self.n_pois = 1
         self.n_steps = 50
         
@@ -114,6 +114,40 @@ cdef class RoverDomain:
         if self.poi_positions.shape[0] != self.n_pois:
             raise ValueError('Number of POIs does not match number of POI positions')
 
+        # Allocate space for all unspecified working data
+        if self.rover_positions is None:
+            self.rover_positions = np.zeros((self.n_rovers, 2))
+        if self.rover_orientations is  None:
+            self.rover_orientations = np.zeros((self.n_rovers, 2))
+        if self.rover_position_histories is None:
+            self.rover_position_histories = np.zeros((self.n_steps + 1, self.n_rovers, 2))
+
+        # Allocate space for all unspecified return data
+        if self.rover_observations is None:
+            self.rover_observations = np.zeros((self.n_rovers, 2, self.n_obs_sections))
+        if self.rover_rewards is None:
+            self.rover_rewards = np.zeros(self.n_rovers)
+
+        # Reallocate all invalid working data arrays
+        if self.rover_positions.shape[0] != self.n_rovers:
+            self.rover_positions = np.zeros((self.n_rovers, 2))
+        if self.rover_orientations.shape[0] != self.n_rovers:
+            self.rover_orientations = np.zeros((self.n_rovers, 2))
+        if (self.rover_position_histories.shape[0] != self.n_steps + 1 or self.rover_position_histories.shape[1] != self.n_rovers):
+            self.rover_position_histories = np.zeros((self.n_steps + 1, self.n_rovers, 2))
+
+        # Recreate all invalid return data
+        if (self.rover_observations.shape[0] != self.n_rovers or self.rover_observations.shape[3] != self.n_obs_sections):
+            self.rover_observations = np.zeros((self.n_rovers, 2, self.n_obs_sections))
+        if self.rover_rewards.shape[0] != self.n_rovers:
+            self.rover_rewards = np.zeros(self.n_rovers)
+
+        # Copy over initial data to working data
+        self.rover_positions[...] = self.init_rover_positions
+        self.rover_orientations[...] = self.init_rover_orientations
+
+        self.step_id = 0
+        self.done = False
 
     cpdef void reset(self):
         """
@@ -126,37 +160,17 @@ cdef class RoverDomain:
         self.step_id = 0
         self.done = False
 
-         
-        # Allocate space for all unspecified working data
-        if self.rover_positions is  None:
-            self.rover_positions = np.zeros((self.n_rovers, 2))
-        if self.rover_orientations is  None:
-            self.rover_orientations = np.zeros((self.n_rovers, 2))
-        if self.rover_position_histories is None:
-            self.rover_position_histories = np.zeros((self.n_steps + 1, self.n_rovers, 2))
-        
-        # Allocate space for all unspecified return data
-        if self.rover_observations is None:
-            self.rover_observations = np.zeros((self.n_rovers, 2, self.n_obs_sections))
-        if self.rover_rewards is None:
-            self.rover_rewards = np.zeros(self.n_rovers)
-            
-        
         # Reallocate all invalid working data arrays
         if self.rover_positions.shape[0] != self.n_rovers:
             self.rover_positions = np.zeros((self.n_rovers, 2))
         if self.rover_orientations.shape[0] != self.n_rovers:
             self.rover_orientations = np.zeros((self.n_rovers, 2))
-        if (self.rover_position_histories.shape[0] != self.n_steps + 1
-                or self.rover_position_histories.shape[1] != self.n_rovers):
-            self.rover_position_histories = np.zeros((self.n_steps + 1, 
-                self.n_rovers, 2))
-        
+        if (self.rover_position_histories.shape[0] != self.n_steps + 1 or self.rover_position_histories.shape[1] != self.n_rovers):
+            self.rover_position_histories = np.zeros((self.n_steps + 1, self.n_rovers, 2))
+
         # Recreate all invalid return data
-        if (self.rover_observations.shape[0] != self.n_rovers or
-                self.rover_observations.shape[3] != self.n_obs_sections):
-            self.rover_observations = np.zeros((self.n_rovers, 2,
-                self.n_obs_sections))
+        if (self.rover_observations.shape[0] != self.n_rovers or self.rover_observations.shape[3] != self.n_obs_sections):
+            self.rover_observations = np.zeros((self.n_rovers, 2, self.n_obs_sections))
         if self.rover_rewards.shape[0] != self.n_rovers:
             self.rover_rewards = np.zeros(self.n_rovers)
         
@@ -186,8 +200,7 @@ cdef class RoverDomain:
             # index because the initial position before any movement
             # is stored in rover_position_histories[0], so the first step
             # (step_id = 0) must be stored in rover_position_histories[1]
-            self.rover_position_histories[self.step_id,...]\
-                = self.rover_positions
+            self.rover_position_histories[self.step_id,...] = self.rover_positions
             
         self.done = self.step_id >= self.n_steps
         if evaluate:
@@ -428,18 +441,13 @@ cdef class RoverDomain:
             for type_id in range(2):
                 for section_id in range(self.n_obs_sections):
                     self.rover_observations[rover_id, type_id, section_id] = 0.
-        
-        
-        for rover_id in range(self.n_rovers):
 
-            
+        for rover_id in range(self.n_rovers):
             # Update rover type observations
             for other_rover_id in range(self.n_rovers):
-                
                 # agents do not sense self (ergo skip self comparison)
                 if rover_id == other_rover_id:
                     continue
-
                 self.add_to_sensor(rover_id, 0, self.rover_positions[rover_id, 0], self.rover_positions[rover_id, 1], 1.)
 
             # Update POI type observations

@@ -1,7 +1,7 @@
-import rover_domain_w_setup as rover_domain
 import numpy as np
+import random
 import pandas as pd
-
+import rover_domain
 
 def test_G():
     """
@@ -9,15 +9,22 @@ def test_G():
     :return: None (at the moment)
     """
     rd = rover_domain.RoverDomain()
+    actions = np.random.random((10, 2))
+    print(actions)
+    obs, reward, done, _ = rd.step(actions)
+    print("observations:", np.array(obs)[:,0])
 
     for t in range(rd.n_steps):
         # For each step
-        actions = np.random.random((2, 1))
+        actions = np.random.random((10, 2))
         print(actions)
         obs, reward, done, _ = rd.step(actions)
-        print(obs, reward, done)
+        print(np.array(obs), reward, done)
 
 
 
 if __name__ == "__main__":
+    random.seed(0)
+    np.random.seed(0)
+
     test_G()
