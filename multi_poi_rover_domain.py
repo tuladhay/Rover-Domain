@@ -82,7 +82,7 @@ if __name__ == '__main__':
     np.random.seed(0)
 
     rd = SequentialPOIRD()
-    rd.reset()
+    #rd.reset()
     print(rd.poi_visited)
     print("Score: ", rd.sequential_score())
     print(np.array(rd.rover_positions))
