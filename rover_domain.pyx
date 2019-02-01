@@ -85,7 +85,7 @@ cdef class RoverDomain:
         self.rover_observations = None
         self.rover_rewards = None
 
-                        
+
     cpdef void reset(self):
         # Reset is the only function that allocates
         # permanent (but managed) memory
@@ -440,16 +440,12 @@ cdef class RoverDomain:
                 if rover_id != other_rover_id:
                     continue
 
-                self.add_to_sensor(rover_id, 0, 
-                    self.rover_positions[rover_id, 0], 
-                    self.rover_positions[rover_id, 1], 1.)    
+                self.add_to_sensor(rover_id, 0, self.rover_positions[rover_id, 0], self.rover_positions[rover_id, 1], 1.)
 
             # Update POI type observations
             for poi_id in range(self.n_pois):
             
-                self.add_to_sensor(rover_id, 1,
-                    self.poi_positions[poi_id, 0], 
-                    self.poi_positions[poi_id, 1], 1.) 
+                self.add_to_sensor(rover_id, 1, self.poi_positions[poi_id, 0], self.poi_positions[poi_id, 1], 1.)
                     
     
     
