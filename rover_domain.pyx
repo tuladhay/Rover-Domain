@@ -23,10 +23,6 @@ from libcpp.algorithm cimport partial_sort
 
 cimport cython
 
-# Define module level temporary array manager for fast creation of short-lived
-# c++ arrays
-cdef vector[double] def_buf = vector[double](0)
-cdef vector[double]* buf = address(def_buf)
 
 cdef extern from "math.h":
     double sqrt(double m)
@@ -54,8 +50,12 @@ cdef class RoverDomain:
     cdef public double[:, :, :] rover_position_histories
     cdef public double[:, :] rover_orientations
     cdef public double[:] poi_values
-    
     cdef public double[:, :] poi_positions
+    
+    # Define module level temporary array manager for fast creation of short-lived
+    # c++ arrays
+    cdef vector[double] def_buf
+    cdef vector[double]* buf 
     
     # Some return values are stored for performance reasons
     cdef public double[:, :, :] rover_observations
@@ -92,7 +92,10 @@ cdef class RoverDomain:
         self.poi_positions =  None
         self.rover_observations = None
         self.rover_rewards = None
-
+        
+        # Initialize Temp Array Buffer and address it
+        self.def_buf = vector[double](0)
+        self.buf = address(self.def_buf)
                         
     cpdef void reset(self):
         # Reset is the only function that allocates
@@ -258,7 +261,7 @@ cdef class RoverDomain:
         cdef double displ_x, displ_y, sqr_dist_sum
         cdef Py_ssize_t rover_id, near_rover_id
         
-        sqr_dists_to_poi.alloc(buf, self.n_rovers)
+        sqr_dists_to_poi.alloc(self.buf, self.n_rovers)
         
         # Get the rover square distances to POIs.
         for rover_id in range(self.n_rovers):
@@ -302,8 +305,8 @@ cdef class RoverDomain:
         cdef double displ_x, displ_y, sqr_dist_sum, l_reward
         cdef Py_ssize_t rover_id, near_rover_id
         
-        sqr_dists_to_poi.alloc(buf, self.n_rovers)
-        sqr_dists_to_poi_unsorted.alloc(buf, self.n_rovers)
+        sqr_dists_to_poi.alloc(self.buf, self.n_rovers)
+        sqr_dists_to_poi_unsorted.alloc(self.buf, self.n_rovers)
         # Get the rover square distances to POIs.
         for rover_id in range(self.n_rovers):
             displ_x = (self.rover_positions[rover_id, 0]
@@ -393,7 +396,7 @@ cdef class RoverDomain:
             
         # Initialize evaluations to 0
         eval = 0.
-        poi_evals.alloc(buf, self.n_pois)
+        poi_evals.alloc(self.buf, self.n_pois)
         for poi_id in range(self.n_pois):
             poi_evals[poi_id] = 0
         
@@ -428,8 +431,8 @@ cdef class RoverDomain:
         if not self.done:
             return 0.
         
-        actual_x_hist.alloc(buf, self.n_steps+1)
-        actual_y_hist.alloc(buf, self.n_steps+1)
+        actual_x_hist.alloc(self.buf, self.n_steps+1)
+        actual_y_hist.alloc(self.buf, self.n_steps+1)
         
         for step_id in range(self.n_steps+1):
             # Store actual positions for later reassignment
