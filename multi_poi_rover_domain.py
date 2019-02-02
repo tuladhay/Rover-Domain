@@ -128,6 +128,19 @@ class SequentialPOIRD(rover_domain.RoverDomain):
                 )
             # TODO add the "is observed section"
 
+    def score_single_type(self, poi_type):
+        """
+        Calculates the step score for a single type of POI, ignoring all other POI
+
+        :param poi_type: The type of the point of interest being scored
+        :return: score, the global score for observing the specified POI type
+        """
+        score = 0
+        for poi_id in range(self.n_pois):
+            if self.poi_types[poi_id] == poi_type:
+                score += self.calc_step_eval_from_poi(poi_id)
+        return score
+
 
 if __name__ == '__main__':
     # Fix random seeds
@@ -138,26 +151,35 @@ if __name__ == '__main__':
 
     rd = SequentialPOIRD()
     # rd.reset()
-    print(rd.poi_visited)
-    print("Score: ", rd.sequential_score())
-    print(np.array(rd.rover_positions))
-    print(np.array(rd.poi_positions))
-    print()
-    rd.interaction_dist = 1
-    rd.update_sequence_visits()
-    print(rd.poi_visited)
-    print("Score: ", rd.sequential_score())
-    print()
-    rd.interaction_dist = 2
-    rd.update_sequence_visits()
-    print(rd.poi_visited)
-    print("Score: ", rd.sequential_score())
-    print()
-    rd.interaction_dist = 3
-    rd.update_sequence_visits()
-    print(rd.poi_visited)
-    print("Score: ", rd.sequential_score())
+    # print(rd.poi_visited)
+    # print("Score: ", rd.sequential_score())
+    # print(np.array(rd.rover_positions))
+    # print(np.array(rd.poi_positions))
+    # print()
+    # rd.interaction_dist = 1
+    # rd.update_sequence_visits()
+    # print(rd.poi_visited)
+    # print("Score: ", rd.sequential_score())
+    # print()
+    # rd.interaction_dist = 2
+    # rd.update_sequence_visits()
+    # print(rd.poi_visited)
+    # print("Score: ", rd.sequential_score())
+    # print()
+    # rd.interaction_dist = 3
+    # rd.update_sequence_visits()
+    # print(rd.poi_visited)
+    # print("Score: ", rd.sequential_score())
+#
+    # print("Initial observations:", np.array(rd.rover_observations))
+    # rd.update_observations()
+    # print("Updated observations:", np.array(rd.rover_observations)[0])
 
-    print("Initial observations:", np.array(rd.rover_observations))
-    rd.update_observations()
-    print("Updated observations:", np.array(rd.rover_observations)[0])
+    rd.poi_positions[2, 0] = 3.0
+    rd.poi_positions[2, 1] = 3.0
+    done = False
+    print(np.array(rd.rover_positions))
+    while not done:
+        actions = np.random.random((10, 2))
+        obs, reward, done, _ = rd.step(actions)
+        print("Type 0: {} Type 1: {} Type 2: {}".format(rd.score_single_type(0), rd.score_single_type(1), rd.score_single_type(2)))
