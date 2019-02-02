@@ -4,10 +4,11 @@ import numpy as np
 
 class SequentialPOIRD(rover_domain.RoverDomain):
     """
-    Extends the rover domain class to include funcions for sequential POI observation tasks,
+    Extends the rover domain class to include functions for sequential POI observation tasks,
     where the reward is not handed out until all types of a POI are observed, and there is a specific
     sequential relationship for how each POI can be observed.
     """
+
     def __init__(self):
         super(SequentialPOIRD, self).__init__()
         self.poi_types = [2, 1, 0]
@@ -24,7 +25,6 @@ class SequentialPOIRD(rover_domain.RoverDomain):
 
         # Override the size of the observations matrix
         self.rover_observations = np.zeros((self.n_rovers, 1 + len(self.poi_visited), self.n_obs_sections))
-
 
     def reset(self):
         """
@@ -121,7 +121,7 @@ class SequentialPOIRD(rover_domain.RoverDomain):
                 # and then is assigned to it's respective section
                 self.add_to_sensor(
                     rover_id,
-                    poi_type+1,
+                    poi_type + 1,
                     self.poi_positions[poi_id, 0],
                     self.poi_positions[poi_id, 1],
                     1.
@@ -132,11 +132,12 @@ class SequentialPOIRD(rover_domain.RoverDomain):
 if __name__ == '__main__':
     # Fix random seeds
     import random
+
     random.seed(0)
     np.random.seed(0)
 
     rd = SequentialPOIRD()
-    #rd.reset()
+    # rd.reset()
     print(rd.poi_visited)
     print("Score: ", rd.sequential_score())
     print(np.array(rd.rover_positions))
