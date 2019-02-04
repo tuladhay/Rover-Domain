@@ -1,10 +1,10 @@
 # distutils: language = c++
 # cython: language_level=3, boundscheck=True
 
-# todo Convert to cpp and wrap
+# todo Convert to cpp or D and wrap
 # todo TempArray.alloc() -> TempArray()
 # todo Static default TEmpArray buffer for each RoverDomain
-# todo "sticky" POIs, do re
+# todo "sticky" POIs, when POI's are observed they (can) go away
 # todo cythonize the step code 
 # todo observation and reward is always correct (potentially read only) after reset(), move(), step()
 # todo default: no reward update in step
@@ -17,12 +17,13 @@ from cpython cimport bool
 from cython.view cimport array as cvarray
 from cython.operator cimport address
 from libcpp.vector cimport vector
+from libcpp.functional cimport function
 from libc cimport math as cmath
 from  temp_array cimport TempArray
 from libcpp.algorithm cimport partial_sort
-
 cimport cython
 
+import time
 
 cdef extern from "math.h":
     double sqrt(double m)
@@ -30,6 +31,9 @@ cdef extern from "math.h":
 cdef cython.numeric sqr(cython.numeric x):
     return x*x
     
+
+ctypedef enum ObjTypeId: ROVER_T_ID, POI_T_ID
+ctypedef void (*Evaluate)(RoverDomain, int)
 
 cdef class RoverDomain:
     cdef public Py_ssize_t n_rovers
@@ -185,7 +189,7 @@ cdef class RoverDomain:
         self.n_steps = self.step_id
         self.done = True
 
-    def step(self, double[:, :] actions, update_reward = None):
+    cpdef step(self, double[:, :] actions, update_reward = None):
         """
         Provided for convenience, not recommended for performance
         
@@ -205,13 +209,38 @@ cdef class RoverDomain:
             
         self.done = self.step_id >= self.n_steps
         if update_reward:
-            update_reward(self)
+            update_reward()
         else:
             self.update_rewards_step_global_eval()
         self.update_observations()
         return self.rover_observations, self.rover_rewards, self.done, self
+        
+    cpdef void step_nret(self, double[:, :] actions, update_reward = None):
+        """
+        Provided for convenience, not recommended for performance
+        
+        Note, reward is a function
+        """
+        if not self.done:
+            if actions is not None:
+                self.move_rovers(actions)
+            self.step_id += 1
+            
+            # We must record rover positions after increasing the step 
+            # index because the initial position before any movement
+            # is stored in rover_position_histories[0], so the first step
+            # (step_id = 0) must be stored in rover_position_histories[1]
+            self.rover_position_histories[self.step_id,...]\
+                = self.rover_positions
+            
+        self.done = self.step_id >= self.n_steps
+        if update_reward:
+            update_reward()
+        else:
+            self.update_rewards_step_global_eval()
+        self.update_observations()
     
-
+        
     cpdef void move_rovers(self, double[:, :] actions):
         cdef Py_ssize_t rover_id
         cdef double dx, dy, norm
@@ -256,12 +285,12 @@ cdef class RoverDomain:
                 
     
     cpdef double calc_step_eval_from_poi(self, Py_ssize_t poi_id):
-        # todo profile the benefit (or loss) of TempArray
         cdef TempArray[double] sqr_dists_to_poi
+        sqr_dists_to_poi.alloc(self.buf, self.n_rovers)
         cdef double displ_x, displ_y, sqr_dist_sum
         cdef Py_ssize_t rover_id, near_rover_id
         
-        sqr_dists_to_poi.alloc(self.buf, self.n_rovers)
+        
         
         # Get the rover square distances to POIs.
         for rover_id in range(self.n_rovers):
@@ -299,14 +328,15 @@ cdef class RoverDomain:
             return self.poi_values[poi_id]    
 
     cpdef void update_local_step_reward_from_poi(self, Py_ssize_t poi_id):
-        # todo profile the benefit (or loss) of TempArray
         cdef TempArray[double] sqr_dists_to_poi
+        sqr_dists_to_poi.alloc(self.buf, self.n_rovers)
         cdef TempArray[double] sqr_dists_to_poi_unsorted
+        sqr_dists_to_poi_unsorted.alloc(self.buf, self.n_rovers)
         cdef double displ_x, displ_y, sqr_dist_sum, l_reward
         cdef Py_ssize_t rover_id, near_rover_id
         
-        sqr_dists_to_poi.alloc(self.buf, self.n_rovers)
-        sqr_dists_to_poi_unsorted.alloc(self.buf, self.n_rovers)
+        
+        
         # Get the rover square distances to POIs.
         for rover_id in range(self.n_rovers):
             displ_x = (self.rover_positions[rover_id, 0]
@@ -388,6 +418,7 @@ cdef class RoverDomain:
     cpdef double calc_traj_global_eval(self):
         cdef Py_ssize_t step_id, poi_id
         cdef TempArray[double] poi_evals
+        poi_evals.alloc(self.buf, self.n_pois)
         cdef double eval
         
         # Only evaluate trajectories at the end
@@ -396,7 +427,7 @@ cdef class RoverDomain:
             
         # Initialize evaluations to 0
         eval = 0.
-        poi_evals.alloc(self.buf, self.n_pois)
+        
         for poi_id in range(self.n_pois):
             poi_evals[poi_id] = 0
         
@@ -459,7 +490,7 @@ cdef class RoverDomain:
         return eval
 
     cpdef void add_to_sensor(self, Py_ssize_t rover_id, 
-        Py_ssize_t type_id, double other_x, double other_y, double val):
+        ObjTypeId obj_type_id, double other_x, double other_y, double val):
             
             cdef double gf_displ_x, gf_displ_y, displ_x, displ_y, 
             cdef double rf_displ_x, rf_displ_y, dist, angle,  sec_id_temp
@@ -508,7 +539,8 @@ cdef class RoverDomain:
             sec_id = <Py_ssize_t>min(max(0, sec_id_temp), self.n_obs_sections-1)
                 
             
-            self.rover_observations[rover_id,type_id,sec_id] += val/(dist*dist)
+            self.rover_observations[rover_id,<Py_ssize_t>obj_type_id,sec_id] +=(
+                val/(dist*dist))
         
     cpdef void update_observations(self):
         
@@ -531,18 +563,22 @@ cdef class RoverDomain:
                 if rover_id == other_rover_id:
                     continue
 
-                self.add_to_sensor(rover_id, 0, 
-                    self.rover_positions[other_rover_id, 0], 
-                    self.rover_positions[other_rover_id, 1], 1.)    
-
+                self.add_to_sensor(rover_id, 
+                    obj_type_id = ROVER_T_ID, 
+                    other_x = self.rover_positions[other_rover_id, 0], 
+                    other_y = self.rover_positions[other_rover_id, 1], 
+                    val = 1.)    
+                    
             # Update POI type observations
             for poi_id in range(self.n_pois):
             
-                self.add_to_sensor(rover_id, 1,
-                    self.poi_positions[poi_id, 0], 
-                    self.poi_positions[poi_id, 1], 1.) 
+                self.add_to_sensor(rover_id, 
+                    obj_type_id = POI_T_ID,
+                    other_x = self.poi_positions[poi_id, 0], 
+                    other_y = self.poi_positions[poi_id, 1], 
+                    val = self.poi_values[poi_id]) 
                     
-    
+
     
     cpdef void update_rewards_step_global_eval(self):
         cdef double global_eval
@@ -580,5 +616,33 @@ cdef class RoverDomain:
             cfact_global_eval = self.calc_traj_cfact_global_eval(rover_id)
             self.rover_rewards[rover_id] = global_eval - cfact_global_eval
         
+        
+def timing_test():
+    cdef RoverDomain r = RoverDomain()
+    r.n_rovers = 10
+    r.n_pois = 5
+    start = time.time()
+    cdef double[:, :] actions = None
+    cdef int i, j
+    for j in range(10000):
+        r.reset()
+        for i in range(50):
+            if not r.done:
+                if actions is not None:
+                    r.move_rovers(actions)
+                    r.step_id += 1
+                    
+                    # We must record rover positions after increasing the step 
+                    # index because the initial position before any movement
+                    # is stored in rover_position_histories[0], so the first step
+                    # (step_id = 0) must be stored in rover_position_histories[1]
+                    r.rover_position_histories[r.step_id,...]\
+                        = r.rover_positions
+                    
+                r.done = r.step_id >= r.n_steps
+                r.update_rewards_traj_global_eval()
+                r.update_observations()
+            # r.step_nret(None, None)
+    print(time.time()-start)
         
         
