@@ -2,14 +2,8 @@
 # cython: language_level=3, boundscheck=True
 
 # todo Convert to cpp or D and wrap
-# todo TempArray.alloc() -> TempArray()
 # todo "sticky" POIs, when POI's are observed they (can) go away
-# todo observation and reward is always correct (potentially read only) after reset(), move(), step()
-# todo default: no reward update in step
-# todo ability to set reward in code (delegation)
-# todo does "from rover_domain_w_setup import *" work? compile/initializes more than once?
 
-# todo Convert to delegate/composition pattern
 import numpy as np
 from cpython cimport bool
 from cython.view cimport array as cvarray
@@ -267,14 +261,12 @@ cdef class RoverDomain:
         self.done = self.step_id >= self.n_steps
         self.update_rewards()
         self.update_observations()
-    
+      
     cpdef double calc_step_eval_from_poi(self, Py_ssize_t poi_id):
-        cdef TempArray[double] sqr_dists_to_poi
-        sqr_dists_to_poi.alloc(self.buf, self.n_rovers)
+        cdef TempArray[double] sqr_dists_to_poi\
+            = TempArray[double](self.buf, self.n_rovers)
         cdef double displ_x, displ_y, sqr_dist_sum
         cdef Py_ssize_t rover_id, near_rover_id
-        
-        
         
         # Get the rover square distances to POIs.
         for rover_id in range(self.n_rovers):
@@ -312,10 +304,10 @@ cdef class RoverDomain:
             return self.poi_values[poi_id]    
 
     cpdef void update_local_step_reward_from_poi(self, Py_ssize_t poi_id):
-        cdef TempArray[double] sqr_dists_to_poi
-        sqr_dists_to_poi.alloc(self.buf, self.n_rovers)
-        cdef TempArray[double] sqr_dists_to_poi_unsorted
-        sqr_dists_to_poi_unsorted.alloc(self.buf, self.n_rovers)
+        cdef TempArray[double] sqr_dists_to_poi\
+            = TempArray[double](self.buf, self.n_rovers)
+        cdef TempArray[double] sqr_dists_to_poi_unsorted\
+            = TempArray[double](self.buf, self.n_rovers)
         cdef double displ_x, displ_y, sqr_dist_sum, l_reward
         cdef Py_ssize_t rover_id, near_rover_id
         
@@ -401,8 +393,8 @@ cdef class RoverDomain:
 
     cpdef double calc_traj_global_eval(self):
         cdef Py_ssize_t step_id, poi_id
-        cdef TempArray[double] poi_evals
-        poi_evals.alloc(self.buf, self.n_pois)
+        cdef TempArray[double] poi_evals\
+            = TempArray[double](self.buf, self.n_pois)
         cdef double eval
         
         # Only evaluate trajectories at the end
@@ -437,7 +429,10 @@ cdef class RoverDomain:
 
     cpdef double calc_traj_cfact_global_eval(self, Py_ssize_t rover_id):
         # Hack: simulate counterfactual by moving agent FAR AWAY, then calculate
-        cdef TempArray[double] actual_x_hist, actual_y_hist,
+        cdef TempArray[double] actual_x_hist\
+            = TempArray[double](self.buf, self.n_steps+1)
+        cdef TempArray[double] actual_y_hist\
+            = TempArray[double](self.buf, self.n_steps+1)
         cdef double  far, eval
         cdef Py_ssize_t step_id
         far = 1000000. # That's far enough, right?
@@ -445,9 +440,6 @@ cdef class RoverDomain:
         # Only evaluate trajectories at the end
         if not self.done:
             return 0.
-        
-        actual_x_hist.alloc(self.buf, self.n_steps+1)
-        actual_y_hist.alloc(self.buf, self.n_steps+1)
         
         for step_id in range(self.n_steps+1):
             # Store actual positions for later reassignment
@@ -600,7 +592,16 @@ cdef class RoverDomain:
             cfact_global_eval = self.calc_traj_cfact_global_eval(rover_id)
             self.rover_rewards[rover_id] = global_eval - cfact_global_eval
         
-        
+def timing_test():
+    cdef RoverDomain r = RoverDomain()
+    cdef Py_ssize_t i
+    r.n_rovers = 5
+    r.n_pois = 4
+    r.reset()
+    start = time.time()
+    for i in range(10000000):
+        r.calc_step_global_eval()
+    print(time.time() - start)
 
         
         
