@@ -3,9 +3,7 @@
 
 # todo Convert to cpp or D and wrap
 # todo TempArray.alloc() -> TempArray()
-# todo Static default TEmpArray buffer for each RoverDomain
 # todo "sticky" POIs, when POI's are observed they (can) go away
-# todo cythonize the step code 
 # todo observation and reward is always correct (potentially read only) after reset(), move(), step()
 # todo default: no reward update in step
 # todo ability to set reward in code (delegation)
@@ -105,7 +103,7 @@ cdef class RoverDomain:
         # Use default reward update
         self.update_rewards = self.update_rewards_step_global_eval
                         
-    cpdef void reset(self):
+    cpdef double[:, :, :] reset(self):
         # Reset is the only function that allocates
         # permanent (but managed) memory
         
@@ -185,7 +183,13 @@ cdef class RoverDomain:
         
         # Store first rover positions in histories
         self.rover_position_histories[0,...] = self.init_rover_positions
+        
+        # Update observation and rewards (nothing happened yet thus rewards 
+        # are zero)
+        self.rover_rewards[:] = 0
         self.update_observations()
+        return self.rover_observations
+
             
     cpdef void stop_prematurely(self):
         self.n_steps = self.step_id
