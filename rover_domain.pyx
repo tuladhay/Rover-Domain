@@ -215,7 +215,7 @@ cdef class RoverDomain:
 
         if not self.done:
             if actions is not None:
-                # Move rovers
+                # Move rovers using actions
                 
                 # clip actions
                 for rover_id in range(self.n_rovers):
