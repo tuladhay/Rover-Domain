@@ -530,11 +530,8 @@ cdef class RoverDomain:
         
         
         for rover_id in range(self.n_rovers):
-
-            
             # Update rover type observations
             for other_rover_id in range(self.n_rovers):
-                
                 # agents do not sense self (ergo skip self comparison)
                 if rover_id == other_rover_id:
                     continue
@@ -553,6 +550,7 @@ cdef class RoverDomain:
                     other_x = self.poi_positions[poi_id, 0], 
                     other_y = self.poi_positions[poi_id, 1], 
                     val = self.poi_values[poi_id]) 
+
                     
 
     
@@ -592,16 +590,7 @@ cdef class RoverDomain:
             cfact_global_eval = self.calc_traj_cfact_global_eval(rover_id)
             self.rover_rewards[rover_id] = global_eval - cfact_global_eval
         
-def timing_test():
-    cdef RoverDomain r = RoverDomain()
-    cdef Py_ssize_t i
-    r.n_rovers = 5
-    r.n_pois = 4
-    r.reset()
-    start = time.time()
-    for i in range(10000000):
-        r.calc_step_global_eval()
-    print(time.time() - start)
+
 
         
         
