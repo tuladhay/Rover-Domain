@@ -55,6 +55,7 @@ cdef class RoverDomain:
     cdef public double[:, :] rover_orientations
     cdef public double[:] poi_values
     cdef public double[:, :] poi_positions
+    cdef public object update_rewards
     
     # Define module level temporary array manager for fast creation of short-lived
     # c++ arrays
@@ -100,6 +101,9 @@ cdef class RoverDomain:
         # Initialize Temp Array Buffer and address it
         self.def_buf = vector[double](0)
         self.buf = address(self.def_buf)
+        
+        # Use default reward update
+        self.update_rewards = self.update_rewards_step_global_eval
                         
     cpdef void reset(self):
         # Reset is the only function that allocates
@@ -180,50 +184,73 @@ cdef class RoverDomain:
         self.rover_orientations[...] = self.init_rover_orientations
         
         # Store first rover positions in histories
-        # todo avoiding slicing for speed?
         self.rover_position_histories[0,...] = self.init_rover_positions
-        
-        # Todo I need observation and reward to be correct each step
+        self.update_observations()
             
     cpdef void stop_prematurely(self):
         self.n_steps = self.step_id
         self.done = True
 
-    cpdef step(self, double[:, :] actions, update_reward = None):
+    cpdef step(self, double[:, :] actions):
         """
-        Provided for convenience, not recommended for performance
+        Slightly slower than step_n0_ret in cython
         
-        Note, reward is a function
+        Note, update_reward is a function
         """
-        if not self.done:
-            if actions is not None:
-                self.move_rovers(actions)
-            self.step_id += 1
-            
-            # We must record rover positions after increasing the step 
-            # index because the initial position before any movement
-            # is stored in rover_position_histories[0], so the first step
-            # (step_id = 0) must be stored in rover_position_histories[1]
-            self.rover_position_histories[self.step_id,...]\
-                = self.rover_positions
-            
-        self.done = self.step_id >= self.n_steps
-        if update_reward:
-            update_reward()
-        else:
-            self.update_rewards_step_global_eval()
-        self.update_observations()
+        self.step_no_ret(actions)
         return self.rover_observations, self.rover_rewards, self.done, self
         
-    cpdef void step_nret(self, double[:, :] actions, update_reward = None):
+    cpdef void step_no_ret(self, double[:, :] actions):
         """
         Provided for convenience, not recommended for performance
         
         Note, reward is a function
         """
+        cdef Py_ssize_t rover_id
+        cdef double dx, dy, norm
+
         if not self.done:
             if actions is not None:
-                self.move_rovers(actions)
+                # Move rovers
+                
+                # clip actions
+                for rover_id in range(self.n_rovers):
+                    actions[rover_id, 0] = min(max(-1, actions[rover_id, 0]), 1)
+                    actions[rover_id, 1] = min(max(-1, actions[rover_id, 1]), 1)
+                
+                
+                if self.reorients:
+                    # Translate and Reorient all rovers based on their actions
+                    for rover_id in range(self.n_rovers):
+                
+                        # turn action into global frame motion
+                        dx = (self.rover_orientations[rover_id, 0]
+                            * actions[rover_id, 0] 
+                            - self.rover_orientations[rover_id, 1] 
+                            * actions[rover_id, 1])
+                        dy = (self.rover_orientations[rover_id, 0] 
+                            * actions[rover_id, 1] 
+                            + self.rover_orientations[rover_id, 1] 
+                            * actions[rover_id, 0])
+                        
+                    
+                        # globally move and reorient agent
+                        self.rover_positions[rover_id, 0] += dx
+                        self.rover_positions[rover_id, 1] += dy
+                        
+                        # Reorient agent in the direction of movement in
+                        # the global frame.  Avoid divide by 0
+                        # (by skipping the reorientation step entirely).
+                        if not (dx == 0. and dy == 0.): 
+                            norm = sqrt(dx*dx +  dy*dy)
+                            self.rover_orientations[rover_id, 0] = dx / norm
+                            self.rover_orientations[rover_id, 1] = dy / norm
+                            
+                # Else domain translates but does not reorients agents
+                else:
+                    for rover_id in range(self.n_rovers):
+                        self.rover_positions[rover_id, 0] += actions[rover_id,0]
+                        self.rover_positions[rover_id, 1] += actions[rover_id,1]
             self.step_id += 1
             
             # We must record rover positions after increasing the step 
@@ -234,55 +261,8 @@ cdef class RoverDomain:
                 = self.rover_positions
             
         self.done = self.step_id >= self.n_steps
-        if update_reward:
-            update_reward()
-        else:
-            self.update_rewards_step_global_eval()
+        self.update_rewards()
         self.update_observations()
-    
-        
-    cpdef void move_rovers(self, double[:, :] actions):
-        cdef Py_ssize_t rover_id
-        cdef double dx, dy, norm
-        
-        # clip actions
-        for rover_id in range(self.n_rovers):
-            actions[rover_id, 0] = min(max(-1, actions[rover_id, 0]), 1)
-            actions[rover_id, 1] = min(max(-1, actions[rover_id, 1]), 1)
-        
-        
-        if self.reorients:
-            # Translate and Reorient all rovers based on their actions
-            for rover_id in range(self.n_rovers):
-        
-                # turn action into global frame motion
-                dx = (self.rover_orientations[rover_id, 0]
-                    * actions[rover_id, 0] 
-                    - self.rover_orientations[rover_id, 1] 
-                    * actions[rover_id, 1])
-                dy = (self.rover_orientations[rover_id, 0] 
-                    * actions[rover_id, 1] 
-                    + self.rover_orientations[rover_id, 1] 
-                    * actions[rover_id, 0])
-                
-            
-                # globally move and reorient agent
-                self.rover_positions[rover_id, 0] += dx
-                self.rover_positions[rover_id, 1] += dy
-                
-                # Reorient agent in the direction of movement in the global 
-                # frame.  Avoid divide by 0 (by skipping the reorientation step 
-                # entirely).
-                if not (dx == 0. and dy == 0.): 
-                    norm = sqrt(dx*dx +  dy*dy)
-                    self.rover_orientations[rover_id,0] = dx / norm
-                    self.rover_orientations[rover_id,1] = dy / norm
-        # Else domain translates but does not reorients agents
-        else:
-            for rover_id in range(self.n_rovers):
-                self.rover_positions[rover_id, 0] += actions[rover_id, 0]
-                self.rover_positions[rover_id, 1] += actions[rover_id, 1]
-                
     
     cpdef double calc_step_eval_from_poi(self, Py_ssize_t poi_id):
         cdef TempArray[double] sqr_dists_to_poi
@@ -617,32 +597,6 @@ cdef class RoverDomain:
             self.rover_rewards[rover_id] = global_eval - cfact_global_eval
         
         
-def timing_test():
-    cdef RoverDomain r = RoverDomain()
-    r.n_rovers = 10
-    r.n_pois = 5
-    start = time.time()
-    cdef double[:, :] actions = None
-    cdef int i, j
-    for j in range(10000):
-        r.reset()
-        for i in range(50):
-            if not r.done:
-                if actions is not None:
-                    r.move_rovers(actions)
-                    r.step_id += 1
-                    
-                    # We must record rover positions after increasing the step 
-                    # index because the initial position before any movement
-                    # is stored in rover_position_histories[0], so the first step
-                    # (step_id = 0) must be stored in rover_position_histories[1]
-                    r.rover_position_histories[r.step_id,...]\
-                        = r.rover_positions
-                    
-                r.done = r.step_id >= r.n_steps
-                r.update_rewards_traj_global_eval()
-                r.update_observations()
-            # r.step_nret(None, None)
-    print(time.time()-start)
+
         
         
