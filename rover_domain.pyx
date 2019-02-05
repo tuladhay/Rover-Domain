@@ -62,9 +62,9 @@ cdef class RoverDomain:
     
     
     def __cinit__(self):
-        self.n_rovers = 1
-        self.n_pois = 1
-        self.n_steps = 50
+        self.n_rovers = 3
+        self.n_pois = 3
+        self.n_steps = 100
         
         self.n_req = 1
         self.min_dist = 1.
