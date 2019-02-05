@@ -153,7 +153,11 @@ cdef class RoverDomain:
         """
         Resets the simulation. This encapsulates:
         - Resetting rover positions to initial locations
-        - 
+        - Zeroing the observation arrays
+        - Zeroing the reward arrays
+        - Resetting the position history arrays
+        
+        :return: None
 
         """
 

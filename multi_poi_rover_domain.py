@@ -59,7 +59,8 @@ class SequentialPOIRD(rover_domain.RoverDomain):
     def update_sequence_visits(self):
         """
         Uses current rover positions to update observations.
-        :return:
+
+        :return: None
         """
         # TODO implement tight coupling in this scenario (can use parent class functionality?)
         for rover in self.rover_positions:
@@ -72,6 +73,7 @@ class SequentialPOIRD(rover_domain.RoverDomain):
     def sequential_score(self):
         """
         Checks if all the POI in poi_visited have been observed. Returns a fixed score at the moment.
+
         :return: Global reward score for the agents based on the sequential observation task
         """
         # Update to see if the requirements are now set
@@ -126,7 +128,7 @@ class SequentialPOIRD(rover_domain.RoverDomain):
                     self.poi_positions[poi_id, 1],
                     1.
                 )
-            # TODO add the "is observed section"
+            # TODO add the "is observed section" ?
 
     def score_single_type(self, poi_type):
         """
