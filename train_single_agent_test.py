@@ -15,6 +15,7 @@ def evaluate_policy(p):
     :return: (Integer) The fitness (G score) of the policy
     """
     rd = rover_domain.RoverDomain()
+    rd.poi_positions = np.array([10, 10])
     done = False
     state = rd.rover_observations
     reward = 0

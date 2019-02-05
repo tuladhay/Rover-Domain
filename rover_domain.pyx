@@ -75,7 +75,7 @@ cdef class RoverDomain:
         self.done = True 
         
         self.setup_size = 10.
-        self.interaction_dist = 4.
+        self.interaction_dist = 1.
         self.n_obs_sections = 4
         self.reorients = False
         self.discounts_eval = False
