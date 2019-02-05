@@ -223,7 +223,7 @@ cdef class RoverDomain:
         for rover_id in range(self.n_rovers):
             actions[rover_id, 0] = min(max(-1, actions[rover_id, 0]), 1)
             actions[rover_id, 1] = min(max(-1, actions[rover_id, 1]), 1)
-        
+
         
         if self.reorients:
             # Translate and Reorient all rovers based on their actions
@@ -252,7 +252,7 @@ cdef class RoverDomain:
             for rover_id in range(self.n_rovers):
                 self.rover_positions[rover_id, 0] += actions[rover_id, 0]
                 self.rover_positions[rover_id, 1] += actions[rover_id, 1]
-                
+
     
     cpdef double calc_step_eval_from_poi(self, Py_ssize_t poi_id):
         # todo profile the benefit (or loss) of TempArray
