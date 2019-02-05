@@ -20,6 +20,11 @@ def evaluate_policy(policies):
         actions = []
         for i, p in enumerate(policies):
             s = np.array(state[i])
+            s = s.flatten()
+            visited = []
+            for key in sorted(rd.poi_visited):
+                visited.append(int(rd.poi_visited[key]))
+            s = np.concatenate((s, np.array(visited)))
             s = torch.tensor(s.flatten())
             with torch.set_grad_enabled(False):
                 actions.append(np.array(p.forward(s.float())))
@@ -35,13 +40,17 @@ class Agent:
         self.policy_pool = []
         self.cum_rewards = [0]*pool_size
         for _ in range(pool_size):
-            self.policy_pool.append(MLP.Policy(16, 64, 2))
+            self.policy_pool.append(MLP.Policy(19, 64, 2))
 
     def reset(self):
         self.cum_rewards = [0]*len(self.cum_rewards)
 
 
-if __name__ == '__main__':
+def test_G():
+    """
+    Tests a set of agents learning direct control actions only on G
+    :return:
+    """
     pool = multiprocessing.Pool()
     agents = []
     best_performance = []
@@ -83,13 +92,12 @@ if __name__ == '__main__':
                         a.policy_pool[r].mutate()
                     for r in results[18:]:
                         # Inject random policies into a.policy_pool
-                        a.policy_pool[r] = MLP.Policy(16, 64, 2)
+                        a.policy_pool[r] = MLP.Policy(19, 64, 2)
                     # zero out the score again
                     a.reset()
     best_performance = pd.DataFrame(best_performance)
     best_performance.to_hdf("./G_multi-reward_best.hdf5")
 
 
-
-
-
+if __name__ == '__main__':
+    test_G()
