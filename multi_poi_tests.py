@@ -31,7 +31,7 @@ def evaluate_policy(policies):
 
 
 class Agent:
-    def __init__(self, pool_size=50):
+    def __init__(self, pool_size=20):
         self.policy_pool = []
         self.cum_rewards = [0]*pool_size
         for _ in range(pool_size):
@@ -52,7 +52,7 @@ if __name__ == '__main__':
         for gen in range(5000):
             teams = []
             for _ in agents:
-                teams.append(list(range(50)))
+                teams.append(list(range(20)))
                 random.shuffle(teams[-1])
             teams = np.array(teams)
             teams = teams.transpose()
@@ -77,11 +77,11 @@ if __name__ == '__main__':
                     # Gets the keys for policy sorted by highest cumulative score first
                     results = sorted(zip(list(range(len(a.policy_pool))), a.cum_rewards), key=lambda x:x[1], reverse=True)
                     results = results[0]
-                    for r in results[25:50]:
-                        copy_state_dict = a.policy_pool[random.choice(results[:25])].state_dict()
+                    for r in results[10:20]:
+                        copy_state_dict = a.policy_pool[random.choice(results[:10])].state_dict()
                         a.policy_pool[r].load_state_dict(copy_state_dict)
                         a.policy_pool[r].mutate()
-                    for r in results[45:]:
+                    for r in results[18:]:
                         # Inject random policies into a.policy_pool
                         a.policy_pool[r] = MLP.Policy(16, 64, 2)
                     # zero out the score again
