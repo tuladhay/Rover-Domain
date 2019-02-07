@@ -593,20 +593,4 @@ cdef class RoverDomain:
             self.rover_rewards[rover_id] = global_eval - cfact_global_eval
         
 
-def test():
-    r = RoverDomain()
-    r.n_rovers = 5
-    r.n_pois = 5
-    r.n_steps = 100
-    r.reset()
-    
-    while not r.done:
-        r.step(None)
-        
-    r.update_rewards_traj_global_eval()
-    print(r.rover_rewards.base)
-    for i in range(r.n_pois):
-        print(r.calc_step_eval_from_poi(i))
-
-        
         
