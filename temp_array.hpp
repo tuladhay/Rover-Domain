@@ -44,16 +44,11 @@ public:
         m_loc = 0;
         m_size = 0;
     }
-    TempArray(std::vector<T>* buffer, std::size_t size) {
+    void alloc(std::vector<T>* buffer, std::size_t size) {
         m_buffer = buffer;
         m_loc = buffer->size();
         buffer->resize(m_loc + size);
         m_size = size;
-    }
-    TempArray(TempArray& other){
-        m_buffer = other.m_buffer;
-        m_loc = other.m_loc;
-        m_size = other.m_size;
     }
     ~TempArray() {
         m_buffer->resize(m_loc);

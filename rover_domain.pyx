@@ -50,7 +50,10 @@ cdef class RoverDomain:
     cdef public object update_rewards
     
     # Define module level temporary array manager for fast creation of short-lived
-    # c++ arrays
+    # c++ arrays.
+    # Note that the use of buffers make the a single instance of
+    # the rover domain not thread-safe. Multiple instances can be on different
+    # threads though
     cdef vector[double] def_buf
     cdef vector[double]* buf 
     
@@ -114,7 +117,7 @@ cdef class RoverDomain:
             self.init_rover_orientations = np.vstack((np.cos(rand_angles),
                 np.sin(rand_angles))).T
         if self.poi_values is None:
-            self.poi_values = np.arange(self.n_pois) + 1.
+            self.poi_values = np.arange(self.n_pois, dtype = float) + 1.
         if self.poi_positions is None:
             self.poi_positions = (np.random.rand(self.n_pois, 2) * 
                 self.setup_size)
@@ -263,10 +266,12 @@ cdef class RoverDomain:
         self.update_observations()
       
     cpdef double calc_step_eval_from_poi(self, Py_ssize_t poi_id):
-        cdef TempArray[double] sqr_dists_to_poi\
-            = TempArray[double](self.buf, self.n_rovers)
+        
+        cdef TempArray[double] sqr_dists_to_poi
+        sqr_dists_to_poi.alloc(self.buf, self.n_rovers)
         cdef double displ_x, displ_y, sqr_dist_sum
         cdef Py_ssize_t rover_id, near_rover_id
+        
         
         # Get the rover square distances to POIs.
         for rover_id in range(self.n_rovers):
@@ -276,9 +281,9 @@ cdef class RoverDomain:
                 - self.poi_positions[poi_id, 1])
             sqr_dists_to_poi[rover_id] = displ_x*displ_x + displ_y*displ_y
             
+        
                
-               
-        # Sort (n_req) closest rovers for evaluation
+        # Sort (n_req) closest rovers for evaluation.
         # Sqr_dists_to_poi is no longer in rover order!
         partial_sort(sqr_dists_to_poi.begin(), 
             sqr_dists_to_poi.begin() + self.n_req,
@@ -286,16 +291,18 @@ cdef class RoverDomain:
             
         
         # Is there (n_req) rovers observing? Only need to check the (n_req)th
-        # closest rover
+        # closest rover.
         if (sqr_dists_to_poi[self.n_req-1] > 
                 self.interaction_dist * self.interaction_dist):
             # Not close enough?, then there is no reward for this POI
             return 0.
-        #Yes? Continue evaluation
+            
+        
+        # Close enough! Continue evaluation.
         
         if self.discounts_eval:
             sqr_dist_sum = 0.
-            # Get sum sqr distance of nearest rovers
+            # Get sum sqr distance of nearest rovers.
             for near_rover_id in range(self.n_req):
                 sqr_dist_sum += sqr_dists_to_poi[near_rover_id]
             return self.poi_values[poi_id] / max(self.min_dist, sqr_dist_sum)
@@ -304,14 +311,12 @@ cdef class RoverDomain:
             return self.poi_values[poi_id]    
 
     cpdef void update_local_step_reward_from_poi(self, Py_ssize_t poi_id):
-        cdef TempArray[double] sqr_dists_to_poi\
-            = TempArray[double](self.buf, self.n_rovers)
-        cdef TempArray[double] sqr_dists_to_poi_unsorted\
-            = TempArray[double](self.buf, self.n_rovers)
+        cdef TempArray[double] sqr_dists_to_poi
+        sqr_dists_to_poi.alloc(self.buf, self.n_rovers)
+        cdef TempArray[double] sqr_dists_to_poi_unsorted
+        sqr_dists_to_poi_unsorted.alloc(self.buf, self.n_rovers)
         cdef double displ_x, displ_y, sqr_dist_sum, l_reward
         cdef Py_ssize_t rover_id, near_rover_id
-        
-        
         
         # Get the rover square distances to POIs.
         for rover_id in range(self.n_rovers):
@@ -393,8 +398,8 @@ cdef class RoverDomain:
 
     cpdef double calc_traj_global_eval(self):
         cdef Py_ssize_t step_id, poi_id
-        cdef TempArray[double] poi_evals\
-            = TempArray[double](self.buf, self.n_pois)
+        cdef TempArray[double] poi_evals
+        poi_evals.alloc(self.buf, self.n_pois)
         cdef double eval
         
         # Only evaluate trajectories at the end
@@ -405,7 +410,7 @@ cdef class RoverDomain:
         eval = 0.
         
         for poi_id in range(self.n_pois):
-            poi_evals[poi_id] = 0
+            poi_evals[poi_id] = 0.
         
         
         # Get evaluation for poi, for each step, storing the max
@@ -419,20 +424,20 @@ cdef class RoverDomain:
                 poi_evals[poi_id] = max(poi_evals[poi_id],
                     self.calc_step_eval_from_poi(poi_id))
         
-        
         # Set evaluation to the sum of all POI-specific evaluations
         for poi_id in range(self.n_pois):
             eval += poi_evals[poi_id]
+        
         
         return eval
        
 
     cpdef double calc_traj_cfact_global_eval(self, Py_ssize_t rover_id):
         # Hack: simulate counterfactual by moving agent FAR AWAY, then calculate
-        cdef TempArray[double] actual_x_hist\
-            = TempArray[double](self.buf, self.n_steps+1)
-        cdef TempArray[double] actual_y_hist\
-            = TempArray[double](self.buf, self.n_steps+1)
+        cdef TempArray[double] actual_x_hist
+        actual_x_hist.alloc(self.buf, self.n_steps+1)
+        cdef TempArray[double] actual_y_hist
+        actual_y_hist.alloc(self.buf, self.n_steps+1)
         cdef double  far, eval
         cdef Py_ssize_t step_id
         far = 1000000. # That's far enough, right?
@@ -551,9 +556,6 @@ cdef class RoverDomain:
                     other_y = self.poi_positions[poi_id, 1], 
                     val = self.poi_values[poi_id]) 
 
-                    
-
-    
     cpdef void update_rewards_step_global_eval(self):
         cdef double global_eval
         cdef Py_ssize_t rover_id
@@ -576,8 +578,8 @@ cdef class RoverDomain:
         cdef double global_eval
         cdef Py_ssize_t rover_id
         
-        
         global_eval = self.calc_traj_global_eval()
+        print(self.calc_traj_global_eval())
         for rover_id in range(self.n_rovers):
             self.rover_rewards[rover_id] = global_eval
     
@@ -591,6 +593,20 @@ cdef class RoverDomain:
             self.rover_rewards[rover_id] = global_eval - cfact_global_eval
         
 
+def test():
+    r = RoverDomain()
+    r.n_rovers = 5
+    r.n_pois = 5
+    r.n_steps = 100
+    r.reset()
+    
+    while not r.done:
+        r.step(None)
+        
+    r.update_rewards_traj_global_eval()
+    print(r.rover_rewards.base)
+    for i in range(r.n_pois):
+        print(r.calc_step_eval_from_poi(i))
 
         
         
