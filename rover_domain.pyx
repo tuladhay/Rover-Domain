@@ -39,6 +39,8 @@ cdef class RoverDomain:
     cdef public double setup_size
     cdef public double interaction_dist
     cdef public bool reorients
+    cdef public Py_ssize_t comm_acs     # Communication
+    cdef public double[:] team_comm
     cdef public bool discounts_eval
     cdef public double[:, :] init_rover_positions
     cdef public double[:, :] init_rover_orientations
@@ -67,7 +69,7 @@ cdef class RoverDomain:
         self.n_pois = 10
         self.n_steps = 100
         
-        self.n_req = 6
+        self.n_req = 4
         self.min_dist = 1.
         self.step_id = 0
         
@@ -78,6 +80,12 @@ cdef class RoverDomain:
         self.setup_size = 25.
         self.interaction_dist = 4.
         self.n_obs_sections = 4
+
+        # Communication
+        self.comm_acs = 1 #True
+        self.team_comm = None
+
+
         self.reorients = False
         self.discounts_eval = False
         
@@ -150,7 +158,7 @@ cdef class RoverDomain:
         
         # Create all unspecified return data
         if self.rover_observations is None:
-            self.rover_observations = np.zeros((self.n_rovers, 2, 
+            self.rover_observations = np.zeros((self.n_rovers, 2+self.comm_acs,
                 self.n_obs_sections))
         if self.rover_rewards is None:
             self.rover_rewards = np.zeros(self.n_rovers)
@@ -169,7 +177,7 @@ cdef class RoverDomain:
         # Recreate all invalid return data
         if (self.rover_observations.shape[0] != self.n_rovers or
                 self.rover_observations.shape[3] != self.n_obs_sections):
-            self.rover_observations = np.zeros((self.n_rovers, 2,
+            self.rover_observations = np.zeros((self.n_rovers, 2+self.comm_acs,
                 self.n_obs_sections))
         if self.rover_rewards.shape[0] != self.n_rovers:
             self.rover_rewards = np.zeros(self.n_rovers)
@@ -192,6 +200,14 @@ cdef class RoverDomain:
         self.n_steps = self.step_id
         self.done = True
 
+    def calc_team_comm(self, double[:,:] actions):
+        # Sum up rover communication actions to make team_utterance
+        team_comm = np.zeros(self.n_obs_sections)
+        for rover_id in range(self.n_rovers):
+            # Summing up individual rover utterances
+            team_comm += actions[rover_id][2:]  # get last 4 actions as comm actions
+        self.team_comm = team_comm
+
     cpdef step(self, double[:, :] actions):
         """
         Slightly slower than step_n0_ret in cython
@@ -212,6 +228,9 @@ cdef class RoverDomain:
 
         if not self.done:
             if actions is not None:
+                # Calculate team communication
+                self.calc_team_comm(actions)
+
                 # Move rovers using actions
                 
                 # clip actions
@@ -529,7 +548,8 @@ cdef class RoverDomain:
         
         # Zero all observations
         for rover_id in range(self.n_rovers):
-            for type_id in range(2):
+            # for type_id in range(2):
+            for type_id in range(3):  # added comm, was 2
                 for section_id in range(self.n_obs_sections):
                     self.rover_observations[rover_id, type_id, section_id] = 0.
         
@@ -549,12 +569,17 @@ cdef class RoverDomain:
                     
             # Update POI type observations
             for poi_id in range(self.n_pois):
-            
+
                 self.add_to_sensor(rover_id, 
                     obj_type_id = POI_T_ID,
                     other_x = self.poi_positions[poi_id, 0], 
                     other_y = self.poi_positions[poi_id, 1], 
-                    val = self.poi_values[poi_id]) 
+                    val = self.poi_values[poi_id])
+
+            # Update Communication observations
+            for rover_id in range(self.n_rovers):
+                self.rover_observations[rover_id, 2] = self.team_comm
+                # print(self.rover_observations[rover_id,2])
 
     cpdef void update_rewards_step_global_eval(self):
         cdef double global_eval

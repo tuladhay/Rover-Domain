@@ -21,7 +21,8 @@ class Params:
         self.nn_hidden_size = 16
 
 def get_env_setting():
-    setting = {"n_agents" : env.n_rovers,
+    setting = {"communication" : env.comm_acs,
+               "n_agents" : env.n_rovers,
                "n_pois": env.n_pois,
                "n_req": env.n_req,
                "n_steps": env.n_steps,
@@ -38,7 +39,7 @@ def get_env_setting():
 
 if __name__=="__main__":
 
-    # initialize the environment
+    # Initialize the environment
     env = r.RoverDomain()
     env.reset()
 
@@ -46,7 +47,12 @@ if __name__=="__main__":
     params = Params()
     params.n_agents = env.n_rovers
     params.nn_input_size = env.rover_observations.base[0].size
-    params.nn_output_size = 2  # set this automatically
+    params.nn_output_size = 2  # todo: Set this automatically
+
+    # Communication
+    use_comm = True
+    if use_comm:
+        params.nn_output_size += env.n_obs_sections  # same num of channels as obs quadrants
 
     # -----------------------------------------------------------------------------------------------------------------#
     # Logger and save experiment setting
@@ -55,7 +61,7 @@ if __name__=="__main__":
     file_path = Path('./Experiments') / ("R"+str(env.n_rovers) + "-P"+str(env.n_pois) + "-Cp"+str(env.n_req) + timestr)
     os.makedirs(file_path)
 
-    # save setting
+    # Save setting
     setting = get_env_setting()
     with open(str(file_path) +'/settings.csv', 'w') as csv_file:
         writer = csv.writer(csv_file)
@@ -134,3 +140,5 @@ if __name__=="__main__":
 
         # Print Episode and fitness
         print("Episode:"+str(ep_i) + "  Fitness:" + str(fitness))
+
+    print()
