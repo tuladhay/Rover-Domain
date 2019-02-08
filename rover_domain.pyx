@@ -63,11 +63,11 @@ cdef class RoverDomain:
     
     
     def __cinit__(self):
-        self.n_rovers = 1
-        self.n_pois = 1
-        self.n_steps = 50
+        self.n_rovers = 10
+        self.n_pois = 10
+        self.n_steps = 100
         
-        self.n_req = 1
+        self.n_req = 6
         self.min_dist = 1.
         self.step_id = 0
         
@@ -75,7 +75,7 @@ cdef class RoverDomain:
         # before a call to reset (i.e. the domain is not yet ready/initialized).
         self.done = True 
         
-        self.setup_size = 10.
+        self.setup_size = 25.
         self.interaction_dist = 4.
         self.n_obs_sections = 4
         self.reorients = False
@@ -579,7 +579,7 @@ cdef class RoverDomain:
         cdef Py_ssize_t rover_id
         
         global_eval = self.calc_traj_global_eval()
-        print(self.calc_traj_global_eval())
+        #print(self.calc_traj_global_eval())
         for rover_id in range(self.n_rovers):
             self.rover_rewards[rover_id] = global_eval
     

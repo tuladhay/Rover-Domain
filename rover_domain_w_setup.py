@@ -1,4 +1,4 @@
-# Run file by itself (or import it?) Comment out following code if building 
+# Run file by itself (or import it?) Comment out following code if building
 # from command line. (setup default)
 import sys
 import numpy
