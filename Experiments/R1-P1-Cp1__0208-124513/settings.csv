@@ -1,0 +1,12 @@
+communication,1
+n_agents,1
+n_pois,1
+n_req,1
+n_steps,50
+setup_size,25.0
+min_dist,1.0
+interaction_dist,400.0
+reorients,True
+discounts_eval,False
+n_obs_sections,4
+timestr,__0208-124513

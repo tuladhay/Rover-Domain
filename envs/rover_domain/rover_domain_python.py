@@ -2,6 +2,7 @@ import random, sys
 from random import randint
 import numpy as np
 import math
+import matplotlib.pyplot as plt
 
 class RoverDomain:
 
@@ -37,6 +38,17 @@ class RoverDomain:
         self.istep = 0
         return self.get_joint_state()
 
+    def view_pos(self):
+        ''' Function to plot the current positions of POIs and rovers '''
+        poi_x = [pos[0] for pos in self.poi_pos]
+        poi_y = [pos[1] for pos in self.poi_pos]
+        rov_x = [pos[0] for pos in self.rover_pos]
+        rov_y = [pos[1] for pos in self.rover_pos]
+        plt.title("blue:poi, red:rover")
+        plt.scatter(poi_x, poi_y, color='blue')
+        plt.scatter(rov_x, rov_y, color='red')
+        plt.show()
+
 
     def step(self, joint_action):
         self.istep += 1
@@ -62,16 +74,16 @@ class RoverDomain:
 
     def reset_poi_pos(self):
 
-        if self.args.unit_test == 1: #Unit_test
-            self.poi_pos[0] = [0,1]
-            return
+        # if self.args.unit_test == 1: #Unit_test
+        #     self.poi_pos[0] = [0,1]
+        #     return
+        #
+        # if self.args.unit_test == 2: #Unit_test
+        #     if random.random()<0.5: self.poi_pos[0] = [4,0]
+        #     else: self.poi_pos[0] = [4,9]
+        #     return
 
-        if self.args.unit_test == 2: #Unit_test
-            if random.random()<0.5: self.poi_pos[0] = [4,0]
-            else: self.poi_pos[0] = [4,9]
-            return
-
-        start = 0.0;
+        start = 0.0
         end = self.args.dim_x - 1.0
         rad = int(self.args.dim_x / math.sqrt(3) / 2.0)
         center = int((start + end) / 2.0)
@@ -115,9 +127,9 @@ class RoverDomain:
         rad = int(self.args.dim_x / math.sqrt(3) / 2.0)
         center = int((start + end) / 2.0)
 
-        if self.args.unit_test == 1: #Unit test
-            self.rover_pos[0] = [end,0];
-            return
+        # if self.args.unit_test == 1: #Unit test
+        #     self.rover_pos[0] = [end,0];
+        #     return
 
         for rover_id in range(self.args.num_agents):
                 quadrant = rover_id % 4
@@ -139,7 +151,8 @@ class RoverDomain:
     def get_joint_state(self):
         joint_state = []
         for rover_id in range(self.args.num_agents):
-            self_x = self.rover_pos[rover_id][0]; self_y = self.rover_pos[rover_id][1]
+            self_x = self.rover_pos[rover_id][0]
+            self_y = self.rover_pos[rover_id][1]
 
             rover_state = [0.0 for _ in range(int(360 / self.args.angle_res))]
             poi_state = [0.0 for _ in range(int(360 / self.args.angle_res))]
@@ -166,7 +179,7 @@ class RoverDomain:
 
                 if dist == 0: dist = 0.001
                 bracket = int(angle / self.args.angle_res)
-                temp_rover_dist_list[bracket].append((1/(dist*dist)))
+                temp_rover_dist_list[bracket].append((1/(dist*dist))) #if rovers overlap in pos,this number becomes 1million
 
 
             ####Encode the information onto the state

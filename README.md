@@ -25,12 +25,15 @@ self.coupling = COUPLING
 
 self.rover_speed = SPEED OF ROVER (default is 1)
 
-self.sensor_model = 'Closest': report the closest distance 
+self.sensor_model = 'closest': report the closest distance 
 
-                    'Density': report the average (standard rover domain)
+self.action_dim = 2
+                    'density': report the average (standard rover domain)
 
 
 
 
 NUM_EVALS = Number of ROverDomain to run in parallel [Similar to a parallel universe - a policy will act in multiple universes (env) concurrently using the same feedforward operation] - massive speedup
 
+Notes:
+- shouldn't the env give out the action and obs dimensions?
