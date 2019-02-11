@@ -2623,8 +2623,8 @@ static PyObject *__pyx_codeobj__31;
  * 
  * 
  *     def __cinit__(self):             # <<<<<<<<<<<<<<
- *         self.n_rovers = 10
- *         self.n_pois = 10
+ *         self.n_rovers = 1
+ *         self.n_pois = 1
  */
 
 /* Python wrapper */
@@ -2656,42 +2656,42 @@ static int __pyx_pf_12rover_domain_11RoverDomain___cinit__(struct __pyx_obj_12ro
   /* "rover_domain.pyx":68
  * 
  *     def __cinit__(self):
- *         self.n_rovers = 10             # <<<<<<<<<<<<<<
- *         self.n_pois = 10
- *         self.n_steps = 100
+ *         self.n_rovers = 1             # <<<<<<<<<<<<<<
+ *         self.n_pois = 1
+ *         self.n_steps = 50
  */
-  __pyx_v_self->n_rovers = 10;
+  __pyx_v_self->n_rovers = 1;
 
   /* "rover_domain.pyx":69
  *     def __cinit__(self):
- *         self.n_rovers = 10
- *         self.n_pois = 10             # <<<<<<<<<<<<<<
- *         self.n_steps = 100
+ *         self.n_rovers = 1
+ *         self.n_pois = 1             # <<<<<<<<<<<<<<
+ *         self.n_steps = 50
  * 
  */
-  __pyx_v_self->n_pois = 10;
+  __pyx_v_self->n_pois = 1;
 
   /* "rover_domain.pyx":70
- *         self.n_rovers = 10
- *         self.n_pois = 10
- *         self.n_steps = 100             # <<<<<<<<<<<<<<
+ *         self.n_rovers = 1
+ *         self.n_pois = 1
+ *         self.n_steps = 50             # <<<<<<<<<<<<<<
  * 
- *         self.n_req = 4
+ *         self.n_req = 1
  */
-  __pyx_v_self->n_steps = 0x64;
+  __pyx_v_self->n_steps = 50;
 
   /* "rover_domain.pyx":72
- *         self.n_steps = 100
+ *         self.n_steps = 50
  * 
- *         self.n_req = 4             # <<<<<<<<<<<<<<
+ *         self.n_req = 1             # <<<<<<<<<<<<<<
  *         self.min_dist = 1.
  *         self.step_id = 0
  */
-  __pyx_v_self->n_req = 4;
+  __pyx_v_self->n_req = 1;
 
   /* "rover_domain.pyx":73
  * 
- *         self.n_req = 4
+ *         self.n_req = 1
  *         self.min_dist = 1.             # <<<<<<<<<<<<<<
  *         self.step_id = 0
  * 
@@ -2699,7 +2699,7 @@ static int __pyx_pf_12rover_domain_11RoverDomain___cinit__(struct __pyx_obj_12ro
   __pyx_v_self->min_dist = 1.;
 
   /* "rover_domain.pyx":74
- *         self.n_req = 4
+ *         self.n_req = 1
  *         self.min_dist = 1.
  *         self.step_id = 0             # <<<<<<<<<<<<<<
  * 
@@ -2724,7 +2724,7 @@ static int __pyx_pf_12rover_domain_11RoverDomain___cinit__(struct __pyx_obj_12ro
  *         self.done = True
  * 
  *         self.setup_size = 25.             # <<<<<<<<<<<<<<
- *         self.interaction_dist = 4.
+ *         self.interaction_dist = 400.
  *         self.n_obs_sections = 4
  */
   __pyx_v_self->setup_size = 25.;
@@ -2732,15 +2732,15 @@ static int __pyx_pf_12rover_domain_11RoverDomain___cinit__(struct __pyx_obj_12ro
   /* "rover_domain.pyx":81
  * 
  *         self.setup_size = 25.
- *         self.interaction_dist = 4.             # <<<<<<<<<<<<<<
+ *         self.interaction_dist = 400.             # <<<<<<<<<<<<<<
  *         self.n_obs_sections = 4
  * 
  */
-  __pyx_v_self->interaction_dist = 4.;
+  __pyx_v_self->interaction_dist = 400.;
 
   /* "rover_domain.pyx":82
  *         self.setup_size = 25.
- *         self.interaction_dist = 4.
+ *         self.interaction_dist = 400.
  *         self.n_obs_sections = 4             # <<<<<<<<<<<<<<
  * 
  *         # Communication
@@ -2772,28 +2772,28 @@ static int __pyx_pf_12rover_domain_11RoverDomain___cinit__(struct __pyx_obj_12ro
   /* "rover_domain.pyx":89
  * 
  * 
- *         self.reorients = False             # <<<<<<<<<<<<<<
- *         self.discounts_eval = False
+ *         self.reorients = True             # <<<<<<<<<<<<<<
+ *         self.discounts_eval = True
  * 
  */
-  __Pyx_INCREF(Py_False);
-  __Pyx_GIVEREF(Py_False);
+  __Pyx_INCREF(Py_True);
+  __Pyx_GIVEREF(Py_True);
   __Pyx_GOTREF(__pyx_v_self->reorients);
   __Pyx_DECREF(((PyObject *)__pyx_v_self->reorients));
-  __pyx_v_self->reorients = ((PyBoolObject *)Py_False);
+  __pyx_v_self->reorients = ((PyBoolObject *)Py_True);
 
   /* "rover_domain.pyx":90
  * 
- *         self.reorients = False
- *         self.discounts_eval = False             # <<<<<<<<<<<<<<
+ *         self.reorients = True
+ *         self.discounts_eval = True             # <<<<<<<<<<<<<<
  * 
  *         # Set positions to zero lets rover domain generate self for you
  */
-  __Pyx_INCREF(Py_False);
-  __Pyx_GIVEREF(Py_False);
+  __Pyx_INCREF(Py_True);
+  __Pyx_GIVEREF(Py_True);
   __Pyx_GOTREF(__pyx_v_self->discounts_eval);
   __Pyx_DECREF(((PyObject *)__pyx_v_self->discounts_eval));
-  __pyx_v_self->discounts_eval = ((PyBoolObject *)Py_False);
+  __pyx_v_self->discounts_eval = ((PyBoolObject *)Py_True);
 
   /* "rover_domain.pyx":93
  * 
@@ -2955,8 +2955,8 @@ static int __pyx_pf_12rover_domain_11RoverDomain___cinit__(struct __pyx_obj_12ro
  * 
  * 
  *     def __cinit__(self):             # <<<<<<<<<<<<<<
- *         self.n_rovers = 10
- *         self.n_pois = 10
+ *         self.n_rovers = 1
+ *         self.n_pois = 1
  */
 
   /* function exit code */
