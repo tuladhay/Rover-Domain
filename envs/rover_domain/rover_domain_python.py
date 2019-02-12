@@ -69,8 +69,7 @@ class RoverDomain:
 
         #Compute done
         self.done = self.istep >= self.args.ep_len
-        if self.done:
-            print(self.done)
+
         #info
         global_reward = None
         if self.done:
@@ -258,14 +257,58 @@ class RoverDomain:
         return rewards
 
 
-    #TODO
     def get_global_traj_reward(self):
         if not self.done:
             sys.exit('Global trajectory reward queried before end of episode, check:self.done')
-        global_traj_reward = None
-        #use
-        #self.rover_path and self.poi_pos and self.poi_value to compute TRAJECTORY_WIDE REWARD
+
+        global_traj_reward = 0
+        poi_evals = np.zeros(self.args.num_poi)
+
+        # loop over time-steps
+        for tstep in range(self.args.ep_len):
+            # rover positions at this time-step
+            tstep_rover_pos = [self.rover_path[rover][tstep] for rover in range(self.args.num_agents)]
+
+            for poi_id in range(self.args.num_poi):
+                poi_evals[poi_id] = max(poi_evals[poi_id], self.calc_step_eval_from_poi(poi_id, tstep_rover_pos))
+
+        for poi_id in range(self.args.num_poi):
+            global_traj_reward += poi_evals[poi_id]
+
         return global_traj_reward
+
+    def calc_step_eval_from_poi(self, poi_id, tstep_rover_pos):
+        sqr_dists_to_poi = np.zeros(self.args.num_agents)
+
+        for rover_id in range(self.args.num_agents):
+            displ_x = (tstep_rover_pos[rover_id][0] - self.poi_pos[poi_id][0])
+            displ_y = (tstep_rover_pos[rover_id][1] - self.poi_pos[poi_id][1])
+            sqr_dists_to_poi[rover_id] = displ_x*displ_x + displ_y*displ_y
+
+        # Sort (n_req) closest rovers for evaluation.
+        # Sqr_dists_to_poi is no longer in rover order!
+        sqr_dists_to_poi = np.sort(sqr_dists_to_poi)
+
+        # Is there (n_req) rovers observing? Only need to check the (n_req)th closest rover.
+        if (sqr_dists_to_poi[self.args.coupling-1] >
+                self.args.act_dist * self.args.act_dist):
+            # Not close enough?, then there is no reward for this POI
+            return 0.
+
+        # Close enough! Continue evaluation.
+
+        # if self.discounts_eval:
+        #     sqr_dist_sum = 0.
+        #     # Get sum sqr distance of nearest rovers.
+        #     for near_rover_id in range(self.n_req):
+        #         sqr_dist_sum += sqr_dists_to_poi[near_rover_id]
+        #     return self.poi_values[poi_id] / max(self.min_dist, sqr_dist_sum)
+        # # Do not discount POI evaluation
+        # else:
+        #     return self.poi_values[poi_id]
+
+        return self.poi_value[poi_id]
+
 
     def render(self):
         # Visualize
@@ -290,6 +333,3 @@ class RoverDomain:
         print()
 
         print('------------------------------------------------------------------------')
-
-
-
