@@ -7,13 +7,14 @@ import time
 from pathlib import Path
 import os
 import csv
+import copy
 
 
 class Params:
     def __init__(self):
-        self.population_size = 10
+        self.population_size = 20
         self.n_agents = None
-        self.mutation_rate = 0.01
+        self.mutation_rate = 0.01  #useless right now
 
         # For Neural Network Policies
         self.nn_input_size = None
@@ -70,7 +71,7 @@ if __name__=="__main__":
 
     # Initialize algorithm
     ccea = CCEA(params)
-    test_team_runs = 5      # eval runs for best_team
+    test_team_runs = 10      # eval runs for best_team
 
     episodes = 10000
     for ep_i in range(episodes):
@@ -83,6 +84,7 @@ if __name__=="__main__":
         for _ in range(ccea.leniency_evals*len(ccea.agents[0].population)):  # run n number of times for leniency evaluation.
             # List is popped, so will run out if make_team is run more than ccea.leniency eval times.
             env.poi_positions = None        # Hack
+            env.rover_positions = None
             env.reset()
             ccea.make_team()
 
@@ -110,10 +112,11 @@ if __name__=="__main__":
         # ------------------------------------------------------------------------------------------------------------#
         # Evaluate the best team. This is the fitness that we record for learning
         # ------------------------------------------------------------------------------------------------------------#
-        ccea.team = ccea.best_team
+        ccea.team = copy.deepcopy(ccea.best_team)
         fitness = []        # assuming fitness is always positive
         for _ in range(test_team_runs):
             env.poi_positions = None        # Hack
+            env.rover_positions = None
             env.reset()
             done = False
             while not done:
