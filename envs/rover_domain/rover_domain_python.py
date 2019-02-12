@@ -4,17 +4,19 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 
+
 class RoverDomain:
 
     def __init__(self, args):
 
         self.args = args
+        self.dim_y = self.args.dim_x
 
-        #Gym compatible attributes
+        # Gym compatible attributes
         self.observation_space = np.zeros((1, int(2*360 / self.args.angle_res)))
         self.action_space = np.zeros((1, self.args.action_dim))
 
-        self.istep = 0 #Current Step counter
+        self.istep = 0  # Current Step counter
 
         # Initialize POI containers tha track POI position and status
         self.poi_pos = [[None, None] for _ in range(self.args.num_poi)]  # FORMAT: [poi_id][x, y] coordinate
@@ -24,11 +26,15 @@ class RoverDomain:
         # Initialize rover position container
         self.rover_pos = [[0.0, 0.0] for _ in range(self.args.num_agents)]  # FORMAT: [rover_id][x, y] coordinate
 
-        #Rover path trace for trajectory-wide global reward computation and vizualization purposes
+        # Rover path trace for trajectory-wide global reward computation and vizualization purposes
         self.rover_path = [[(loc[0], loc[1])] for loc in self.rover_pos] # FORMAT: [rover_id][timestep][x, y]
         self.action_seq = [[0.0 for _ in range(self.args.action_dim)] for _ in range(self.args.num_agents)] # FORMAT: [timestep][rover_id][action]
 
+        # End of an episode
+        self.done = False
+
     def reset(self):
+        self.done = False
         self.reset_poi_pos()
         self.reset_rover_pos()
         self.poi_value = [float(i+1) for i in range(self.args.num_poi)]
@@ -36,10 +42,10 @@ class RoverDomain:
         self.rover_path = [[(loc[0], loc[1])] for loc in self.rover_pos]
         self.action_seq = [[0.0 for _ in range(self.args.action_dim)] for _ in range(self.args.num_agents)]
         self.istep = 0
-        return self.get_joint_state()
+        return self.get_joint_state()  # [rover_densities, poi_densities]
 
     def view_pos(self):
-        ''' Function to plot the current positions of POIs and rovers '''
+        ''' Function to plot the current positions of POIs and Rovers '''
         poi_x = [pos[0] for pos in self.poi_pos]
         poi_y = [pos[1] for pos in self.poi_pos]
         rov_x = [pos[0] for pos in self.rover_pos]
@@ -57,19 +63,20 @@ class RoverDomain:
             action = joint_action[rover_id]
             self.rover_pos[rover_id] = [self.rover_pos[rover_id][0]+action[0], self.rover_pos[rover_id][1]+action[1]]  # Execute action
 
-
         #Append rover path
         for rover_id in range(self.args.num_agents):
             self.rover_path[rover_id].append((self.rover_pos[rover_id][0], self.rover_pos[rover_id][1]))
 
         #Compute done
-        done = int(self.istep >= self.args.ep_len)
-
+        self.done = self.istep >= self.args.ep_len
+        if self.done:
+            print(self.done)
         #info
         global_reward = None
-        if done: global_reward = self.get_global_reward()
+        if self.done:
+            global_reward = self.get_global_traj_reward()
 
-        return self.get_joint_state(), self.get_local_reward(), done, global_reward
+        return self.get_joint_state(), self.get_local_reward(), self.done, global_reward
 
 
     def reset_poi_pos(self):
@@ -216,7 +223,7 @@ class RoverDomain:
 
 
     def get_angle_dist(self, x1, y1, x2, y2):  # Computes angles and distance between two predators relative to (1,0) vector (x-axis)
-        v1 = x2 - x1;
+        v1 = x2 - x1
         v2 = y2 - y1
         angle = np.rad2deg(np.arctan2(v1, v2))
         if angle < 0: angle += 360
@@ -225,7 +232,6 @@ class RoverDomain:
         dist = math.sqrt(dist)
 
         return angle, dist
-
 
 
     def get_local_reward(self):
@@ -253,17 +259,17 @@ class RoverDomain:
 
 
     #TODO
-    def get_global_reward(self):
+    def get_global_traj_reward(self):
+        if not self.done:
+            sys.exit('Global trajectory reward queried before end of episode, check:self.done')
+        global_traj_reward = None
         #use
         #self.rover_path and self.poi_pos and self.poi_value to compute TRAJECTORY_WIDE REWARD
-        pass
-
-
+        return global_traj_reward
 
     def render(self):
         # Visualize
         grid = [['-' for _ in range(self.args.dim_x)] for _ in range(self.args.dim_y)]
-
 
         # Draw in rover path
         for rover_id, path in enumerate(self.rover_path):
@@ -274,7 +280,7 @@ class RoverDomain:
 
         # Draw in food
         for poi_pos, poi_status in zip(self.poi_pos, self.poi_status):
-            x = int(poi_pos[0]);
+            x = int(poi_pos[0])
             y = int(poi_pos[1])
             marker = '$' if poi_status else '#'
             grid[x][y] = marker
