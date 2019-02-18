@@ -36,7 +36,8 @@ class RoverDomain:
         # Communication
         self.comm_dim = args.n_comm_bits
         # Joint state w comm
-        self.joint_state_w_comm = [[0.0 for _ in range(12)] for _ in range(args.num_agents)] # TODO: do this automatically
+        #self.comm_state = [[0.0 for _ in range(12)] for _ in range(args.num_agents)]  # TODO: do this automatically
+        self.comm_state = np.zeros(self.comm_dim)  #[0.0 for _ in range(args.n_comm_bits)]  # TODO: do this automatically
 
     def reset(self):
         self.done = False
@@ -47,8 +48,9 @@ class RoverDomain:
         self.rover_path = [[(loc[0], loc[1])] for loc in self.rover_pos]
         self.action_seq = [[0.0 for _ in range(self.args.action_dim)] for _ in range(self.args.num_agents)]
         self.istep = 0
-        #return self.get_joint_state()  # [rover_densities, poi_densities]
-        return self.joint_state_w_comm
+        # Reset communication bits to zeros
+        self.comm_state = np.zeros(self.comm_dim)
+        return self.get_joint_state()  # [rover_densities, poi_densities]
 
     def view_pos(self):
         ''' Function to plot the current positions of POIs and Rovers '''
@@ -83,11 +85,12 @@ class RoverDomain:
             global_reward = self.get_global_traj_reward()
 
         # append comm_signal to joint state of all agents
-        self.joint_state_w_comm = self.get_joint_state()
-        for i, state in enumerate(self.joint_state_w_comm):
-            self.joint_state_w_comm[i] += comm_signal.tolist()
+        #self.joint_state_w_comm = self.get_joint_state()
 
-        return self.joint_state_w_comm, self.get_local_reward(), self.done, global_reward
+        #for i, state in enumerate(self.comm_state):
+        self.comm_state += comm_signal  #.tolist()
+
+        return self.get_joint_state(), self.get_local_reward(), self.done, global_reward
 
     def reset_poi_pos(self):
         start = 0.0
@@ -154,7 +157,6 @@ class RoverDomain:
                     y = center + 1 - (rover_id / 4) % (center - rad)
                 self.rover_pos[rover_id] = [x, y]
 
-
     def get_joint_state(self):
         joint_state = []
         for rover_id in range(self.args.num_agents):
@@ -173,6 +175,9 @@ class RoverDomain:
                 angle, dist = self.get_angle_dist(self_x, self_y, loc[0], loc[1])
                 if dist > self.args.obs_radius: continue #Observability radius
 
+                if math.isnan(angle):
+                    print(angle)
+                    print("*********************************************")
                 bracket = int(angle / self.args.angle_res)
                 if dist == 0: dist = 0.001
                 temp_poi_dist_list[bracket].append((value/(dist*dist)))
@@ -218,6 +223,9 @@ class RoverDomain:
 
             #state = np.array(state)
             joint_state.append(state)
+
+        for i, state in enumerate(joint_state):
+            joint_state[i] = joint_state[i] + self.comm_state.tolist()
 
         return joint_state
 
