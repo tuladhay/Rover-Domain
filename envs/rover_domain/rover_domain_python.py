@@ -33,6 +33,11 @@ class RoverDomain:
         # End of an episode
         self.done = False
 
+        # Communication
+        self.comm_dim = args.n_comm_bits
+        # Joint state w comm
+        self.joint_state_w_comm = [[0.0 for _ in range(12)] for _ in range(args.num_agents)] # TODO: do this automatically
+
     def reset(self):
         self.done = False
         self.reset_poi_pos()
@@ -42,7 +47,8 @@ class RoverDomain:
         self.rover_path = [[(loc[0], loc[1])] for loc in self.rover_pos]
         self.action_seq = [[0.0 for _ in range(self.args.action_dim)] for _ in range(self.args.num_agents)]
         self.istep = 0
-        return self.get_joint_state()  # [rover_densities, poi_densities]
+        #return self.get_joint_state()  # [rover_densities, poi_densities]
+        return self.joint_state_w_comm
 
     def view_pos(self):
         ''' Function to plot the current positions of POIs and Rovers '''
@@ -55,13 +61,14 @@ class RoverDomain:
         plt.scatter(rov_x, rov_y, color='red')
         plt.show()
 
-
     def step(self, joint_action):
         self.istep += 1
+        comm_signal = np.zeros(self.comm_dim)
 
         for rover_id in range(self.args.num_agents):
             action = joint_action[rover_id]
             self.rover_pos[rover_id] = [self.rover_pos[rover_id][0]+action[0], self.rover_pos[rover_id][1]+action[1]]  # Execute action
+            comm_signal += action[2:]  # actions after the 2 physical actions are communication actions
 
         #Append rover path
         for rover_id in range(self.args.num_agents):
@@ -75,20 +82,14 @@ class RoverDomain:
         if self.done:
             global_reward = self.get_global_traj_reward()
 
-        return self.get_joint_state(), self.get_local_reward(), self.done, global_reward
+        # append comm_signal to joint state of all agents
+        self.joint_state_w_comm = self.get_joint_state()
+        for i, state in enumerate(self.joint_state_w_comm):
+            self.joint_state_w_comm[i] += comm_signal.tolist()
 
+        return self.joint_state_w_comm, self.get_local_reward(), self.done, global_reward
 
     def reset_poi_pos(self):
-
-        # if self.args.unit_test == 1: #Unit_test
-        #     self.poi_pos[0] = [0,1]
-        #     return
-        #
-        # if self.args.unit_test == 2: #Unit_test
-        #     if random.random()<0.5: self.poi_pos[0] = [4,0]
-        #     else: self.poi_pos[0] = [4,9]
-        #     return
-
         start = 0.0
         end = self.args.dim_x - 1.0
         rad = int(self.args.dim_x / math.sqrt(3) / 2.0)
@@ -253,9 +254,7 @@ class RoverDomain:
                 for rover_id in lucky_rovers:
                     rewards[rover_id] += self.poi_value[poi_id]
 
-
         return rewards
-
 
     def get_global_traj_reward(self):
         if not self.done:
