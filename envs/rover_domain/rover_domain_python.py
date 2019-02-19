@@ -37,8 +37,8 @@ class RoverDomain:
         # Communication
         self.comm_dim = args.n_comm_bits
         # Joint state w comm
-        #self.comm_state = [[0.0 for _ in range(12)] for _ in range(args.num_agents)]  # TODO: do this automatically
         self.comm_state = np.zeros(self.comm_dim)  #[0.0 for _ in range(args.n_comm_bits)]  # TODO: do this automatically
+        self.comm_one_hot = args.comm_one_hot  # hard(one hot) or soft
 
     def reset(self):
         self.done = False
@@ -73,7 +73,13 @@ class RoverDomain:
             self.rover_pos[rover_id] = [self.rover_pos[rover_id][0]+action[0], self.rover_pos[rover_id][1]+action[1]]  # Execute action
 
             # COMMUNICATION = add the softmax for each agent's comm channel
-            comm_signal += softmax(action[2:], axis=None)  # actions after the 2 physical actions are communication actions
+            if not self.comm_one_hot:
+                comm_signal += softmax(action[2:], axis=None)  # actions after the 2 physical actions are communication actions
+            else:
+                signal = softmax(action[2:], axis=None)
+                signal[np.where(signal==np.max(signal))] = 1.0
+                signal[np.where(signal!=np.max(signal))] = 0.0
+                comm_signal += signal
 
         #Append rover path
         for rover_id in range(self.args.num_agents):
