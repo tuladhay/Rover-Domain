@@ -3,6 +3,7 @@ from random import randint
 import numpy as np
 import math
 import matplotlib.pyplot as plt
+from scipy.special import softmax
 
 
 class RoverDomain:
@@ -70,7 +71,9 @@ class RoverDomain:
         for rover_id in range(self.args.num_agents):
             action = joint_action[rover_id]
             self.rover_pos[rover_id] = [self.rover_pos[rover_id][0]+action[0], self.rover_pos[rover_id][1]+action[1]]  # Execute action
-            comm_signal += action[2:]  # actions after the 2 physical actions are communication actions
+
+            # COMMUNICATION = add the softmax for each agent's comm channel
+            comm_signal += softmax(action[2:], axis=None)  # actions after the 2 physical actions are communication actions
 
         #Append rover path
         for rover_id in range(self.args.num_agents):
@@ -84,11 +87,8 @@ class RoverDomain:
         if self.done:
             global_reward = self.get_global_traj_reward()
 
-        # append comm_signal to joint state of all agents
-        #self.joint_state_w_comm = self.get_joint_state()
-
-        #for i, state in enumerate(self.comm_state):
-        self.comm_state += comm_signal  #.tolist()
+        # Do this so that get_joint_state() can append it to other states
+        self.comm_state = comm_signal
 
         return self.get_joint_state(), self.get_local_reward(), self.done, global_reward
 
